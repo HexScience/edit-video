@@ -4,4 +4,6 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="seperate_line_layer_color">#77777777</color>
+    <color name="seperate_line_layer_icon_color">#414040</color>
+    <color name="background_timeline">#81b476</color>
 </resources>

@@ -7,23 +7,52 @@
 
     <LinearLayout
         android:id="@+id/main_toolbar"
-        android:layout_width="60dp"
+        android:layout_width="@dimen/main_toolbar_width"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:background="#111111"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
         <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_width="@dimen/toolbar_icon_dimension"
+            android:layout_height="@dimen/toolbar_icon_dimension"
+            android:padding="@dimen/toolbar_icon_padding"
+            android:src="@drawable/ic_back"
+            android:clickable="true"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"/>
         <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_width="@dimen/toolbar_icon_dimension"
+            android:layout_height="@dimen/toolbar_icon_dimension"
+            android:padding="@dimen/toolbar_icon_padding"
+            android:src="@drawable/ic_add_media"
+            android:clickable="true"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"/>
         <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_width="@dimen/toolbar_icon_dimension"
+            android:layout_height="@dimen/toolbar_icon_dimension"
+            android:padding="@dimen/toolbar_icon_padding"
+            android:src="@drawable/ic_undo"
+            android:clickable="true"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"/>
         <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_width="@dimen/toolbar_icon_dimension"
+            android:layout_height="@dimen/toolbar_icon_dimension"
+            android:padding="@dimen/toolbar_icon_padding"
+            android:src="@drawable/ic_export"
+            android:clickable="true"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"/>
+        <ImageView
+            android:layout_width="@dimen/toolbar_icon_dimension"
+            android:layout_height="@dimen/toolbar_icon_dimension"
+            android:padding="@dimen/toolbar_icon_padding"
+            android:src="@drawable/ic_preview"
+            android:clickable="true"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"/>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/main_layout"
@@ -34,12 +63,14 @@
         android:orientation="vertical">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="@dimen/video_view_height"
             android:background="#555555">
             <LinearLayout
-                android:layout_width="440dp"
-                android:layout_height="250dp"
+                android:id="@+id/video_view_layout"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/video_view_height"
                 android:layout_centerInParent="true"
+                android:orientation="horizontal"
                 android:background="#333333">
 
             </LinearLayout>
@@ -53,20 +84,68 @@
                 android:layout_height="match_parent"
                 android:background="#2d2c2c"
                 android:orientation="vertical">
-                <ImageView
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-                <ImageView
+                    android:layout_height="@dimen/layout_timeline_height"/>
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-                <ImageView
+                    android:layout_height="@dimen/seperate_line_height"
+                    android:background="@color/seperate_line_layer_icon_color"/>
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-                <ImageView
+                    android:layout_height="0dp"
+                    android:gravity="center"
+                    android:layout_weight="2">
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:src="@drawable/ic_movie_layer"/>
+                </LinearLayout>
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="@dimen/seperate_line_height"
+                    android:background="@color/seperate_line_layer_icon_color"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:gravity="center"
+                    android:layout_weight="1">
+                    <ImageView
+                        android:layout_width="@dimen/layer_icon_dimension"
+                        android:layout_height="@dimen/layer_icon_dimension"
+                        android:src="@drawable/ic_image_layer"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/seperate_line_height"
+                    android:background="@color/seperate_line_layer_icon_color"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:gravity="center"
+                    android:layout_weight="1">
+                    <ImageView
+                        android:layout_width="@dimen/layer_icon_dimension"
+                        android:layout_height="@dimen/layer_icon_dimension"
+                        android:src="@drawable/ic_text_layer"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/seperate_line_height"
+                    android:background="@color/seperate_line_layer_icon_color"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:gravity="center"
+                    android:layout_weight="1">
+                    <ImageView
+                        android:layout_width="@dimen/layer_icon_dimension"
+                        android:layout_height="@dimen/layer_icon_dimension"
+                        android:src="@drawable/ic_audio_layer"/>
+                </LinearLayout>
             </LinearLayout>
-            <HorizontalScrollView
+            <com.hecorat.editvideo.CustomHorizontalScrollView
+                android:id="@+id/scroll_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="#393737">
@@ -75,39 +154,67 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
                     <LinearLayout
-                        android:layout_width="1000dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="2"/>
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/layout_timeline_height"/>
                     <LinearLayout
                         android:layout_width="match_parent"
+                        android:layout_height="@dimen/seperate_line_height"
+                        android:background="@color/seperate_line_layer_color"/>
+                    <RelativeLayout
+                        android:id="@+id/timeline_video"
+                        android:layout_width="wrap_content"
                         android:layout_height="0dp"
-                        android:layout_weight="1">
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="@color/seperate_line_layer_color"/>
-                    </LinearLayout>
+                        android:layout_weight="2">
+                        <RelativeLayout
+                            android:id="@+id/layout_video"
+                            android:layout_width="2000dp"
+                            android:layout_height="match_parent"/>
+                    </RelativeLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="@color/seperate_line_layer_color"/>
-                    </LinearLayout>
-                    <LinearLayout
+                        android:layout_height="@dimen/seperate_line_height"
+                        android:background="@color/seperate_line_layer_color"/>
+                    <RelativeLayout
+                        android:id="@+id/timeline_image"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1">
-                        <LinearLayout
+                        <RelativeLayout
+                            android:id="@+id/layout_image"
                             android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="@color/seperate_line_layer_color"/>
-                    </LinearLayout>
+                            android:layout_height="match_parent"/>
+                    </RelativeLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/seperate_line_height"
+                        android:background="@color/seperate_line_layer_color"/>
+                    <RelativeLayout
+                        android:id="@+id/timeline_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1">
+                        <RelativeLayout
+                            android:id="@+id/layout_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
+                    </RelativeLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/seperate_line_height"
+                        android:background="@color/seperate_line_layer_color"/>
+                    <RelativeLayout
+                        android:id="@+id/timeline_audio"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1">
+                        <RelativeLayout
+                            android:id="@+id/layout_audio"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
+                    </RelativeLayout>
                 </LinearLayout>
-            </HorizontalScrollView>
+            </com.hecorat.editvideo.CustomHorizontalScrollView>
         </LinearLayout>
     </LinearLayout>
 

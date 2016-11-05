@@ -29,9 +29,11 @@ public class ExtraTimeLine extends ImageView {
     int leftPosition;
     ExtraTimeLineStatus timeLineStatus;
     Bitmap bitmap;
+    String text;
+    boolean timelinePicture;
 
     ArrayList<Bitmap> listBitmap;
-    public ExtraTimeLine(Context context, String imagePath, int height) {
+    public ExtraTimeLine(Context context, String pathOrText, int height, boolean isPicture) {
         super(context);
         durationImage = Constants.IMAGE_TEXT_DURATION;
         startTime = 0;
@@ -40,7 +42,12 @@ public class ExtraTimeLine extends ImageView {
         this.height = height;
 
         paint = new Paint();
-        bitmap = getBitmap(imagePath);
+        if (isPicture) {
+            bitmap = getBitmap(pathOrText);
+        } else {
+            text = pathOrText;
+        }
+        timelinePicture = isPicture;
 
         params = new RelativeLayout.LayoutParams(width, height);
         setLayoutParams(params);
@@ -67,6 +74,7 @@ public class ExtraTimeLine extends ImageView {
     public void setLeftMargin(int value) {
         leftPosition = value;
         timeLineStatus.leftMargin = leftPosition - MainTimeLineControl.THUMB_WIDTH;
+        log("time status left: "+timeLineStatus.leftMargin);
         params.leftMargin = value;
     }
 
@@ -86,7 +94,14 @@ public class ExtraTimeLine extends ImageView {
         setLayoutParams(params);
         paint.setColor(getResources().getColor(R.color.background_timeline));
         canvas.drawRect(rectBackground, paint);
-        canvas.drawBitmap(bitmap, 20, 0, paint);
+        if (timelinePicture) {
+            canvas.drawBitmap(bitmap, 20, 0, paint);
+        } else {
+            paint.setColor(Color.MAGENTA);
+            paint.setTextSize(35);
+            canvas.drawText(text, 20, 50, paint);
+            log(text);
+        }
     }
 
     private Bitmap createDefaultBitmap(){

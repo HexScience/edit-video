@@ -24,6 +24,7 @@ public class ExtraTimeLineControl extends ImageView {
     int startTime, endTime;
     int limitLeftMargin;
     int leftMargin;
+    boolean inLayoutImage;
     RectF thumbLeft, thumbRight;
     Rect lineAbove, lineBelow;
     Paint paint;
@@ -79,6 +80,7 @@ public class ExtraTimeLineControl extends ImageView {
         extraTimeLineStatus.widthTimeLine = widthTimeLine;
         extraTimeLineStatus.startTime = startTime;
         extraTimeLineStatus.endTime = endTime;
+        extraTimeLineStatus.inLayoutImage = inLayoutImage;
     }
 
     public void restoreTimeLineStatus(ExtraTimeLine extraTimeLine) {
@@ -89,6 +91,7 @@ public class ExtraTimeLineControl extends ImageView {
         endTime = extraTimeLineStatus.endTime;
         start = THUMB_WIDTH;
         end = widthTimeLine + THUMB_WIDTH;
+        inLayoutImage = extraTimeLineStatus.inLayoutImage;
         updateLayout(leftMargin, widthTimeLine);
     }
 
@@ -142,7 +145,6 @@ public class ExtraTimeLineControl extends ImageView {
 
                     moveX = motionEvent.getX() - oldX;
                     moveY = motionEvent.getY() - oldY;
-                    log("moveX: " + moveX);
                     if (touch == TOUCH_LEFT) {
                         startPosition = start + (int) moveX;
                         endPosition = end;
@@ -154,7 +156,6 @@ public class ExtraTimeLineControl extends ImageView {
                         if (margin < limitLeftMargin) {
                             margin = limitLeftMargin;
                         }
-                        log("start position when < limit: " + startPosition);
                         updateLayoutRuntime(startPosition, endPosition);
                     }
                     if (touch == TOUCH_RIGHT) {
@@ -165,9 +166,7 @@ public class ExtraTimeLineControl extends ImageView {
                             endPosition = start + 20;
                         }
                         updateLayoutRuntime(startPosition, endPosition);
-                        log("margin: " + margin);
                     }
-                    log("end position < limit " + endPosition);
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (touch == TOUCH_CENTER) {
@@ -182,8 +181,7 @@ public class ExtraTimeLineControl extends ImageView {
                     mOnControlTimeLineChanged.updateExtraTimeLine(startTime, endTime);
 
                     updateLayout(leftMargin, widthTimeLine);
-                    log("left margin: " + leftMargin);
-                    log("widthTimeline " + widthTimeLine);
+
                     end = start + widthTimeLine;
                     touch = 0;
                     return true;

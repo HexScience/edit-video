@@ -6,4 +6,5 @@ package com.hecorat.editvideo;
 public class ExtraTimeLineStatus {
     int leftMargin, widthTimeLine;
     int startTime, endTime;
+    boolean inLayoutImage;
 }

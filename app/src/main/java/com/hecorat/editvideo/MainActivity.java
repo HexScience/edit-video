@@ -18,24 +18,34 @@ import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements MainTimeLineControl.OnControlTimeLineChanged, ExtraTimeLineControl.OnExtraTimeLineControlChanged {
+public class MainActivity extends AppCompatActivity implements MainTimeLineControl.OnControlTimeLineChanged, ExtraTimeLineControl.OnExtraTimeLineControlChanged, OnAudioControlTimeLineChanged {
     private LinearLayout mVideoViewLayout;
-    private int mCountVideo = 2;
+
     private ArrayList<MainTimeLine> mVideoList;
     private RelativeLayout mLayoutVideo, mLayoutImage, mLayoutText, mLayoutAudio;
     private RelativeLayout mTimeLineVideo, mTimeLineImage, mTimeLineText, mTimeLineAudio;
-    private boolean mMainControlVisiable;
     private MainTimeLine mSelectedMainTimeLine;
     private MainTimeLineControl mMainTimeLineControl;
-    private RelativeLayout.LayoutParams mControlParams;
     private CustomHorizontalScrollView mScrollView;
-    private int mTimeLineVideoHeight = 150;
-    private int mTimeLineImageHeight = 70;
+    private LinearLayout mLayoutScrollView;
+
     private ExtraTimeLine mSelectedExtraTimeLine;
     private boolean mExtraControlVisiable;
     private ExtraTimeLineControl mExtraTimeLineControl;
     private ImageView mImageShadow;
     private RelativeLayout.LayoutParams mImageShadowParams;
+    private AudioTimeLineControl mAudioTimeLineControl;
+    private AudioTimeLine mSelectedAudioTimeLine;
+    private ImageView mShadowIndicator;
+    private RelativeLayout.LayoutParams mShadowIndicatorParams;
+
+    public static final int DRAG_VIDEO = 0;
+    public static final int DRAG_EXTRA = 1;
+    public static final int DRAG_AUDIO = 2;
+    private int mDragCode = DRAG_VIDEO;
+    private int mCountVideo = 2;
+    private int mTimeLineVideoHeight = 150;
+    private int mTimeLineImageHeight = 70;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +62,14 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mTimeLineText = (RelativeLayout) findViewById(R.id.timeline_text);
         mLayoutAudio = (RelativeLayout) findViewById(R.id.layout_audio);
         mTimeLineAudio = (RelativeLayout) findViewById(R.id.timeline_audio);
+        mLayoutScrollView = (LinearLayout) findViewById(R.id.layout_scrollview);
         mImageShadow = new ImageView(this);
         mImageShadow.setBackgroundResource(R.drawable.shadow);
         mImageShadowParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        mShadowIndicator = new ImageView(this);
+        mShadowIndicator.setBackgroundResource(R.drawable.shadow_indicator);
+        mShadowIndicatorParams = new RelativeLayout.LayoutParams(10, mTimeLineVideoHeight);
+        mShadowIndicator.setLayoutParams(mShadowIndicatorParams);
 
         setVideoRatio();
         mVideoList = new ArrayList<>();
@@ -62,34 +77,35 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         for (int i = 0; i < mCountVideo; i++) {
             MainTimeLine mainTimeLine = new MainTimeLine(this, videoPath, mTimeLineVideoHeight);
             mainTimeLine.setOnClickListener(onMainTimeLineClick);
+            mainTimeLine.setOnLongClickListener(onVideoLongClick);
             mVideoList.add(mainTimeLine);
             mLayoutVideo.addView(mainTimeLine);
         }
         getLeftMargin(mCountVideo - 1);
-        mMainTimeLineControl = new MainTimeLineControl(this, mVideoList.get(0).width, mTimeLineVideoHeight);
-        mControlParams = (RelativeLayout.LayoutParams) mMainTimeLineControl.getLayoutParams();
-        mTimeLineVideo.addView(mMainTimeLineControl);
-        toggleMainTimeLineControl();
+        mMainTimeLineControl = new MainTimeLineControl(this, mVideoList.get(0).width, mTimeLineVideoHeight, Constants.MARGIN_LEFT_TIME_LINE);
+        mTimeLineVideo.addView(mMainTimeLineControl, mMainTimeLineControl.params);
+        mScrollView.scroll = false;
+        mMainTimeLineControl.setVisibility(View.GONE);
 
         String imagePath = Environment.getExternalStorageDirectory() + "/a.png";
         ExtraTimeLine extraTimeLine = new ExtraTimeLine(this, imagePath, mTimeLineImageHeight, true);
         extraTimeLine.setLeftMargin(Constants.MARGIN_LEFT_TIME_LINE);
         extraTimeLine.setOnClickListener(onExtraTimeLineClick);
-        extraTimeLine.setOnLongClickListener(onTimelineLongClick);
+        extraTimeLine.setOnLongClickListener(onExtraTimelineLongClick);
         mLayoutImage.addView(extraTimeLine);
         extraTimeLine.timeLineStatus.inLayoutImage = true;
 
         ExtraTimeLine extraTimeLine1 = new ExtraTimeLine(this, imagePath, mTimeLineImageHeight, true);
         extraTimeLine1.setLeftMargin(2 * Constants.MARGIN_LEFT_TIME_LINE + extraTimeLine.width);
         extraTimeLine1.setOnClickListener(onExtraTimeLineClick);
-        extraTimeLine1.setOnLongClickListener(onTimelineLongClick);
+        extraTimeLine1.setOnLongClickListener(onExtraTimelineLongClick);
         mLayoutImage.addView(extraTimeLine1);
         extraTimeLine1.timeLineStatus.inLayoutImage = true;
 
         ExtraTimeLine extraTimeLine2 = new ExtraTimeLine(this, "Lai Trung Tien", mTimeLineImageHeight, false);
         extraTimeLine2.setLeftMargin(Constants.MARGIN_LEFT_TIME_LINE);
         extraTimeLine2.setOnClickListener(onExtraTimeLineClick);
-        extraTimeLine2.setOnLongClickListener(onTimelineLongClick);
+        extraTimeLine2.setOnLongClickListener(onExtraTimelineLongClick);
         mLayoutText.addView(extraTimeLine2);
         extraTimeLine2.timeLineStatus.inLayoutImage = false;
 
@@ -98,31 +114,193 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mSelectedExtraTimeLine = extraTimeLine;
         setExtraControlVisiable(false);
 
-        mTimeLineImage.setOnDragListener(onDragListener);
-        mTimeLineVideo.setOnDragListener(onDragListener);
-        mTimeLineText.setOnDragListener(onDragListener);
+        mTimeLineImage.setOnDragListener(onExtraDragListener);
+        mTimeLineVideo.setOnDragListener(onExtraDragListener);
+        mTimeLineText.setOnDragListener(onExtraDragListener);
 
         String audioPath = Environment.getExternalStorageDirectory() + "/a.mp3";
-        AudioTimeLine audioTimeLine = new AudioTimeLine(this, audioPath, mTimeLineImageHeight, Constants.MARGIN_LEFT_TIME_LINE);
+        AudioTimeLine audioTimeLine = new AudioTimeLine(this, videoPath, mTimeLineImageHeight, Constants.MARGIN_LEFT_TIME_LINE);
         mLayoutAudio.addView(audioTimeLine, audioTimeLine.params);
+        audioTimeLine.setOnClickListener(onAudioTimeLineClick);
+        audioTimeLine.setOnLongClickListener(onAudioLongClick);
+        mSelectedAudioTimeLine = audioTimeLine;
+
+        AudioTimeLine audioTimeLine1 = new AudioTimeLine(this, videoPath, mTimeLineImageHeight, Constants.MARGIN_LEFT_TIME_LINE * 2 + audioTimeLine.width);
+        mLayoutAudio.addView(audioTimeLine1, audioTimeLine1.params);
+        audioTimeLine1.setOnClickListener(onAudioTimeLineClick);
+        audioTimeLine1.setOnLongClickListener(onAudioLongClick);
+
+        int leftAudioControl = Constants.MARGIN_LEFT_TIME_LINE;
+        int rightAudioControl = leftAudioControl + audioTimeLine.width;
+        mAudioTimeLineControl = new AudioTimeLineControl(this, leftAudioControl, rightAudioControl, mTimeLineImageHeight);
+        mTimeLineAudio.addView(mAudioTimeLineControl);
+        mAudioTimeLineControl.setVisibility(View.GONE);
+
+
+
     }
 
-    View.OnLongClickListener onTimelineLongClick = new View.OnLongClickListener() {
+    View.OnLongClickListener onVideoLongClick = new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View view) {
-        mSelectedExtraTimeLine = (ExtraTimeLine) view;
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(100);
-        ClipData clipData = ClipData.newPlainText("", "");
-        View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            view.startDragAndDrop(clipData, shadowBuilder, view, 0);
-        } else {
-            view.startDrag(clipData, shadowBuilder, view, 0);
+            mSelectedMainTimeLine = (MainTimeLine) view;
+            Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(100);
+            ClipData clipData = ClipData.newPlainText("", "");
+            View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                view.startDragAndDrop(clipData, shadowBuilder, view, 0);
+            } else {
+                view.startDrag(clipData, shadowBuilder, view, 0);
+            }
+            mImageShadowParams.width = mSelectedMainTimeLine.width;
+            mImageShadowParams.height = mSelectedMainTimeLine.height;
+            mDragCode = DRAG_VIDEO;
+            ViewGroup parent = (ViewGroup) mImageShadow.getParent();
+            if (parent != null) {
+                parent.removeView(mImageShadow);
+            }
+            mLayoutVideo.addView(mImageShadow);
+            mLayoutVideo.addView(mShadowIndicator);
+            mLayoutScrollView.setOnDragListener(onVideoDragListener);
+            return false;
         }
-        mImageShadowParams.width = mSelectedExtraTimeLine.width;
-        mImageShadowParams.height = mSelectedExtraTimeLine.height;
-        return false;
+    };
+
+    View.OnDragListener onVideoDragListener = new View.OnDragListener() {
+        int finalMargin;
+        int changePosition;
+        @Override
+        public boolean onDrag(View view, DragEvent dragEvent) {
+            if (mDragCode != DRAG_VIDEO) {
+                return false;
+            }
+            int x = (int) dragEvent.getX();
+            if (x > 0) {
+                finalMargin = x - 200;
+            }
+            for (int i=0; i<mVideoList.size(); i++){
+                MainTimeLine mainTimeLine = mVideoList.get(i);
+                if (x >= mainTimeLine.left && x <= mainTimeLine.right) {
+                    mShadowIndicator.setVisibility(View.VISIBLE);
+                    mShadowIndicatorParams.leftMargin = mainTimeLine.left;
+                    mShadowIndicator.setLayoutParams(mShadowIndicatorParams);
+                    changePosition = i;
+                    break;
+                } else {
+                    mShadowIndicator.setVisibility(View.GONE);
+                }
+            }
+
+            if (finalMargin < Constants.MARGIN_LEFT_TIME_LINE) {
+                finalMargin = Constants.MARGIN_LEFT_TIME_LINE;
+            }
+            mImageShadowParams.leftMargin = finalMargin;
+            mImageShadow.setLayoutParams(mImageShadowParams);
+
+            switch (dragEvent.getAction()) {
+                case DragEvent.ACTION_DROP:
+                    MainTimeLine changeTimeLine = mVideoList.get(changePosition);
+                    if (!changeTimeLine.equals(mSelectedMainTimeLine)) {
+                        mSelectedMainTimeLine.setLeftMargin(changeTimeLine.left);
+                        mVideoList.remove(mSelectedMainTimeLine);
+                        mVideoList.add(changePosition, mSelectedMainTimeLine);
+                        getLeftMargin(mCountVideo-1);
+                    }
+                    break;
+                case DragEvent.ACTION_DRAG_ENDED:
+                    mLayoutVideo.removeView(mImageShadow);
+                    mLayoutVideo.removeView(mShadowIndicator);
+                    break;
+            }
+            return true;
+        }
+    };
+
+    View.OnDragListener onAudioDragListener = new View.OnDragListener() {
+        int finalMargin;
+
+        @Override
+        public boolean onDrag(View view, DragEvent dragEvent) {
+            if (mDragCode != DRAG_AUDIO) {
+                return false;
+            }
+            int x = (int) dragEvent.getX();
+            if (x > 0) {
+                finalMargin = x - 200;
+            }
+            if (finalMargin < Constants.MARGIN_LEFT_TIME_LINE) {
+                finalMargin = Constants.MARGIN_LEFT_TIME_LINE;
+            }
+            mImageShadowParams.leftMargin = finalMargin;
+            mImageShadow.setLayoutParams(mImageShadowParams);
+
+
+            switch (dragEvent.getAction()) {
+                case DragEvent.ACTION_DROP:
+                    mSelectedAudioTimeLine.moveTimeLine(finalMargin);
+                    break;
+                case DragEvent.ACTION_DRAG_ENDED:
+                    mLayoutAudio.removeView(mImageShadow);
+                    break;
+            }
+            return true;
+        }
+    };
+
+    View.OnLongClickListener onAudioLongClick = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View view) {
+            mSelectedAudioTimeLine = (AudioTimeLine) view;
+            Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(100);
+            ClipData clipData = ClipData.newPlainText("", "");
+            View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                view.startDragAndDrop(clipData, shadowBuilder, view, 0);
+            } else {
+                view.startDrag(clipData, shadowBuilder, view, 0);
+            }
+            mImageShadowParams.width = mSelectedAudioTimeLine.width;
+            mImageShadowParams.height = mSelectedAudioTimeLine.height;
+            mDragCode = DRAG_AUDIO;
+            ViewGroup parent = (ViewGroup) mImageShadow.getParent();
+            if (parent != null) {
+                parent.removeView(mImageShadow);
+            }
+            mLayoutAudio.addView(mImageShadow);
+            mLayoutScrollView.setOnDragListener(onAudioDragListener);
+            return false;
+        }
+    };
+
+    View.OnClickListener onAudioTimeLineClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            mSelectedAudioTimeLine = (AudioTimeLine) view;
+            mScrollView.scroll = false;
+            mAudioTimeLineControl.setVisibility(View.VISIBLE);
+            mAudioTimeLineControl.restoreTimeLineStatus(mSelectedAudioTimeLine);
+        }
+    };
+
+    View.OnLongClickListener onExtraTimelineLongClick = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View view) {
+            mSelectedExtraTimeLine = (ExtraTimeLine) view;
+            Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(100);
+            ClipData clipData = ClipData.newPlainText("", "");
+            View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                view.startDragAndDrop(clipData, shadowBuilder, view, 0);
+            } else {
+                view.startDrag(clipData, shadowBuilder, view, 0);
+            }
+            mImageShadowParams.width = mSelectedExtraTimeLine.width;
+            mImageShadowParams.height = mSelectedExtraTimeLine.height;
+            mDragCode = DRAG_EXTRA;
+            return false;
         }
     };
 
@@ -133,12 +311,15 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         return mImageShadow.getParent().equals(layout);
     }
 
-    View.OnDragListener onDragListener = new View.OnDragListener() {
+    View.OnDragListener onExtraDragListener = new View.OnDragListener() {
         boolean inLayoutImage;
         int finalMargin = 0;
 
         @Override
         public boolean onDrag(View view, DragEvent dragEvent) {
+            if (mDragCode != DRAG_EXTRA) {
+                return false;
+            }
 
             int x = (int) dragEvent.getX();
 
@@ -243,69 +424,28 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     View.OnClickListener onMainTimeLineClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mMainControlVisiable = true;
-            toggleMainTimeLineControl();
-            saveTimLineStatus();
             mSelectedMainTimeLine = (MainTimeLine) view;
-            showControl();
+            mScrollView.scroll = false;
+            mMainTimeLineControl.setVisibility(View.VISIBLE);
+            mMainTimeLineControl.restoreTimeLineStatus(mSelectedMainTimeLine);
         }
     };
 
-    private void showControl() {
-        backupTimeLineStatus();
-        mMainTimeLineControl.updateLayout(mMainTimeLineControl.start, mMainTimeLineControl.end, true);
-    }
-
-    private void backupTimeLineStatus() {
-        MainTimeLineStatus timeLineStatus = mSelectedMainTimeLine.timeLineStatus;
-        mControlParams.leftMargin = timeLineStatus.leftMargin;
-        mMainTimeLineControl.start = timeLineStatus.start;
-        mMainTimeLineControl.end = timeLineStatus.end;
-        mMainTimeLineControl.currentMinPosition = timeLineStatus.currentMinPosition;
-        mMainTimeLineControl.currentMaxPosition = timeLineStatus.currentMaxPosition;
-        mMainTimeLineControl.maxPosition = timeLineStatus.maxPosition;
-        log("Start Time: " + timeLineStatus.startTime + " End Time: " + timeLineStatus.endTime);
+    @Override
+    public void updateTimeLine(int leftPosition, int width) {
+        mSelectedMainTimeLine.drawTimeLine(leftPosition, width);
+        getLeftMargin(mCountVideo-1);
     }
 
     private void log(String msg) {
         Log.e("Edit video", msg);
     }
 
-    private void saveTimLineStatus() {
-        if (mSelectedMainTimeLine == null) {
-            return;
-        }
-        MainTimeLineStatus timeLineStatus = mSelectedMainTimeLine.timeLineStatus;
-        timeLineStatus.startTime = mSelectedMainTimeLine.startTime;
-        timeLineStatus.endTime = mSelectedMainTimeLine.endTime;
-        timeLineStatus.start = mMainTimeLineControl.start;
-        timeLineStatus.end = mMainTimeLineControl.end;
-        timeLineStatus.currentMinPosition = mMainTimeLineControl.currentMinPosition;
-        timeLineStatus.currentMaxPosition = mMainTimeLineControl.currentMaxPosition;
-        timeLineStatus.maxPosition = mMainTimeLineControl.maxPosition;
-        timeLineStatus.leftMargin = mControlParams.leftMargin;
-    }
-
-    private void toggleMainTimeLineControl() {
-        if (mMainControlVisiable) {
-            mMainTimeLineControl.setVisibility(View.VISIBLE);
-            mScrollView.scroll = false;
-        } else {
-            mMainTimeLineControl.setVisibility(View.INVISIBLE);
-            mScrollView.scroll = true;
-        }
-    }
-
-    @Override
-    public void updateTimeLine(int start, int end) {
-        mSelectedMainTimeLine.drawTimeLine(start, end);
-        getLeftMargin(mCountVideo - 1);
-    }
 
     @Override
     public void invisibleControl() {
-        mMainControlVisiable = false;
-        toggleMainTimeLineControl();
+        mMainTimeLineControl.setVisibility(View.GONE);
+        mScrollView.scroll = true;
     }
 
     private int getLeftMargin(int position) {
@@ -354,5 +494,16 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     public void invisibleExtraControl() {
         setExtraControlVisiable(false);
         mExtraTimeLineControl.saveTimeLineStatus(mSelectedExtraTimeLine);
+    }
+
+    @Override
+    public void updateAudioTimeLine(int start, int end) {
+        mSelectedAudioTimeLine.seekTimeLine(start, end);
+    }
+
+    @Override
+    public void invisibleAudioControl() {
+        mAudioTimeLineControl.setVisibility(View.GONE);
+        mScrollView.scroll = true;
     }
 }

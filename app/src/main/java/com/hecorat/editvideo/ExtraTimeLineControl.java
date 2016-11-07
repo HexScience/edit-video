@@ -107,7 +107,6 @@ public class ExtraTimeLineControl extends ImageView {
 
     public interface OnExtraTimeLineControlChanged {
         void updateExtraTimeLine(int start, int end);
-
         void invisibleExtraControl();
     }
 

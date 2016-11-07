@@ -27,7 +27,8 @@ public class MainTimeLine extends ImageView {
     RelativeLayout.LayoutParams params;
     int startTime, endTime;
     int startPosition;
-    int leftPosition;
+    int left, right;
+    int min, max;
     MainTimeLineStatus timeLineStatus;
 
     ArrayList<Bitmap> listBitmap;
@@ -44,43 +45,44 @@ public class MainTimeLine extends ImageView {
         this.height = height;
 
         paint = new Paint();
+        left = 0;
+        width = durationVideo/Constants.SCALE_VALUE;
+        min = left;
+        max = min + width;
+        right = left + width;
+        log("init min: "+min);
 
         params = new RelativeLayout.LayoutParams(width, height);
         setLayoutParams(params);
         defaultBitmap = createDefaultBitmap();
-        drawTimeLine(startTime, endTime);
-        initTimeLineStatus();
+        drawTimeLine(left, width);
 
         new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void initTimeLineStatus(){
-        timeLineStatus = new MainTimeLineStatus();
-        timeLineStatus.start = 0;
-        timeLineStatus.end = width;
-        timeLineStatus.currentMinPosition = 0;
-        timeLineStatus.currentMaxPosition = width;
-        timeLineStatus.maxPosition = width;
-        timeLineStatus.startTime = 0;
-        timeLineStatus.endTime = endTime;
-
-    }
-
     public void setLeftMargin(int value) {
-        leftPosition = value;
-        timeLineStatus.leftMargin = leftPosition - MainTimeLineControl.THUMB_WIDTH;
-        params.leftMargin = value;
+        int moveX = value-left;
+        left = value;
+        params.leftMargin = left;
+        min += moveX;
+        max += moveX;
+        right = left+width;
+        setLayoutParams(params);
+        log("margin min: ");
     }
 
-    public void drawTimeLine(int startTime, int endTime) {
-        startPosition = startTime/Constants.SCALE_VALUE;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        width = (endTime - startTime)/Constants.SCALE_VALUE;
-        rectBackground = new Rect(0, 0, width, height);
+    public void drawTimeLine(int leftPosition, int width) {
+        int moveX = left - leftPosition;
+        min += moveX;
+        max += moveX;
+        this.width = width;
+        right = left + width;
+        startPosition = left - min;
         params.width = width;
-        log("Start: "+startTime+" End: "+endTime);
+        setLayoutParams(params);
+        rectBackground = new Rect(0, 0, width, height);
         invalidate();
+        log("min: "+min+" max: "+max);
     }
 
     @Override

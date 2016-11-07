@@ -150,6 +150,7 @@
                 android:layout_height="match_parent"
                 android:background="#393737">
                 <LinearLayout
+                    android:id="@+id/layout_scrollview"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
@@ -162,7 +163,7 @@
                         android:background="@color/seperate_line_layer_color"/>
                     <RelativeLayout
                         android:id="@+id/timeline_video"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="2">
                         <RelativeLayout

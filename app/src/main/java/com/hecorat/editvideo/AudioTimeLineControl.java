@@ -15,50 +15,37 @@ import android.widget.RelativeLayout;
 /**
  * Created by bkmsx on 01/11/2016.
  */
-public class MainTimeLineControl extends ImageView {
-    int width, height;
-    static final int THUMB_WIDTH = 30;
-    static final int LINE_HEIGHT = 4;
-    static final int ROUND = 10;
-    int min, max;
-    int left, right;
+public class AudioTimeLineControl extends ImageView {
     RectF thumbLeft, thumbRight;
     Rect lineAbove, lineBelow;
+    int min, max;
+    int left , right;
+    int height;
     Paint paint;
     RelativeLayout.LayoutParams params;
-    OnControlTimeLineChanged mOnControlTimeLineChanged;
+    OnAudioControlTimeLineChanged mOnAudioControlTimeLineChanged;
+    static final int THUMB_WIDTH = 30, LINE_HEIGHT=4, ROUND = 10;
 
-    public MainTimeLineControl(Context context, int widthTimeLine, int heightTimeLine, int left) {
+    public AudioTimeLineControl(Context context, int left, int right, int height) {
         super(context);
-        mOnControlTimeLineChanged = (OnControlTimeLineChanged) context;
-        width = widthTimeLine;
-        height = heightTimeLine;
-        this.left = left;
-        right = left + width;
+        mOnAudioControlTimeLineChanged = (OnAudioControlTimeLineChanged) context;
         min = left;
-        max = left + width;
-
+        max = right;
+        this.height = height;
         paint = new Paint();
+        setOnTouchListener(onTouchListener);
+
         params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, height);
         setLayoutParams(params);
         seekTo(left, right);
-        setOnTouchListener(onTouchListener);
     }
 
-    public void restoreTimeLineStatus(MainTimeLine mainTimeLine) {
-        min = mainTimeLine.min;
-        max = mainTimeLine.max;
-        left = mainTimeLine.left;
-        width = mainTimeLine.width;
-        right = left + width;
-        updateLayout(left, right);
-    }
-
+    // layout Match_parent
     public void seekTo(int left, int right) {
         thumbLeft = new RectF(left - THUMB_WIDTH, 0, left, height);
-        thumbRight = new RectF(right, 0, right+THUMB_WIDTH, height );
-        lineAbove = new Rect(left - THUMB_WIDTH/2, 0, right+THUMB_WIDTH/2, LINE_HEIGHT);
-        lineBelow = new Rect(left-THUMB_WIDTH/2, height-LINE_HEIGHT, right+THUMB_WIDTH/2, height);
+        thumbRight = new RectF(right, 0, right + THUMB_WIDTH, height);
+        lineAbove = new Rect(left - THUMB_WIDTH/2, 0, right + THUMB_WIDTH/2, LINE_HEIGHT);
+        lineBelow = new Rect(left- THUMB_WIDTH/2, height - LINE_HEIGHT, right+THUMB_WIDTH/2, height);
         params.width = RelativeLayout.LayoutParams.MATCH_PARENT;
         params.leftMargin = 0;
         setLayoutParams(params);
@@ -78,23 +65,22 @@ public class MainTimeLineControl extends ImageView {
         invalidate();
     }
 
+    public void restoreTimeLineStatus(AudioTimeLine audioTimeLine) {
+        min = audioTimeLine.min;
+        max = audioTimeLine.max;
+        left = audioTimeLine.left;
+        right = audioTimeLine.right;
+        updateLayout(left, right);
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         paint.setColor(Color.CYAN);
-        canvas.drawRect(lineAbove, paint);
-        canvas.drawRect(lineBelow, paint);
         canvas.drawRoundRect(thumbLeft, ROUND, ROUND, paint);
         canvas.drawRoundRect(thumbRight, ROUND, ROUND, paint);
-    }
-
-    public interface OnControlTimeLineChanged {
-        void updateTimeLine(int leftPosition, int width);
-        void invisibleControl();
-    }
-
-    private void log(String msg) {
-        Log.e("Log for Control", msg);
+        canvas.drawRect(lineAbove, paint);
+        canvas.drawRect(lineBelow, paint);
     }
 
     OnTouchListener onTouchListener = new OnTouchListener() {
@@ -112,31 +98,35 @@ public class MainTimeLineControl extends ImageView {
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-
                     seekTo(left, right);
-                    oldX = motionEvent.getX()+left - THUMB_WIDTH;
-                    oldY = motionEvent.getY();
-                    if (oldX < left + epsX && oldX > left - epsX && oldY > -epsY && oldY < height + epsY) {
-                        touch = TOUCH_LEFT;
-                    }
-                    else if (oldX > right - epsX && oldX < right + epsX && oldY > -epsY && oldY < height + epsY) {
+                    oldX = motionEvent.getX() + left - THUMB_WIDTH;
+                    oldY = motionEvent.getY() ;
+                    if (oldX > right - epsX && oldX < right + epsX && oldY > -epsY && oldY < height + epsY) {
                         touch = TOUCH_RIGHT;
-                    }
-                    else {
+                    } else if (oldX < left + epsX && oldX > left - epsX && oldY > -epsY && oldY < height + epsY) {
+                        touch = TOUCH_LEFT;
+                    } else {
                         touch = TOUCH_CENTER;
                     }
 
                     return true;
                 case MotionEvent.ACTION_MOVE:
+
                     moveX = motionEvent.getX() - oldX;
+                    moveY = motionEvent.getY() - oldY;
                     if (touch == TOUCH_LEFT) {
-                        startPosition = left + (int) moveX;
+                        startPosition = left + (int)moveX;
                         endPosition = right;
                         if (startPosition < min) {
                             startPosition = min;
                         }
-                        if (startPosition > right-10) {
-                            startPosition = right - 10;
+
+                        if (startPosition < Constants.MARGIN_LEFT_TIME_LINE) {
+                            startPosition = Constants.MARGIN_LEFT_TIME_LINE;
+                        }
+
+                        if (startPosition > right - 10) {
+                             startPosition = right - 10;
                         }
                     }
                     if (touch == TOUCH_RIGHT) {
@@ -145,23 +135,22 @@ public class MainTimeLineControl extends ImageView {
                         if (endPosition > max) {
                             endPosition = max;
                         }
-                        if (endPosition < left+10) {
-                            endPosition = left+10;
+                        if (endPosition < left + 10) {
+                            endPosition = left + 10;
                         }
                     }
+
                     seekTo(startPosition, endPosition);
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (touch == TOUCH_CENTER) {
-                        mOnControlTimeLineChanged.invisibleControl();
+                        mOnAudioControlTimeLineChanged.invisibleAudioControl();
                         return true;
                     }
-                    width = endPosition - startPosition;
-                    right = left + width;
-                    min += left - startPosition;
-                    max += left - startPosition;
+                    left = startPosition;
+                    right = endPosition;
                     updateLayout(left, right);
-                    mOnControlTimeLineChanged.updateTimeLine(startPosition, width);
+                    mOnAudioControlTimeLineChanged.updateAudioTimeLine(left, right);
                     touch = 0;
                     return true;
                 default:
@@ -170,4 +159,8 @@ public class MainTimeLineControl extends ImageView {
             return false;
         }
     };
+
+    private void log(String msg) {
+        Log.e("Log for audio Timeline", msg);
+    }
 }

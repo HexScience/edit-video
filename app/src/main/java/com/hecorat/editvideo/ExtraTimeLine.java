@@ -100,7 +100,6 @@ public class ExtraTimeLine extends ImageView {
             paint.setColor(Color.MAGENTA);
             paint.setTextSize(35);
             canvas.drawText(text, 20, 50, paint);
-            log(text);
         }
     }
 

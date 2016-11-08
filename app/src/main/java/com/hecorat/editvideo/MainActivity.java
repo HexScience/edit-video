@@ -83,8 +83,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         getLeftMargin(mCountVideo - 1);
         mMainTimeLineControl = new MainTimeLineControl(this, mVideoList.get(0).width, mTimeLineVideoHeight, Constants.MARGIN_LEFT_TIME_LINE);
         mTimeLineVideo.addView(mMainTimeLineControl, mMainTimeLineControl.params);
-        mScrollView.scroll = false;
-        mMainTimeLineControl.setVisibility(View.GONE);
+        setMainControlVisible(false);
 
         int left = Constants.MARGIN_LEFT_TIME_LINE;
         String imagePath = Environment.getExternalStorageDirectory() + "/a.png";
@@ -109,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mTimeLineImage.addView(mExtraTimeLineControl);
         mExtraTimeLineControl.inLayoutImage = true;
         mSelectedExtraTimeLine = extraTimeLine;
-        mExtraTimeLineControl.setVisibility(View.GONE);
+        setExtraControlVisible(false);
 
         mTimeLineImage.setOnDragListener(onExtraDragListener);
         mTimeLineVideo.setOnDragListener(onExtraDragListener);
@@ -131,10 +130,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         int rightAudioControl = leftAudioControl + audioTimeLine.width;
         mAudioTimeLineControl = new AudioTimeLineControl(this, leftAudioControl, rightAudioControl, mTimeLineImageHeight);
         mTimeLineAudio.addView(mAudioTimeLineControl);
-        mAudioTimeLineControl.setVisibility(View.GONE);
-
-
-
+        setAudioControlVisible(false);
     }
 
     View.OnLongClickListener onVideoLongClick = new View.OnLongClickListener() {
@@ -275,8 +271,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         @Override
         public void onClick(View view) {
             mSelectedAudioTimeLine = (AudioTimeLine) view;
-            mScrollView.scroll = false;
-            mAudioTimeLineControl.setVisibility(View.VISIBLE);
+            setAudioControlVisible(true);
             mAudioTimeLineControl.restoreTimeLineStatus(mSelectedAudioTimeLine);
         }
     };
@@ -385,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         @Override
         public void onClick(View view) {
             mSelectedExtraTimeLine = (ExtraTimeLine) view;
-            setExtraControlVisiable(true);
+            setExtraControlVisible(true);
             mExtraTimeLineControl.restoreTimeLineStatus(mSelectedExtraTimeLine);
 
             ViewGroup parent = (ViewGroup) mExtraTimeLineControl.getParent();
@@ -400,12 +395,14 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         }
     };
 
-    private void setExtraControlVisiable(boolean visiable) {
-        if (visiable) {
+    private void setExtraControlVisible(boolean visible) {
+        if (visible) {
             mExtraTimeLineControl.setVisibility(View.VISIBLE);
             mScrollView.scroll = false;
+            mMainTimeLineControl.setVisibility(View.GONE);
+            mAudioTimeLineControl.setVisibility(View.GONE);
         } else {
-            mExtraTimeLineControl.setVisibility(View.INVISIBLE);
+            mExtraTimeLineControl.setVisibility(View.GONE);
             mScrollView.scroll = true;
         }
     }
@@ -414,8 +411,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         @Override
         public void onClick(View view) {
             mSelectedMainTimeLine = (MainTimeLine) view;
-            mScrollView.scroll = false;
-            mMainTimeLineControl.setVisibility(View.VISIBLE);
+            setMainControlVisible(true);
             mMainTimeLineControl.restoreTimeLineStatus(mSelectedMainTimeLine);
         }
     };
@@ -433,8 +429,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
 
     @Override
     public void invisibleMainControl() {
-        mMainTimeLineControl.setVisibility(View.GONE);
-        mScrollView.scroll = true;
+        setMainControlVisible(false);
     }
 
     private int getLeftMargin(int position) {
@@ -481,7 +476,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
 
     @Override
     public void invisibleExtraControl() {
-        setExtraControlVisiable(false);
+        setExtraControlVisible(false);
     }
 
     @Override
@@ -491,7 +486,30 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
 
     @Override
     public void invisibleAudioControl() {
-        mAudioTimeLineControl.setVisibility(View.GONE);
-        mScrollView.scroll = true;
+        setAudioControlVisible(false);
+    }
+
+    private void setMainControlVisible(boolean visible){
+        if (visible) {
+            mMainTimeLineControl.setVisibility(View.VISIBLE);
+            mScrollView.scroll = false;
+            mExtraTimeLineControl.setVisibility(View.GONE);
+            mAudioTimeLineControl.setVisibility(View.GONE);
+        } else {
+            mMainTimeLineControl.setVisibility(View.GONE);
+            mScrollView.scroll = true;
+        }
+    }
+
+    private void setAudioControlVisible(boolean visible) {
+        if (visible) {
+            mAudioTimeLineControl.setVisibility(View.VISIBLE);
+            mScrollView.scroll = false;
+            mMainTimeLineControl.setVisibility(View.GONE);
+            mExtraTimeLineControl.setVisibility(View.GONE);
+        } else {
+            mAudioTimeLineControl.setVisibility(View.GONE);
+            mScrollView.scroll = true;
+        }
     }
 }

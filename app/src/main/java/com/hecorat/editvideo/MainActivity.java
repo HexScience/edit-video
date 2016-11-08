@@ -18,7 +18,7 @@ import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements MainTimeLineControl.OnControlTimeLineChanged, ExtraTimeLineControl.OnExtraTimeLineControlChanged, OnAudioControlTimeLineChanged {
+public class MainActivity extends AppCompatActivity implements MainTimeLineControl.OnControlTimeLineChanged, ExtraTimeLineControl.OnExtraTimeLineControlChanged, AudioTimeLineControl.OnAudioControlTimeLineChanged {
     private LinearLayout mVideoViewLayout;
 
     private ArrayList<MainTimeLine> mVideoList;
@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private LinearLayout mLayoutScrollView;
 
     private ExtraTimeLine mSelectedExtraTimeLine;
-    private boolean mExtraControlVisiable;
     private ExtraTimeLineControl mExtraTimeLineControl;
     private ImageView mImageShadow;
     private RelativeLayout.LayoutParams mImageShadowParams;
@@ -87,32 +86,30 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mScrollView.scroll = false;
         mMainTimeLineControl.setVisibility(View.GONE);
 
+        int left = Constants.MARGIN_LEFT_TIME_LINE;
         String imagePath = Environment.getExternalStorageDirectory() + "/a.png";
-        ExtraTimeLine extraTimeLine = new ExtraTimeLine(this, imagePath, mTimeLineImageHeight, true);
-        extraTimeLine.setLeftMargin(Constants.MARGIN_LEFT_TIME_LINE);
+        ExtraTimeLine extraTimeLine = new ExtraTimeLine(this, imagePath, mTimeLineImageHeight, left, true);
         extraTimeLine.setOnClickListener(onExtraTimeLineClick);
         extraTimeLine.setOnLongClickListener(onExtraTimelineLongClick);
         mLayoutImage.addView(extraTimeLine);
-        extraTimeLine.timeLineStatus.inLayoutImage = true;
 
-        ExtraTimeLine extraTimeLine1 = new ExtraTimeLine(this, imagePath, mTimeLineImageHeight, true);
-        extraTimeLine1.setLeftMargin(2 * Constants.MARGIN_LEFT_TIME_LINE + extraTimeLine.width);
+        left = 2 * Constants.MARGIN_LEFT_TIME_LINE + extraTimeLine.width;
+        ExtraTimeLine extraTimeLine1 = new ExtraTimeLine(this, imagePath, mTimeLineImageHeight, left, true);
         extraTimeLine1.setOnClickListener(onExtraTimeLineClick);
         extraTimeLine1.setOnLongClickListener(onExtraTimelineLongClick);
         mLayoutImage.addView(extraTimeLine1);
-        extraTimeLine1.timeLineStatus.inLayoutImage = true;
 
-        ExtraTimeLine extraTimeLine2 = new ExtraTimeLine(this, "Lai Trung Tien", mTimeLineImageHeight, false);
-        extraTimeLine2.setLeftMargin(Constants.MARGIN_LEFT_TIME_LINE);
+        left = Constants.MARGIN_LEFT_TIME_LINE;
+        ExtraTimeLine extraTimeLine2 = new ExtraTimeLine(this, "Lai Trung Tien", mTimeLineImageHeight, left, false);
         extraTimeLine2.setOnClickListener(onExtraTimeLineClick);
         extraTimeLine2.setOnLongClickListener(onExtraTimelineLongClick);
         mLayoutText.addView(extraTimeLine2);
-        extraTimeLine2.timeLineStatus.inLayoutImage = false;
 
-        mExtraTimeLineControl = new ExtraTimeLineControl(this, extraTimeLine.timeLineStatus.leftMargin, extraTimeLine.width, mTimeLineImageHeight);
+        mExtraTimeLineControl = new ExtraTimeLineControl(this, extraTimeLine.left, extraTimeLine.width, mTimeLineImageHeight);
         mTimeLineImage.addView(mExtraTimeLineControl);
+        mExtraTimeLineControl.inLayoutImage = true;
         mSelectedExtraTimeLine = extraTimeLine;
-        setExtraControlVisiable(false);
+        mExtraTimeLineControl.setVisibility(View.GONE);
 
         mTimeLineImage.setOnDragListener(onExtraDragListener);
         mTimeLineVideo.setOnDragListener(onExtraDragListener);
@@ -358,19 +355,17 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
 
             switch (dragEvent.getAction()) {
                 case DragEvent.ACTION_DROP:
-                    mSelectedExtraTimeLine.setLeftMargin(finalMargin);
-                    mExtraTimeLineControl.leftMargin = mSelectedExtraTimeLine.timeLineStatus.leftMargin;
-                    mSelectedExtraTimeLine.setLayoutParams(mSelectedExtraTimeLine.params);
+                    mSelectedExtraTimeLine.moveTimeLine(finalMargin);
                     ViewGroup parent = (ViewGroup) mSelectedExtraTimeLine.getParent();
                     if (parent != null) {
                         parent.removeView(mSelectedExtraTimeLine);
                     }
                     if (inLayoutImage) {
                         mTimeLineImage.addView(mSelectedExtraTimeLine);
-                        mExtraTimeLineControl.inLayoutImage = true;
+                        mSelectedExtraTimeLine.inLayoutImage = true;
                     } else {
                         mTimeLineText.addView(mSelectedExtraTimeLine);
-                        mExtraTimeLineControl.inLayoutImage = false;
+                        mSelectedExtraTimeLine.inLayoutImage = false;
                     }
                     break;
                 case DragEvent.ACTION_DRAG_ENDED:
@@ -389,9 +384,6 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     View.OnClickListener onExtraTimeLineClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (mSelectedExtraTimeLine != null) {
-                mExtraTimeLineControl.saveTimeLineStatus(mSelectedExtraTimeLine);
-            }
             mSelectedExtraTimeLine = (ExtraTimeLine) view;
             setExtraControlVisiable(true);
             mExtraTimeLineControl.restoreTimeLineStatus(mSelectedExtraTimeLine);
@@ -405,13 +397,10 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             } else {
                 mTimeLineText.addView(mExtraTimeLineControl);
             }
-            mExtraTimeLineControl.params.leftMargin = mSelectedExtraTimeLine.timeLineStatus.leftMargin;
-            mExtraTimeLineControl.setLayoutParams(mExtraTimeLineControl.params);
         }
     };
 
     private void setExtraControlVisiable(boolean visiable) {
-        mExtraControlVisiable = visiable;
         if (visiable) {
             mExtraTimeLineControl.setVisibility(View.VISIBLE);
             mScrollView.scroll = false;
@@ -432,7 +421,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     };
 
     @Override
-    public void updateTimeLine(int leftPosition, int width) {
+    public void updateMainTimeLine(int leftPosition, int width) {
         mSelectedMainTimeLine.drawTimeLine(leftPosition, width);
         getLeftMargin(mCountVideo-1);
     }
@@ -443,7 +432,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
 
 
     @Override
-    public void invisibleControl() {
+    public void invisibleMainControl() {
         mMainTimeLineControl.setVisibility(View.GONE);
         mScrollView.scroll = true;
     }
@@ -486,14 +475,13 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     }
 
     @Override
-    public void updateExtraTimeLine(int start, int end) {
-        mSelectedExtraTimeLine.drawTimeLine(start, end);
+    public void updateExtraTimeLine(int left, int right) {
+        mSelectedExtraTimeLine.drawTimeLine(left, right);
     }
 
     @Override
     public void invisibleExtraControl() {
         setExtraControlVisiable(false);
-        mExtraTimeLineControl.saveTimeLineStatus(mSelectedExtraTimeLine);
     }
 
     @Override

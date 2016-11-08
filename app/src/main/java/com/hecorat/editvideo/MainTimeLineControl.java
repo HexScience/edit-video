@@ -41,7 +41,7 @@ public class MainTimeLineControl extends ImageView {
         paint = new Paint();
         params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, height);
         setLayoutParams(params);
-        seekTo(left, right);
+        updateLayoutMatchParent(left, right);
         setOnTouchListener(onTouchListener);
     }
 
@@ -51,10 +51,10 @@ public class MainTimeLineControl extends ImageView {
         left = mainTimeLine.left;
         width = mainTimeLine.width;
         right = left + width;
-        updateLayout(left, right);
+        updateLayoutWidth(left, right);
     }
 
-    public void seekTo(int left, int right) {
+    public void updateLayoutMatchParent(int left, int right) {
         thumbLeft = new RectF(left - THUMB_WIDTH, 0, left, height);
         thumbRight = new RectF(right, 0, right+THUMB_WIDTH, height );
         lineAbove = new Rect(left - THUMB_WIDTH/2, 0, right+THUMB_WIDTH/2, LINE_HEIGHT);
@@ -66,7 +66,7 @@ public class MainTimeLineControl extends ImageView {
     }
 
     // layout with exact width
-    public void updateLayout(int left, int right) {
+    public void updateLayoutWidth(int left, int right) {
         int widthTimeLine = right - left;
         thumbLeft = new RectF(0, 0, THUMB_WIDTH, height);
         thumbRight = new RectF(widthTimeLine+THUMB_WIDTH, 0, widthTimeLine+2*THUMB_WIDTH, height);
@@ -89,8 +89,8 @@ public class MainTimeLineControl extends ImageView {
     }
 
     public interface OnControlTimeLineChanged {
-        void updateTimeLine(int leftPosition, int width);
-        void invisibleControl();
+        void updateMainTimeLine(int leftPosition, int width);
+        void invisibleMainControl();
     }
 
     private void log(String msg) {
@@ -113,7 +113,7 @@ public class MainTimeLineControl extends ImageView {
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
 
-                    seekTo(left, right);
+                    updateLayoutMatchParent(left, right);
                     oldX = motionEvent.getX()+left - THUMB_WIDTH;
                     oldY = motionEvent.getY();
                     if (oldX < left + epsX && oldX > left - epsX && oldY > -epsY && oldY < height + epsY) {
@@ -149,19 +149,19 @@ public class MainTimeLineControl extends ImageView {
                             endPosition = left+10;
                         }
                     }
-                    seekTo(startPosition, endPosition);
+                    updateLayoutMatchParent(startPosition, endPosition);
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (touch == TOUCH_CENTER) {
-                        mOnControlTimeLineChanged.invisibleControl();
+                        mOnControlTimeLineChanged.invisibleMainControl();
                         return true;
                     }
                     width = endPosition - startPosition;
                     right = left + width;
                     min += left - startPosition;
                     max += left - startPosition;
-                    updateLayout(left, right);
-                    mOnControlTimeLineChanged.updateTimeLine(startPosition, width);
+                    updateLayoutWidth(left, right);
+                    mOnControlTimeLineChanged.updateMainTimeLine(startPosition, width);
                     touch = 0;
                     return true;
                 default:

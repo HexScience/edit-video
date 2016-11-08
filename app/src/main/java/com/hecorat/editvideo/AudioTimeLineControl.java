@@ -37,11 +37,11 @@ public class AudioTimeLineControl extends ImageView {
 
         params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, height);
         setLayoutParams(params);
-        seekTo(left, right);
+        updateLayoutMatchParent(left, right);
     }
 
     // layout Match_parent
-    public void seekTo(int left, int right) {
+    public void updateLayoutMatchParent(int left, int right) {
         thumbLeft = new RectF(left - THUMB_WIDTH, 0, left, height);
         thumbRight = new RectF(right, 0, right + THUMB_WIDTH, height);
         lineAbove = new Rect(left - THUMB_WIDTH/2, 0, right + THUMB_WIDTH/2, LINE_HEIGHT);
@@ -53,7 +53,7 @@ public class AudioTimeLineControl extends ImageView {
     }
 
     // layout with exact width
-    public void updateLayout(int left, int right) {
+    public void updateLayoutWidth(int left, int right) {
         int widthTimeLine = right - left;
         thumbLeft = new RectF(0, 0, THUMB_WIDTH, height);
         thumbRight = new RectF(widthTimeLine+THUMB_WIDTH, 0, widthTimeLine+2*THUMB_WIDTH, height);
@@ -70,7 +70,7 @@ public class AudioTimeLineControl extends ImageView {
         max = audioTimeLine.max;
         left = audioTimeLine.left;
         right = audioTimeLine.right;
-        updateLayout(left, right);
+        updateLayoutWidth(left, right);
     }
 
     @Override
@@ -81,6 +81,11 @@ public class AudioTimeLineControl extends ImageView {
         canvas.drawRoundRect(thumbRight, ROUND, ROUND, paint);
         canvas.drawRect(lineAbove, paint);
         canvas.drawRect(lineBelow, paint);
+    }
+
+    public interface OnAudioControlTimeLineChanged {
+        void updateAudioTimeLine(int start, int end);
+        void invisibleAudioControl();
     }
 
     OnTouchListener onTouchListener = new OnTouchListener() {
@@ -98,7 +103,7 @@ public class AudioTimeLineControl extends ImageView {
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    seekTo(left, right);
+                    updateLayoutMatchParent(left, right);
                     oldX = motionEvent.getX() + left - THUMB_WIDTH;
                     oldY = motionEvent.getY() ;
                     if (oldX > right - epsX && oldX < right + epsX && oldY > -epsY && oldY < height + epsY) {
@@ -140,7 +145,7 @@ public class AudioTimeLineControl extends ImageView {
                         }
                     }
 
-                    seekTo(startPosition, endPosition);
+                    updateLayoutMatchParent(startPosition, endPosition);
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (touch == TOUCH_CENTER) {
@@ -149,7 +154,7 @@ public class AudioTimeLineControl extends ImageView {
                     }
                     left = startPosition;
                     right = endPosition;
-                    updateLayout(left, right);
+                    updateLayoutWidth(left, right);
                     mOnAudioControlTimeLineChanged.updateAudioTimeLine(left, right);
                     touch = 0;
                     return true;

@@ -16,83 +16,65 @@ import android.widget.RelativeLayout;
  * Created by bkmsx on 01/11/2016.
  */
 public class ExtraTimeLineControl extends ImageView {
-    int widthTimeLine, height;
-    static final int THUMB_WIDTH = 30;
-    int lineWeight = 4;
-    int round = 10;
-    int start, end;
-    int startTime, endTime;
-    int limitLeftMargin;
-    int leftMargin;
+
+    static final int THUMB_WIDTH = 30, LINE_HEIGHT=4, ROUND = 10;
+    int width, height;
+    int left, right;
+    int min;
     boolean inLayoutImage;
     RectF thumbLeft, thumbRight;
     Rect lineAbove, lineBelow;
     Paint paint;
     RelativeLayout.LayoutParams params;
     OnExtraTimeLineControlChanged mOnControlTimeLineChanged;
-    ExtraTimeLineStatus extraTimeLineStatus;
 
     public ExtraTimeLineControl(Context context, int leftMargin, int widthTimeLine, int heightTimeLine) {
         super(context);
-        this.widthTimeLine = widthTimeLine;
+        left = leftMargin;
+        width = widthTimeLine;
         height = heightTimeLine;
+        right = left + width;
+        min = Constants.MARGIN_LEFT_TIME_LINE;
         paint = new Paint();
         params = new RelativeLayout.LayoutParams(widthTimeLine + 2 * THUMB_WIDTH, height);
-        start = THUMB_WIDTH;
-        limitLeftMargin = Constants.MARGIN_LEFT_TIME_LINE - THUMB_WIDTH;
-        end = start + widthTimeLine;
-        setLayoutParams(params);
-        updateLayout(leftMargin, widthTimeLine);
+
+        updateLayoutWidth(left, right);
         setOnTouchListener(onTouchListener);
         mOnControlTimeLineChanged = (OnExtraTimeLineControlChanged) context;
     }
 
-    private void updateLayoutRuntime(int startPosition, int endPosition) {
-        thumbLeft = new RectF(startPosition - THUMB_WIDTH, 0, startPosition, height);
-        thumbRight = new RectF(endPosition, 0, endPosition + THUMB_WIDTH, height);
-        lineAbove = new Rect(startPosition - THUMB_WIDTH / 2, 0, endPosition + THUMB_WIDTH / 2, lineWeight);
-        lineBelow = new Rect(startPosition - THUMB_WIDTH / 2, height - lineWeight, endPosition + THUMB_WIDTH / 2, height);
+    public void restoreTimeLineStatus(ExtraTimeLine extraTimeLine) {
+        left = extraTimeLine.left;
+        right = extraTimeLine.right;
+        width = right - left;
+        inLayoutImage = extraTimeLine.inLayoutImage;
+        updateLayoutWidth(left, right);
+    }
+
+    public void updateLayoutMatchParent(int left, int right) {
+        width = right - left;
+        thumbLeft = new RectF(left - THUMB_WIDTH, 0, left, height);
+        thumbRight = new RectF(right, 0, right + THUMB_WIDTH, height);
+        lineAbove = new Rect(left - THUMB_WIDTH/2, 0, right+THUMB_WIDTH/2, LINE_HEIGHT);
+        lineBelow = new Rect(left - THUMB_WIDTH/2, height-LINE_HEIGHT, right+THUMB_WIDTH/2, height);
+        params.leftMargin = 0;
+        params.width = RelativeLayout.LayoutParams.MATCH_PARENT;
+        setLayoutParams(params);
         invalidate();
     }
 
-    public void updateLayout(int leftMargin, int widthTimeLine) {
-        this.widthTimeLine = widthTimeLine;
-        this.leftMargin = leftMargin;
+    public void updateLayoutWidth(int left, int right) {
+        width = right - left;
+        thumbLeft = new RectF(0, 0, THUMB_WIDTH, height);
+        thumbRight = new RectF(width+THUMB_WIDTH, 0, width + 2*THUMB_WIDTH, height);
+        lineAbove = new Rect(THUMB_WIDTH / 2, 0, width + 3*THUMB_WIDTH / 2, LINE_HEIGHT);
+        lineBelow = new Rect(THUMB_WIDTH / 2, height - LINE_HEIGHT, width + 3*THUMB_WIDTH / 2, height);
 
-        int start = THUMB_WIDTH;
-        int end = start + widthTimeLine;
-        thumbLeft = new RectF(start - THUMB_WIDTH, 0, start, height);
-        thumbRight = new RectF(end, 0, end + THUMB_WIDTH, height);
-        lineAbove = new Rect(start - THUMB_WIDTH / 2, 0, end + THUMB_WIDTH / 2, lineWeight);
-        lineBelow = new Rect(start - THUMB_WIDTH / 2, height - lineWeight, end + THUMB_WIDTH / 2, height);
-
-        params.leftMargin = leftMargin;
-        params.width = widthTimeLine + 2 * THUMB_WIDTH;
+        params.leftMargin = left - THUMB_WIDTH;
+        params.width = width + 2 * THUMB_WIDTH;
         setLayoutParams(params);
 
         invalidate();
-        log("Left Margin: " + leftMargin + " Width: " + widthTimeLine);
-    }
-
-    public void saveTimeLineStatus(ExtraTimeLine extraTimeLine) {
-        extraTimeLineStatus = extraTimeLine.timeLineStatus;
-        extraTimeLineStatus.leftMargin = leftMargin;
-        extraTimeLineStatus.widthTimeLine = widthTimeLine;
-        extraTimeLineStatus.startTime = startTime;
-        extraTimeLineStatus.endTime = endTime;
-        extraTimeLineStatus.inLayoutImage = inLayoutImage;
-    }
-
-    public void restoreTimeLineStatus(ExtraTimeLine extraTimeLine) {
-        extraTimeLineStatus = extraTimeLine.timeLineStatus;
-        leftMargin = extraTimeLineStatus.leftMargin;
-        widthTimeLine = extraTimeLineStatus.widthTimeLine;
-        startTime = extraTimeLineStatus.startTime;
-        endTime = extraTimeLineStatus.endTime;
-        start = THUMB_WIDTH;
-        end = widthTimeLine + THUMB_WIDTH;
-        inLayoutImage = extraTimeLineStatus.inLayoutImage;
-        updateLayout(leftMargin, widthTimeLine);
     }
 
     @Override
@@ -101,12 +83,12 @@ public class ExtraTimeLineControl extends ImageView {
         paint.setColor(Color.CYAN);
         canvas.drawRect(lineAbove, paint);
         canvas.drawRect(lineBelow, paint);
-        canvas.drawRoundRect(thumbLeft, round, round, paint);
-        canvas.drawRoundRect(thumbRight, round, round, paint);
+        canvas.drawRoundRect(thumbLeft, ROUND, ROUND, paint);
+        canvas.drawRoundRect(thumbRight, ROUND, ROUND, paint);
     }
 
     public interface OnExtraTimeLineControlChanged {
-        void updateExtraTimeLine(int start, int end);
+        void updateExtraTimeLine(int left, int right);
         void invisibleExtraControl();
     }
 
@@ -122,66 +104,60 @@ public class ExtraTimeLineControl extends ImageView {
         int TOUCH_LEFT = 1;
         int TOUCH_RIGHT = 2;
         int TOUCH_CENTER = 3;
-        int startPosition, endPosition, margin;
+        int leftPosition, rightPosition;
 
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    oldX = motionEvent.getX();
+
+                    updateLayoutMatchParent(left, right);
+
+                    oldX = motionEvent.getX()+left-THUMB_WIDTH;
                     oldY = motionEvent.getY();
 
-                    if (oldX > end - epsX && oldX < end + epsX && oldY > -epsY && oldY < height + epsY) {
+                    if (oldX > right - epsX && oldX < right + epsX && oldY > -epsY && oldY < height + epsY) {
                         touch = TOUCH_RIGHT;
-                    } else if (oldX < start + epsX && oldX > start - epsX && oldY > -epsY && oldY < height + epsY) {
+                    } else if (oldX < left + epsX && oldX > left - epsX && oldY > -epsY && oldY < height + epsY) {
                         touch = TOUCH_LEFT;
                     } else {
                         touch = TOUCH_CENTER;
                     }
+                    log("touch extra: "+touch);
                     return true;
                 case MotionEvent.ACTION_MOVE:
 
                     moveX = motionEvent.getX() - oldX;
-                    moveY = motionEvent.getY() - oldY;
+
                     if (touch == TOUCH_LEFT) {
-                        startPosition = start + (int) moveX;
-                        endPosition = end;
-                        margin = leftMargin + (int) moveX;
-                        if (startPosition > end - 20) {
-                            startPosition = end - 20;
-                            margin = leftMargin + startPosition - start;
+                        leftPosition = left + (int) moveX;
+                        rightPosition = right;
+                        if (leftPosition < min) {
+                            leftPosition = min;
                         }
-                        if (margin < limitLeftMargin) {
-                            margin = limitLeftMargin;
+                        if (leftPosition > right - 10) {
+                            leftPosition = right - 10;
                         }
-                        updateLayoutRuntime(startPosition, endPosition);
                     }
                     if (touch == TOUCH_RIGHT) {
-                        startPosition = start;
-                        endPosition = end + (int) moveX;
-                        margin = leftMargin;
-                        if (endPosition < start + 20) {
-                            endPosition = start + 20;
+                        leftPosition = left;
+                        rightPosition = right + (int) moveX;
+                        if (rightPosition < left + 10) {
+                            rightPosition = left + 10;
                         }
-                        updateLayoutRuntime(startPosition, endPosition);
                     }
+                    updateLayoutMatchParent(leftPosition, rightPosition);
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (touch == TOUCH_CENTER) {
                         mOnControlTimeLineChanged.invisibleExtraControl();
                         return true;
                     }
-                    startPosition = start + margin - leftMargin;
-                    leftMargin = margin;
-                    widthTimeLine = endPosition - startPosition;
-                    startTime = (leftMargin - limitLeftMargin) * Constants.SCALE_VALUE;
-                    endTime = startTime + widthTimeLine * Constants.SCALE_VALUE;
-                    mOnControlTimeLineChanged.updateExtraTimeLine(startTime, endTime);
-
-                    updateLayout(leftMargin, widthTimeLine);
-
-                    end = start + widthTimeLine;
+                    left = leftPosition;
+                    right = rightPosition;
+                    updateLayoutWidth(left, right);
+                    mOnControlTimeLineChanged.updateExtraTimeLine(left, right);
                     touch = 0;
                     return true;
                 default:

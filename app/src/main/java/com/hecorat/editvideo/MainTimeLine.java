@@ -29,7 +29,6 @@ public class MainTimeLine extends ImageView {
     int startPosition;
     int left, right;
     int min, max;
-    MainTimeLineStatus timeLineStatus;
 
     ArrayList<Bitmap> listBitmap;
     public MainTimeLine(Context context, String videoPath, int height) {

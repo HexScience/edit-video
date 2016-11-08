@@ -7,12 +7,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.media.MediaMetadataRetriever;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-
-import java.util.ArrayList;
 
 /**
  * Created by bkmsx on 31/10/2016.
@@ -21,19 +18,16 @@ public class ExtraTimeLine extends ImageView {
     int width, height;
     Rect rectBackground;
     Paint paint;
-    MediaMetadataRetriever retriever;
     int durationImage;
-    Bitmap defaultBitmap;
     RelativeLayout.LayoutParams params;
     int startTime, endTime;
-    int leftPosition;
-    ExtraTimeLineStatus timeLineStatus;
+    int left, right;
     Bitmap bitmap;
     String text;
     boolean timelinePicture;
+    boolean inLayoutImage;
 
-    ArrayList<Bitmap> listBitmap;
-    public ExtraTimeLine(Context context, String pathOrText, int height, boolean isPicture) {
+    public ExtraTimeLine(Context context, String pathOrText, int height, int leftMargin, boolean isPicture) {
         super(context);
         durationImage = Constants.IMAGE_TEXT_DURATION;
         startTime = 0;
@@ -44,16 +38,18 @@ public class ExtraTimeLine extends ImageView {
         paint = new Paint();
         if (isPicture) {
             bitmap = getBitmap(pathOrText);
+            inLayoutImage = true;
         } else {
             text = pathOrText;
+            inLayoutImage = false;
         }
         timelinePicture = isPicture;
-
+        left = leftMargin;
+        width = durationImage/Constants.SCALE_VALUE;
+        right = left + width;
         params = new RelativeLayout.LayoutParams(width, height);
         setLayoutParams(params);
-        defaultBitmap = createDefaultBitmap();
-        drawTimeLine(startTime, endTime);
-        initTimeLineStatus();
+        drawTimeLine(left, right);
 
     }
 
@@ -63,29 +59,21 @@ public class ExtraTimeLine extends ImageView {
         return Bitmap.createScaledBitmap(bitmap, 50, height, false);
     }
 
-    public void initTimeLineStatus(){
-        timeLineStatus = new ExtraTimeLineStatus();
-        timeLineStatus.startTime = 0;
-        timeLineStatus.endTime = durationImage;
-        timeLineStatus.widthTimeLine = width;
-
-    }
-
-    public void setLeftMargin(int value) {
-        leftPosition = value;
-        timeLineStatus.leftMargin = leftPosition - MainTimeLineControl.THUMB_WIDTH;
-        log("time status left: "+timeLineStatus.leftMargin);
-        params.leftMargin = value;
-    }
-
-    public void drawTimeLine(int startTime, int endTime) {
-        this.startTime = startTime;
-        this.endTime = endTime;
-        params.leftMargin = startTime/Constants.SCALE_VALUE + Constants.MARGIN_LEFT_TIME_LINE;
-        width = (endTime - startTime)/Constants.SCALE_VALUE;
+    public void drawTimeLine(int left, int right) {
+        this.left = left;
+        this.right = right;
+        width = right - left;
         rectBackground = new Rect(0, 0, width, height);
+        params.leftMargin = left;
         params.width = width;
+        setLayoutParams(params);
         invalidate();
+    }
+
+    public void moveTimeLine(int left) {
+        this.left = left;
+        this.right = left + width;
+        drawTimeLine(left, right);
     }
 
     @Override
@@ -101,15 +89,6 @@ public class ExtraTimeLine extends ImageView {
             paint.setTextSize(35);
             canvas.drawText(text, 20, 50, paint);
         }
-    }
-
-    private Bitmap createDefaultBitmap(){
-        Paint paint = new Paint();
-        Bitmap bitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        paint.setColor(Color.BLACK);
-        canvas.drawRect(0, 0, bitmap.getWidth(), bitmap.getHeight(), paint);
-        return bitmap;
     }
 
     private void log(String msg){

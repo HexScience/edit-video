@@ -1,4 +1,4 @@
-package com.hecorat.editvideo;
+package com.hecorat.editvideo.timeline;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -12,21 +12,23 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.hecorat.editvideo.main.Constants;
+
 /**
  * Created by bkmsx on 01/11/2016.
  */
 public class ExtraTimeLineControl extends ImageView {
 
-    static final int THUMB_WIDTH = 30, LINE_HEIGHT=4, ROUND = 10;
-    int width, height;
-    int left, right;
-    int min;
-    boolean inLayoutImage;
-    RectF thumbLeft, thumbRight;
-    Rect lineAbove, lineBelow;
-    Paint paint;
-    RelativeLayout.LayoutParams params;
-    OnExtraTimeLineControlChanged mOnControlTimeLineChanged;
+    public static final int THUMB_WIDTH = 30, LINE_HEIGHT=4, ROUND = 10;
+    public int width, height;
+    public int left, right;
+    public int min;
+    public boolean inLayoutImage;
+    public RectF thumbLeft, thumbRight;
+    public Rect lineAbove, lineBelow;
+    public Paint paint;
+    public RelativeLayout.LayoutParams params;
+    public OnExtraTimeLineControlChanged mOnControlTimeLineChanged;
 
     public ExtraTimeLineControl(Context context, int leftMargin, int widthTimeLine, int heightTimeLine) {
         super(context);

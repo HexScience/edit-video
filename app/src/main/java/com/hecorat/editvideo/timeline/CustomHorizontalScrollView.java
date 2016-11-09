@@ -1,4 +1,4 @@
-package com.hecorat.editvideo;
+package com.hecorat.editvideo.timeline;
 
 import android.content.Context;
 import android.util.AttributeSet;

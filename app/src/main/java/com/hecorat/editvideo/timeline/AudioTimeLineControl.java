@@ -1,4 +1,4 @@
-package com.hecorat.editvideo;
+package com.hecorat.editvideo.timeline;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -12,19 +12,21 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.hecorat.editvideo.main.Constants;
+
 /**
  * Created by bkmsx on 01/11/2016.
  */
 public class AudioTimeLineControl extends ImageView {
-    RectF thumbLeft, thumbRight;
-    Rect lineAbove, lineBelow;
-    int min, max;
-    int left , right;
-    int height;
-    Paint paint;
-    RelativeLayout.LayoutParams params;
-    OnAudioControlTimeLineChanged mOnAudioControlTimeLineChanged;
-    static final int THUMB_WIDTH = 30, LINE_HEIGHT=4, ROUND = 10;
+    public RectF thumbLeft, thumbRight;
+    public Rect lineAbove, lineBelow;
+    public int min, max;
+    public int left , right;
+    public int height;
+    public Paint paint;
+    public RelativeLayout.LayoutParams params;
+    public OnAudioControlTimeLineChanged mOnAudioControlTimeLineChanged;
+    public static final int THUMB_WIDTH = 30, LINE_HEIGHT=4, ROUND = 10;
 
     public AudioTimeLineControl(Context context, int left, int right, int height) {
         super(context);

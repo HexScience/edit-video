@@ -1,4 +1,4 @@
-package com.hecorat.editvideo;
+package com.hecorat.editvideo.main;
 
 /**
  * Created by bkmsx on 01/11/2016.

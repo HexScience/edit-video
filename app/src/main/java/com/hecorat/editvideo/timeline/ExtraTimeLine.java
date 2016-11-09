@@ -1,4 +1,4 @@
-package com.hecorat.editvideo;
+package com.hecorat.editvideo.timeline;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,21 +11,24 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.hecorat.editvideo.main.Constants;
+import com.hecorat.editvideo.R;
+
 /**
  * Created by bkmsx on 31/10/2016.
  */
 public class ExtraTimeLine extends ImageView {
-    int width, height;
-    Rect rectBackground;
-    Paint paint;
-    int durationImage;
-    RelativeLayout.LayoutParams params;
-    int startTime, endTime;
-    int left, right;
-    Bitmap bitmap;
-    String text;
-    boolean timelinePicture;
-    boolean inLayoutImage;
+    public int width, height;
+    public Rect rectBackground;
+    public Paint paint;
+    public int durationImage;
+    public RelativeLayout.LayoutParams params;
+    public int startTime, endTime;
+    public int left, right;
+    public Bitmap bitmap;
+    public String text;
+    public boolean timelinePicture;
+    public boolean inLayoutImage;
 
     public ExtraTimeLine(Context context, String pathOrText, int height, int leftMargin, boolean isPicture) {
         super(context);

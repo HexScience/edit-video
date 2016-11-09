@@ -1,4 +1,4 @@
-package com.hecorat.editvideo;
+package com.hecorat.editvideo.main;
 
 import android.content.ClipData;
 import android.content.Context;
@@ -7,6 +7,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.DragEvent;
@@ -15,6 +19,19 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.filemanager.FragmentAudioGallery;
+import com.hecorat.editvideo.filemanager.FragmentImagesGallery;
+import com.hecorat.editvideo.filemanager.FragmentVideosGallery;
+import com.hecorat.editvideo.timeline.AudioTimeLine;
+import com.hecorat.editvideo.timeline.AudioTimeLineControl;
+import com.hecorat.editvideo.timeline.CustomHorizontalScrollView;
+import com.hecorat.editvideo.timeline.ExtraTimeLine;
+import com.hecorat.editvideo.timeline.ExtraTimeLineControl;
+import com.hecorat.editvideo.timeline.MainTimeLine;
+import com.hecorat.editvideo.timeline.MainTimeLineControl;
 
 import java.util.ArrayList;
 
@@ -37,14 +54,31 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private AudioTimeLine mSelectedAudioTimeLine;
     private ImageView mShadowIndicator;
     private RelativeLayout.LayoutParams mShadowIndicatorParams;
+    private ViewPager mViewPager;
+    private TextView mFolderName;
+    private FragmentVideosGallery mFragmentVideosGallery;
+    private FragmentImagesGallery mFragmentImagesGallery;
+    private FragmentAudioGallery mFragmentAudioGallery;
+    private ImageView mBtnBack, mBtnAdd, mBtnUndo, mBtnExport, mBtnPlay;
+    private LinearLayout mFileManager;
+    private ImageView mVideoTab, mImageTab, mAudioTab;
+    private LinearLayout mVideoTabLayout, mImageTabLayout, mAudioTabLayout;
+
 
     public static final int DRAG_VIDEO = 0;
     public static final int DRAG_EXTRA = 1;
     public static final int DRAG_AUDIO = 2;
+    public static final int VIDEO_TAB = 0;
+    public static final int IMAGE_TAB = 1;
+    public static final int AUDIO_TAB = 2;
     private int mDragCode = DRAG_VIDEO;
     private int mCountVideo = 2;
     private int mTimeLineVideoHeight = 150;
     private int mTimeLineImageHeight = 70;
+    private int mFragmentCode;
+    private boolean mOpenFileManager;
+    public boolean mOpenVideoSubFolder,
+            mOpenImageSubFolder, mOpenAudioSubFolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +96,22 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mLayoutAudio = (RelativeLayout) findViewById(R.id.layout_audio);
         mTimeLineAudio = (RelativeLayout) findViewById(R.id.timeline_audio);
         mLayoutScrollView = (LinearLayout) findViewById(R.id.layout_scrollview);
+        mBtnBack = (ImageView) findViewById(R.id.btn_back);
+        mBtnAdd = (ImageView) findViewById(R.id.btn_add);
+        mBtnUndo = (ImageView) findViewById(R.id.btn_undo);
+        mBtnExport = (ImageView) findViewById(R.id.btn_export);
+        mBtnPlay = (ImageView) findViewById(R.id.btn_play);
+        mFileManager = (LinearLayout) findViewById(R.id.layout_file_manager);
+        mVideoTab = (ImageView) findViewById(R.id.video_tab);
+        mImageTab = (ImageView) findViewById(R.id.image_tab);
+        mAudioTab = (ImageView) findViewById(R.id.audio_tab);
+        mVideoTabLayout = (LinearLayout) findViewById(R.id.video_tab_layout);
+        mImageTabLayout = (LinearLayout) findViewById(R.id.image_tab_layout);
+        mAudioTabLayout = (LinearLayout) findViewById(R.id.audio_tab_layout);
+        mVideoTabLayout.setOnClickListener(onTabLayoutClick);
+        mImageTabLayout.setOnClickListener(onTabLayoutClick);
+        mAudioTabLayout.setOnClickListener(onTabLayoutClick);
+
         mImageShadow = new ImageView(this);
         mImageShadow.setBackgroundResource(R.drawable.shadow);
         mImageShadowParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -131,6 +181,161 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mAudioTimeLineControl = new AudioTimeLineControl(this, leftAudioControl, rightAudioControl, mTimeLineImageHeight);
         mTimeLineAudio.addView(mAudioTimeLineControl);
         setAudioControlVisible(false);
+
+        mViewPager = (ViewPager) findViewById(R.id.view_pager);
+
+        mFolderName = (TextView) findViewById(R.id.text_folder_name);
+        GalleryPagerAdapter galleryPagerAdapter = new GalleryPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(galleryPagerAdapter);
+        mViewPager.addOnPageChangeListener(onViewPagerChanged);
+        mFragmentVideosGallery = new FragmentVideosGallery();
+        mFragmentImagesGallery = new FragmentImagesGallery();
+        mFragmentAudioGallery = new FragmentAudioGallery();
+
+        mBtnBack.setOnClickListener(onBtnBackClick);
+        mBtnAdd.setOnClickListener(onBtnAddClick);
+    }
+
+    View.OnClickListener onTabLayoutClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (view.equals(mVideoTabLayout)) {
+
+            }
+
+            if (view.equals(mImageTabLayout)) {
+
+            }
+
+            if (view.equals(mAudioTabLayout)) {
+
+            }
+        }
+    };
+
+    public void setFolderName(String name) {
+        mFolderName.setText(name);
+    }
+
+    View.OnClickListener onBtnAddClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (mOpenFileManager) {
+                openFileManager(false);
+            } else {
+                openFileManager(true);
+            }
+        }
+    };
+
+    private void openFileManager(boolean open) {
+        if (open) {
+            mFileManager.setVisibility(View.VISIBLE);
+            mOpenFileManager = true;
+        } else {
+            mFileManager.setVisibility(View.GONE);
+            mOpenFileManager = false;
+        }
+    }
+
+    View.OnClickListener onBtnBackClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            switch (mFragmentCode) {
+                case VIDEO_TAB:
+                    if (mOpenVideoSubFolder) {
+                        mFragmentVideosGallery.backToMain();
+                        mOpenVideoSubFolder = false;
+                        return;
+                    }
+                    break;
+                case IMAGE_TAB:
+                    if (mOpenImageSubFolder) {
+                        mFragmentImagesGallery.backToMain();
+                        mOpenImageSubFolder = false;
+                        return;
+                    }
+                    break;
+                case AUDIO_TAB:
+                    if (mOpenAudioSubFolder) {
+                        mFragmentAudioGallery.backToMain();
+                        mOpenAudioSubFolder = false;
+                        return;
+                    }
+                    break;
+            }
+
+            if (mOpenFileManager) {
+                openFileManager(false);
+            }
+        }
+    };
+
+    ViewPager.OnPageChangeListener onViewPagerChanged = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            mFragmentCode = position;
+            setHightLighTab(position);
+            switch (position) {
+                case VIDEO_TAB:
+
+                    setFolderName(mFragmentVideosGallery.mFolderName);
+                    break;
+                case IMAGE_TAB:
+
+                    setFolderName(mFragmentImagesGallery.mFolderName);
+                    break;
+                case AUDIO_TAB:
+
+                    setFolderName(mFragmentAudioGallery.mFolderName);
+                    break;
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
+    };
+
+    private void setHightLighTab(int tab) {
+        int videoTabId = tab==VIDEO_TAB? R.drawable.ic_video_tab_blue:R.drawable.ic_video_tab;
+        int imageTabId = tab==IMAGE_TAB? R.drawable.ic_image_tab_blue:R.drawable.ic_image_tab;
+        int audioTabId = tab==AUDIO_TAB? R.drawable.ic_audio_tab_blue:R.drawable.ic_audio_tab;
+        mVideoTab.setImageResource(videoTabId);
+        mImageTab.setImageResource(imageTabId);
+        mAudioTab.setImageResource(audioTabId);
+    }
+
+    private class GalleryPagerAdapter extends FragmentPagerAdapter {
+
+        public GalleryPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case 0:
+                    return mFragmentVideosGallery;
+                case 1:
+                    return mFragmentImagesGallery;
+                case 2:
+                    return mFragmentAudioGallery;
+                default:
+                    return mFragmentVideosGallery;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
     }
 
     View.OnLongClickListener onVideoLongClick = new View.OnLongClickListener() {
@@ -163,6 +368,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     View.OnDragListener onVideoDragListener = new View.OnDragListener() {
         int finalMargin;
         int changePosition;
+
         @Override
         public boolean onDrag(View view, DragEvent dragEvent) {
             if (mDragCode != DRAG_VIDEO) {
@@ -172,7 +378,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             if (x > 0) {
                 finalMargin = x - 200;
             }
-            for (int i=0; i<mVideoList.size(); i++){
+            for (int i = 0; i < mVideoList.size(); i++) {
                 MainTimeLine mainTimeLine = mVideoList.get(i);
                 if (x >= mainTimeLine.left && x <= mainTimeLine.right) {
                     mShadowIndicator.setVisibility(View.VISIBLE);
@@ -198,7 +404,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
                         mSelectedMainTimeLine.setLeftMargin(changeTimeLine.left);
                         mVideoList.remove(mSelectedMainTimeLine);
                         mVideoList.add(changePosition, mSelectedMainTimeLine);
-                        getLeftMargin(mCountVideo-1);
+                        getLeftMargin(mCountVideo - 1);
                     }
                     break;
                 case DragEvent.ACTION_DRAG_ENDED:
@@ -419,7 +625,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     @Override
     public void updateMainTimeLine(int leftPosition, int width) {
         mSelectedMainTimeLine.drawTimeLine(leftPosition, width);
-        getLeftMargin(mCountVideo-1);
+        getLeftMargin(mCountVideo - 1);
     }
 
     private void log(String msg) {
@@ -489,7 +695,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         setAudioControlVisible(false);
     }
 
-    private void setMainControlVisible(boolean visible){
+    private void setMainControlVisible(boolean visible) {
         if (visible) {
             mMainTimeLineControl.setVisibility(View.VISIBLE);
             mScrollView.scroll = false;

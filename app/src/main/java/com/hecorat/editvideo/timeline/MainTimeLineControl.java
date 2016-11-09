@@ -1,4 +1,4 @@
-package com.hecorat.editvideo;
+package com.hecorat.editvideo.timeline;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -16,17 +16,17 @@ import android.widget.RelativeLayout;
  * Created by bkmsx on 01/11/2016.
  */
 public class MainTimeLineControl extends ImageView {
-    int width, height;
-    static final int THUMB_WIDTH = 30;
-    static final int LINE_HEIGHT = 4;
-    static final int ROUND = 10;
-    int min, max;
-    int left, right;
-    RectF thumbLeft, thumbRight;
-    Rect lineAbove, lineBelow;
-    Paint paint;
-    RelativeLayout.LayoutParams params;
-    OnControlTimeLineChanged mOnControlTimeLineChanged;
+    public int width, height;
+    public static final int THUMB_WIDTH = 30;
+    public static final int LINE_HEIGHT = 4;
+    public static final int ROUND = 10;
+    public int min, max;
+    public int left, right;
+    public RectF thumbLeft, thumbRight;
+    public Rect lineAbove, lineBelow;
+    public Paint paint;
+    public RelativeLayout.LayoutParams params;
+    public OnControlTimeLineChanged mOnControlTimeLineChanged;
 
     public MainTimeLineControl(Context context, int widthTimeLine, int heightTimeLine, int left) {
         super(context);

@@ -98,7 +98,9 @@ public class FragmentVideosGallery extends Fragment {
     AdapterView.OnItemClickListener onVideoClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            String videoPath = mListVideo.get(i);
             log("this video path: "+mListVideo.get(i));
+            mActivity.addVideo(videoPath);
         }
     };
 

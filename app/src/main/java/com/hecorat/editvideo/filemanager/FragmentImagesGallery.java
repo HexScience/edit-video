@@ -28,10 +28,10 @@ import java.util.ArrayList;
  */
 public class FragmentImagesGallery extends Fragment {
     public ArrayList<String> mListFolder;
-    public ArrayList<String> mListFirstVideo, mListVideo;
+    public ArrayList<String> mListFirstImage, mListImage;
     public GridView mGridView;
     public String mStoragePath;
-    public VideoGalleryAdapter mFolderAdapter, mVideoAdapter;
+    public ImageGalleryAdapter mFolderAdapter, mImageAdapter;
     public MainActivity mActivity;
 
     public boolean mIsSubFolder;
@@ -49,13 +49,13 @@ public class FragmentImagesGallery extends Fragment {
         mListFolder = new ArrayList<>();
         mListFolder.add(mStoragePath);
         listFolderFrom(fileDirectory);
-        mListFirstVideo = new ArrayList<>();
-        mListVideo = new ArrayList<>();
+        mListFirstImage = new ArrayList<>();
+        mListImage = new ArrayList<>();
 
         new AsyncTaskScanFolder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         mIsSubFolder = false;
-        mFolderAdapter = new VideoGalleryAdapter(getContext(), R.layout.image_layout, mListFirstVideo);
+        mFolderAdapter = new ImageGalleryAdapter(getContext(), R.layout.image_layout, mListFirstImage);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
         mFolderName = getString(R.string.image_tab_title);
@@ -83,10 +83,10 @@ public class FragmentImagesGallery extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             mIsSubFolder = true;
-            mListVideo.clear();
-            mVideoAdapter = new VideoGalleryAdapter(getContext(), R.layout.image_layout, mListVideo);
-            mGridView.setAdapter(mVideoAdapter);
-            mGridView.setOnItemClickListener(onVideoClickListener);
+            mListImage.clear();
+            mImageAdapter = new ImageGalleryAdapter(getContext(), R.layout.image_layout, mListImage);
+            mGridView.setAdapter(mImageAdapter);
+            mGridView.setOnItemClickListener(onImageClickListener);
             mActivity.mOpenImageSubFolder = true;
             mFolderName = new File(mListFolder.get(i)).getName();
             mActivity.setFolderName(mFolderName);
@@ -94,10 +94,10 @@ public class FragmentImagesGallery extends Fragment {
         }
     };
 
-    AdapterView.OnItemClickListener onVideoClickListener = new AdapterView.OnItemClickListener() {
+    AdapterView.OnItemClickListener onImageClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            log("this image path: "+mListVideo.get(i));
+            log("this image path: "+ mListImage.get(i));
         }
     };
 
@@ -109,27 +109,27 @@ public class FragmentImagesGallery extends Fragment {
             if (folderPath.equals(mStoragePath)){
                 subFolder = false;
             }
-            loadAllVideo(new File(folderPath), mListVideo, subFolder);
+            loadAllImage(new File(folderPath), mListImage, subFolder);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            mVideoAdapter.notifyDataSetChanged();
+            mImageAdapter.notifyDataSetChanged();
         }
     }
 
-    private void loadAllVideo(File fileDirectory, ArrayList<String> listVideo, boolean subFolder){
+    private void loadAllImage(File fileDirectory, ArrayList<String> listImage, boolean subFolder){
         File[] fileList = fileDirectory.listFiles();
         for (int i=0; i<fileList.length; i++){
             if (fileList[i].isDirectory()) {
                 if (subFolder) {
-                    loadAllVideo(fileList[i], listVideo, true);
+                    loadAllImage(fileList[i], listImage, true);
                 }
             } else {
                 if (matchFile(fileList[i])) {
-                    listVideo.add(fileList[i].getAbsolutePath());
+                    listImage.add(fileList[i].getAbsolutePath());
                 }
             }
         }
@@ -189,7 +189,7 @@ public class FragmentImagesGallery extends Fragment {
                 }
             } else {
                 if (matchFile(fileList[i])) {
-                    mListFirstVideo.add(fileList[i].getAbsolutePath());
+                    mListFirstImage.add(fileList[i].getAbsolutePath());
                     result = true;
                 }
             }
@@ -201,15 +201,15 @@ public class FragmentImagesGallery extends Fragment {
         return result;
     }
 
-    private class VideoGalleryAdapter extends ArrayAdapter<String> {
+    private class ImageGalleryAdapter extends ArrayAdapter<String> {
 
-        public VideoGalleryAdapter(Context context, int resource, ArrayList<String> objects) {
+        public ImageGalleryAdapter(Context context, int resource, ArrayList<String> objects) {
             super(context, resource, objects);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            String videoPath = getItem(position);
+            String imagePath = getItem(position);
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.image_layout, null);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
@@ -217,7 +217,7 @@ public class FragmentImagesGallery extends Fragment {
             String name;
             int iconId;
             if (mIsSubFolder) {
-                name = new File(mListVideo.get(position)).getName();
+                name = new File(mListImage.get(position)).getName();
                 iconId = R.drawable.ic_picture;
             } else {
                 name = new File(mListFolder.get(position)).getName();
@@ -225,7 +225,7 @@ public class FragmentImagesGallery extends Fragment {
             }
             iconFolder.setImageResource(iconId);
             textView.setText(name);
-            Glide.with(getContext()).load(videoPath).centerCrop().into(imageView);
+            Glide.with(getContext()).load(imagePath).centerCrop().into(imageView);
             return convertView;
         }
 

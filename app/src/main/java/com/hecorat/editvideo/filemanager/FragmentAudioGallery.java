@@ -27,10 +27,10 @@ import java.util.ArrayList;
  */
 public class FragmentAudioGallery extends Fragment {
     public ArrayList<String> mListFolder;
-    public ArrayList<String> mListFirstVideo, mListVideo;
+    public ArrayList<String> mListFirstAudio, mListAudio;
     public GridView mGridView;
     public String mStoragePath;
-    public VideoGalleryAdapter mFolderAdapter, mVideoAdapter;
+    public AudioGalleryAdapter mFolderAdapter, mAudioAdapter;
     public MainActivity mActivity;
 
     public int mCountSubFolder;
@@ -48,13 +48,13 @@ public class FragmentAudioGallery extends Fragment {
         mListFolder = new ArrayList<>();
         mListFolder.add(mStoragePath);
         listFolderFrom(fileDirectory);
-        mListFirstVideo = new ArrayList<>();
-        mListVideo = new ArrayList<>();
+        mListFirstAudio = new ArrayList<>();
+        mListAudio = new ArrayList<>();
 
         new AsyncTaskScanFolder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         mIsSubFolder = false;
-        mFolderAdapter = new VideoGalleryAdapter(getContext(), R.layout.image_layout, mListFirstVideo);
+        mFolderAdapter = new AudioGalleryAdapter(getContext(), R.layout.image_layout, mListFirstAudio);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
         mFolderName = getString(R.string.audio_tab_title);
@@ -81,22 +81,22 @@ public class FragmentAudioGallery extends Fragment {
     AdapterView.OnItemClickListener onFolderClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            mIsSubFolder = true;
-            mListVideo.clear();
-            mVideoAdapter = new VideoGalleryAdapter(getContext(), R.layout.image_layout, mListVideo);
-            mGridView.setAdapter(mVideoAdapter);
-            mGridView.setOnItemClickListener(onVideoClickListener);
-            mActivity.mOpenAudioSubFolder = true;
-            mFolderName = new File(mListFolder.get(i)).getName();
-            mActivity.setFolderName(mFolderName);
-            new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
+        mIsSubFolder = true;
+        mListAudio.clear();
+        mAudioAdapter = new AudioGalleryAdapter(getContext(), R.layout.image_layout, mListAudio);
+        mGridView.setAdapter(mAudioAdapter);
+        mGridView.setOnItemClickListener(onAudioClickListener);
+        mActivity.mOpenAudioSubFolder = true;
+        mFolderName = new File(mListFolder.get(i)).getName();
+        mActivity.setFolderName(mFolderName);
+        new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
         }
     };
 
-    AdapterView.OnItemClickListener onVideoClickListener = new AdapterView.OnItemClickListener() {
+    AdapterView.OnItemClickListener onAudioClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            log("this audio path: "+mListVideo.get(i));
+        log("this audio path: "+ mListAudio.get(i));
         }
     };
 
@@ -108,27 +108,27 @@ public class FragmentAudioGallery extends Fragment {
             if (folderPath.equals(mStoragePath)){
                 subFolder = false;
             }
-            loadAllVideo(new File(folderPath), mListVideo, subFolder);
+            loadAllAudio(new File(folderPath), mListAudio, subFolder);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            mVideoAdapter.notifyDataSetChanged();
+            mAudioAdapter.notifyDataSetChanged();
         }
     }
 
-    private void loadAllVideo(File fileDirectory, ArrayList<String> listVideo, boolean subFolder){
+    private void loadAllAudio(File fileDirectory, ArrayList<String> listAudio, boolean subFolder){
         File[] fileList = fileDirectory.listFiles();
         for (int i=0; i<fileList.length; i++){
             if (fileList[i].isDirectory()) {
                 if (subFolder) {
-                    loadAllVideo(fileList[i], listVideo, true);
+                    loadAllAudio(fileList[i], listAudio, true);
                 }
             } else {
                 if (matchFile(fileList[i])) {
-                    listVideo.add(fileList[i].getAbsolutePath());
+                    listAudio.add(fileList[i].getAbsolutePath());
                 }
             }
         }
@@ -148,7 +148,7 @@ public class FragmentAudioGallery extends Fragment {
             for (int i=0; i<mListFolder.size(); i++) {
                 boolean scanSubFolder = mListFolder.get(i).equals(mStoragePath)? false:true;
                 mCountSubFolder = 0;
-                if (!isVideoFolder(new File(mListFolder.get(i)), scanSubFolder)){
+                if (!isAudioFolder(new File(mListFolder.get(i)), scanSubFolder)){
                     mListFolder.remove(i);
                     i--;
                 }
@@ -175,7 +175,7 @@ public class FragmentAudioGallery extends Fragment {
         }
     }
 
-    private boolean isVideoFolder(File fileDirectory, boolean includeSubDir) {
+    private boolean isAudioFolder(File fileDirectory, boolean includeSubDir) {
         if (mCountSubFolder>7) {
             return false;
         }
@@ -184,11 +184,11 @@ public class FragmentAudioGallery extends Fragment {
         for (int i=0; i<fileList.length; i++){
             if (fileList[i].isDirectory()) {
                 if (includeSubDir) {
-                    result = isVideoFolder(fileList[i], true);
+                    result = isAudioFolder(fileList[i], true);
                 }
             } else {
                 if (matchFile(fileList[i])) {
-                    mListFirstVideo.add(fileList[i].getAbsolutePath());
+                    mListFirstAudio.add(fileList[i].getAbsolutePath());
                     result = true;
                 }
             }
@@ -200,15 +200,14 @@ public class FragmentAudioGallery extends Fragment {
         return result;
     }
 
-    private class VideoGalleryAdapter extends ArrayAdapter<String> {
+    private class AudioGalleryAdapter extends ArrayAdapter<String> {
 
-        public VideoGalleryAdapter(Context context, int resource, ArrayList<String> objects) {
+        public AudioGalleryAdapter(Context context, int resource, ArrayList<String> objects) {
             super(context, resource, objects);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            String videoPath = getItem(position);
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.image_layout, null);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
@@ -216,7 +215,7 @@ public class FragmentAudioGallery extends Fragment {
             iconFolder.setVisibility(View.GONE);
             String name;
             if (mIsSubFolder) {
-                name = new File(mListVideo.get(position)).getName();
+                name = new File(mListAudio.get(position)).getName();
             } else {
                 name = new File(mListFolder.get(position)).getName();
             }

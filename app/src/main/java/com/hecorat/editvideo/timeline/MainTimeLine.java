@@ -22,7 +22,7 @@ import java.util.ArrayList;
  */
 public class MainTimeLine extends ImageView {
     public int width, height;
-    public Rect rectBackground;
+    public Rect rectBackground, rectLeft, rectRight;
     public Paint paint;
     public MediaMetadataRetriever retriever;
     public int durationVideo;
@@ -32,10 +32,15 @@ public class MainTimeLine extends ImageView {
     public int startPosition;
     public int left, right;
     public int min, max;
+    public String videoPath;
+    public int startInTimeLine, endInTimeLine;
+
+    public static final int PADDING = 4;
 
     ArrayList<Bitmap> listBitmap;
     public MainTimeLine(Context context, String videoPath, int height) {
         super(context);
+        this.videoPath = videoPath;
         retriever = new MediaMetadataRetriever();
         retriever.setDataSource(videoPath);
         listBitmap = new ArrayList<>();
@@ -59,7 +64,7 @@ public class MainTimeLine extends ImageView {
         defaultBitmap = createDefaultBitmap();
         drawTimeLine(left, width);
 
-//        new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public void setLeftMargin(int value) {
@@ -71,6 +76,7 @@ public class MainTimeLine extends ImageView {
         right = left+width;
         setLayoutParams(params);
         log("margin min: ");
+        updateTimeLineStatus();
     }
 
     public void drawTimeLine(int leftPosition, int width) {
@@ -83,8 +89,19 @@ public class MainTimeLine extends ImageView {
         params.width = width;
         setLayoutParams(params);
         rectBackground = new Rect(0, 0, width, height);
+        rectLeft = new Rect(0, 0, PADDING, height);
+        rectRight = new Rect(width-PADDING, 0, width, height);
         invalidate();
-        log("min: "+min+" max: "+max);
+        updateTimeLineStatus();
+    }
+
+    public void updateTimeLineStatus() {
+        startTime = startPosition*Constants.SCALE_VALUE;
+        endTime = (right - min) * Constants.SCALE_VALUE;
+        startInTimeLine = (left - Constants.MARGIN_LEFT_TIME_LINE)*Constants.SCALE_VALUE;
+        endInTimeLine = (right - Constants.MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
+        log("startTime: "+startTime+" endTime: "+endTime);
+        log("startTimeLine: "+startInTimeLine+"endTimeLine: "+endInTimeLine);
     }
 
     @Override
@@ -94,8 +111,10 @@ public class MainTimeLine extends ImageView {
         paint.setColor(getResources().getColor(R.color.background_timeline));
         canvas.drawRect(rectBackground, paint);
         for (int i=0; i<listBitmap.size(); i++){
-            canvas.drawBitmap(listBitmap.get(i), i*150 - startPosition, 0, paint);
+            canvas.drawBitmap(listBitmap.get(i), i*150 - startPosition, PADDING, paint);
         }
+        canvas.drawRect(rectLeft, paint);
+        canvas.drawRect(rectRight, paint);
     }
 
     private Bitmap createDefaultBitmap(){
@@ -123,7 +142,7 @@ public class MainTimeLine extends ImageView {
                 if (bitmap == null) {
                     bitmap = defaultBitmap;
                 }
-                Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, 150, height, false);
+                Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, 150, height-PADDING*2, false);
                 listBitmap.add(scaleBitmap);
                 publishProgress();
                 timeStamp += 3000000;

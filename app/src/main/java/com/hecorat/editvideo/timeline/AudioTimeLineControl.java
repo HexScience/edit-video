@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.hecorat.editvideo.main.Constants;
+import com.hecorat.editvideo.main.MainActivity;
 
 /**
  * Created by bkmsx on 01/11/2016.
@@ -27,9 +27,14 @@ public class AudioTimeLineControl extends ImageView {
     public RelativeLayout.LayoutParams params;
     public OnAudioControlTimeLineChanged mOnAudioControlTimeLineChanged;
     public static final int THUMB_WIDTH = 30, LINE_HEIGHT=4, ROUND = 10;
+    public MainActivity mActivity;
+
+    public int MARGIN_LEFT_TIME_LINE;
 
     public AudioTimeLineControl(Context context, int left, int right, int height) {
         super(context);
+        mActivity = (MainActivity) context;
+        MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
         mOnAudioControlTimeLineChanged = (OnAudioControlTimeLineChanged) context;
         min = left;
         max = right;
@@ -128,8 +133,8 @@ public class AudioTimeLineControl extends ImageView {
                             startPosition = min;
                         }
 
-                        if (startPosition < Constants.MARGIN_LEFT_TIME_LINE) {
-                            startPosition = Constants.MARGIN_LEFT_TIME_LINE;
+                        if (startPosition < MARGIN_LEFT_TIME_LINE) {
+                            startPosition = MARGIN_LEFT_TIME_LINE;
                         }
 
                         if (startPosition > right - 10) {

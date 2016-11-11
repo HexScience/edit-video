@@ -12,8 +12,9 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.hecorat.editvideo.main.Constants;
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.main.Constants;
+import com.hecorat.editvideo.main.MainActivity;
 
 import java.util.ArrayList;
 
@@ -34,12 +35,17 @@ public class MainTimeLine extends ImageView {
     public int min, max;
     public String videoPath;
     public int startInTimeLine, endInTimeLine;
+    public MainActivity mActivity;
+
+    public int MARGIN_LEFT_TIME_LINE;
 
     public static final int PADDING = 4;
 
     ArrayList<Bitmap> listBitmap;
     public MainTimeLine(Context context, String videoPath, int height) {
         super(context);
+        mActivity = (MainActivity) context;
+        MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
         this.videoPath = videoPath;
         retriever = new MediaMetadataRetriever();
         retriever.setDataSource(videoPath);
@@ -98,8 +104,8 @@ public class MainTimeLine extends ImageView {
     public void updateTimeLineStatus() {
         startTime = startPosition*Constants.SCALE_VALUE;
         endTime = (right - min) * Constants.SCALE_VALUE;
-        startInTimeLine = (left - Constants.MARGIN_LEFT_TIME_LINE)*Constants.SCALE_VALUE;
-        endInTimeLine = (right - Constants.MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
+        startInTimeLine = (left - MARGIN_LEFT_TIME_LINE)*Constants.SCALE_VALUE;
+        endInTimeLine = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
         log("startTime: "+startTime+" endTime: "+endTime);
         log("startTimeLine: "+startInTimeLine+"endTimeLine: "+endInTimeLine);
     }

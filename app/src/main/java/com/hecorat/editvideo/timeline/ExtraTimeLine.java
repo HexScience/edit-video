@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 
 import com.hecorat.editvideo.main.Constants;
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.main.MainActivity;
 
 /**
  * Created by bkmsx on 31/10/2016.
@@ -29,9 +30,11 @@ public class ExtraTimeLine extends ImageView {
     public String text;
     public boolean timelinePicture;
     public boolean inLayoutImage;
+    public MainActivity mActivity;
 
     public ExtraTimeLine(Context context, String pathOrText, int height, int leftMargin, boolean isPicture) {
         super(context);
+        mActivity = (MainActivity) context;
         durationImage = Constants.IMAGE_TEXT_DURATION;
         startTime = 0;
         endTime = durationImage;
@@ -53,7 +56,6 @@ public class ExtraTimeLine extends ImageView {
         params = new RelativeLayout.LayoutParams(width, height);
         setLayoutParams(params);
         drawTimeLine(left, right);
-
     }
 
     private Bitmap getBitmap(String imagePath) {

@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.hecorat.editvideo.main.Constants;
+import com.hecorat.editvideo.main.MainActivity;
 
 /**
  * Created by bkmsx on 01/11/2016.
@@ -29,14 +29,19 @@ public class ExtraTimeLineControl extends ImageView {
     public Paint paint;
     public RelativeLayout.LayoutParams params;
     public OnExtraTimeLineControlChanged mOnControlTimeLineChanged;
+    public MainActivity mActivity;
+
+    public int MARGIN_LEFT_TIME_LINE;
 
     public ExtraTimeLineControl(Context context, int leftMargin, int widthTimeLine, int heightTimeLine) {
         super(context);
+        mActivity = (MainActivity) context;
+        MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
         left = leftMargin;
         width = widthTimeLine;
         height = heightTimeLine;
         right = left + width;
-        min = Constants.MARGIN_LEFT_TIME_LINE;
+        min = MARGIN_LEFT_TIME_LINE;
         paint = new Paint();
         params = new RelativeLayout.LayoutParams(widthTimeLine + 2 * THUMB_WIDTH, height);
 

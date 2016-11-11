@@ -11,6 +11,8 @@ import android.widget.HorizontalScrollView;
  */
 public class CustomHorizontalScrollView extends HorizontalScrollView {
 
+    OnCustomScrollChanged mOnCustomScrollChanged;
+
     public CustomHorizontalScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -52,10 +54,21 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
                 float deltaX = x - startX;
                 smoothScrollBy((int)(-3*deltaX), 0);
                 startX = event.getX();
+                if (mOnCustomScrollChanged!=null) {
+                    mOnCustomScrollChanged.onScrollChanged();
+                }
                 break;
         }
 
         return true;
+    }
+
+    public void setOnCustomScrollChanged(OnCustomScrollChanged listener) {
+        mOnCustomScrollChanged = listener;
+    }
+
+    public interface OnCustomScrollChanged {
+        void onScrollChanged();
     }
 
     private void log(String msg){

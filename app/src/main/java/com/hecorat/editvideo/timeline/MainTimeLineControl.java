@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.hecorat.editvideo.main.Constants;
+
 /**
  * Created by bkmsx on 01/11/2016.
  */
@@ -91,6 +93,7 @@ public class MainTimeLineControl extends ImageView {
     public interface OnControlTimeLineChanged {
         void updateMainTimeLine(int leftPosition, int width);
         void invisibleMainControl();
+        void seekTo(int value, boolean scroll);
     }
 
     private void log(String msg) {
@@ -138,6 +141,8 @@ public class MainTimeLineControl extends ImageView {
                         if (startPosition > right-10) {
                             startPosition = right - 10;
                         }
+                        int currentVideo = (startPosition - min)* Constants.SCALE_VALUE;
+                        mOnControlTimeLineChanged.seekTo(currentVideo, false);
                     }
                     if (touch == TOUCH_RIGHT) {
                         startPosition = left;
@@ -148,6 +153,8 @@ public class MainTimeLineControl extends ImageView {
                         if (endPosition < left+10) {
                             endPosition = left+10;
                         }
+                        int currentVideo = (endPosition - min)* Constants.SCALE_VALUE;
+                        mOnControlTimeLineChanged.seekTo(currentVideo, false);
                     }
                     updateLayoutMatchParent(startPosition, endPosition);
                     return true;

@@ -97,7 +97,7 @@ public class FragmentImagesGallery extends Fragment {
     AdapterView.OnItemClickListener onImageClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            log("this image path: "+ mListImage.get(i));
+        mActivity.addImage(mListImage.get(i));
         }
     };
 

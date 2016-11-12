@@ -96,7 +96,7 @@ public class FragmentAudioGallery extends Fragment {
     AdapterView.OnItemClickListener onAudioClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        log("this audio path: "+ mListAudio.get(i));
+        mActivity.addAudio(mListAudio.get(i));
         }
     };
 

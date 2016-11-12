@@ -271,7 +271,7 @@
                         android:layout_weight="2">
                         <RelativeLayout
                             android:id="@+id/layout_video"
-                            android:layout_width="2000dp"
+                            android:layout_width="10000dp"
                             android:layout_height="match_parent"/>
                         <FrameLayout
                             android:id="@+id/limit_timeline_video"

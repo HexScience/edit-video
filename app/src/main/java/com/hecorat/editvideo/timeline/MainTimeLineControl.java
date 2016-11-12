@@ -168,6 +168,13 @@ public class MainTimeLineControl extends ImageView {
                     min += left - startPosition;
                     max += left - startPosition;
                     updateLayoutWidth(left, right);
+                    int currentVideo;
+                    if (touch == TOUCH_LEFT) {
+                        currentVideo = (left - min)*Constants.SCALE_VALUE;
+                    } else {
+                        currentVideo = (right - min)*Constants.SCALE_VALUE;
+                    }
+                    mOnControlTimeLineChanged.seekTo(currentVideo, true);
                     mOnControlTimeLineChanged.updateMainTimeLine(startPosition, width);
                     touch = 0;
                     return true;

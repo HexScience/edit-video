@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private FrameLayout mLimitTimeLineVideo, mLimitTimeLineImage, mLimitTimeLineText,
                         mLimitTimeLineAudio, mSeperateLineVideo, mSeperateLineImage, mSeperateLineText;
 
+
     private int mDragCode = DRAG_VIDEO;
     private int mCountVideo = 0;
     private int mTimeLineVideoHeight = 150;
@@ -86,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private int mPreviewStatus;
     private int mMaxTimeLine;
     public int mLeftMarginTimeLine = Constants.MARGIN_LEFT_TIME_LINE;
+    private boolean mScroll;
 
     private Thread mThreadPreviewVideo;
     private MainActivity mActivity;
@@ -185,11 +187,13 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mInActiveVideoView = mVideoView2;
         mScrollView.setOnCustomScrollChanged(onCustomScrollChanged);
         mLayoutTimeLine.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutTimeLineCreated);
+        mScroll = true;
     }
 
     @Override
     public void seekTo(int value, boolean scroll) {
         mActiveVideoView.seekTo(value);
+        mScroll = scroll;
     }
 
     ViewTreeObserver.OnGlobalLayoutListener onLayoutTimeLineCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -293,9 +297,9 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             if (mCurrentVideoId != timelineId && mainTimeLine!=null) {
                 mCurrentVideoId = timelineId;
                 mActiveVideoView.setVideoPath(mainTimeLine.videoPath);
-                if (mPreviewStatus == PLAY) {
-                    mActiveVideoView.start();
-                }
+//                if (mPreviewStatus == PLAY) {
+//                    mActiveVideoView.start();
+//                }
             }
 
             mActiveVideoView.seekTo(positionInVideo);
@@ -326,7 +330,9 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             }
             mCurrentPosition += currentVideoView - currentTimeLine.startTime +50;
         }
-
+        if (!mScroll){
+            return;
+        }
         int scrollPosition = mCurrentPosition/Constants.SCALE_VALUE;
         mScrollView.scrollTo(scrollPosition, 0);
     }
@@ -655,6 +661,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
                         mVideoList.remove(mSelectedMainTimeLine);
                         mVideoList.add(changePosition, mSelectedMainTimeLine);
                         getLeftMargin(mCountVideo - 1);
+                        mScrollView.scrollTo(mSelectedMainTimeLine.startInTimeLine/Constants.SCALE_VALUE, 0);
                     }
                     break;
                 case DragEvent.ACTION_DRAG_ENDED:

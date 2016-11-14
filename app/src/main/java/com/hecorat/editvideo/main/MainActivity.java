@@ -344,6 +344,9 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     }
 
     private void updateCurrentPosition(){
+        if (mCurrentPosition >= mMaxTimeLine) {
+            return;
+        }
         if (mCurrentVideoId == -1) {
             mCurrentPosition = 0;
         } else {
@@ -358,12 +361,11 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             }
             mCurrentPosition += currentVideoView - currentTimeLine.startTime +50;
         }
+        log("update current position: "+mCurrentPosition);
         if (!mScroll){
             return;
         }
-        if (mCurrentPosition >= mMaxTimeLine) {
-            return;
-        }
+
         int scrollPosition = mCurrentPosition/Constants.SCALE_VALUE;
         mScrollView.scrollTo(scrollPosition, 0);
     }
@@ -398,14 +400,15 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         }
 
         if (mCurrentVideoId != -1 && mCurrentVideoId<mCountVideo-1) {
-            MainTimeLine currentMainTimeLine = mVideoList.get(mCurrentVideoId);
+            mCurrentMainTimeLine = mVideoList.get(mCurrentVideoId);
             MainTimeLine nextMainTimeLine = mVideoList.get(mCurrentVideoId+1);
 
-            if (mCurrentPosition>=currentMainTimeLine.endInTimeLine-200) {
+            if (mCurrentPosition>=mCurrentMainTimeLine.endInTimeLine-200) {
                 mInActiveVideoView.setVideoPath(nextMainTimeLine.videoPath);
                 mInActiveVideoView.seekTo(10);
             }
         }
+//        log("video id "+mCurrentVideoId+" timeline id "+timelineId);
         if (mCurrentVideoId != timelineId && mainTimeLine!=null) {
             if (mCurrentVideoId != mCountVideo-1) {
                 toggleVideoView();
@@ -710,6 +713,8 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
                         mVideoList.add(changePosition, mSelectedMainTimeLine);
                         getLeftMargin(mCountVideo - 1);
                         mScrollView.scrollTo(mSelectedMainTimeLine.startInTimeLine/Constants.SCALE_VALUE, 0);
+                        mActiveVideoView.setVideoPath(mSelectedMainTimeLine.videoPath);
+                        mCurrentMainTimeLine = mSelectedMainTimeLine;
                     }
                     break;
                 case DragEvent.ACTION_DRAG_ENDED:

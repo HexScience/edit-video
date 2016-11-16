@@ -3,4 +3,6 @@
     <string name="video_tab_title">Videos</string>
     <string name="image_tab_title">Images</string>
     <string name="audio_tab_title">Audio</string>
+    <string name="txt_add_media">Media</string>
+    <string name="txt_add_text">Text</string>
 </resources>

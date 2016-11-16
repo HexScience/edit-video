@@ -32,6 +32,16 @@
             android:layout_marginBottom="@dimen/margin_bottom_toolbar"
             android:background="@drawable/btn_touch_feedback_oval"/>
         <ImageView
+            android:id="@+id/btn_edit_text"
+            android:layout_width="@dimen/toolbar_icon_dimension"
+            android:layout_height="@dimen/toolbar_icon_dimension"
+            android:padding="@dimen/toolbar_icon_padding"
+            android:src="@drawable/ic_edit_text"
+            android:clickable="true"
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"/>
+        <ImageView
             android:id="@+id/btn_undo"
             android:layout_width="@dimen/toolbar_icon_dimension"
             android:layout_height="@dimen/toolbar_icon_dimension"
@@ -86,7 +96,7 @@
                 android:layout_height="@dimen/video_view_height"
                 android:layout_centerInParent="true"
                 android:orientation="horizontal"
-                android:background="#333333">
+                android:background="#060606">
                 <VideoView
                     android:id="@+id/video_view1"
                     android:layout_width="wrap_content"
@@ -99,6 +109,35 @@
                     android:layout_centerHorizontal="true"
                     android:visibility="gone"/>
             </RelativeLayout>
+            <LinearLayout
+                android:id="@+id/layout_add"
+                android:layout_width="60dp"
+                android:layout_height="80dp"
+                android:layout_marginTop="40dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:background="#252121">
+                <TextView
+                    android:id="@+id/btn_add_media"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:background="@drawable/btn_touch_feedback_rec"
+                    android:text="@string/txt_add_media"/>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2a2929"/>
+                <TextView
+                    android:id="@+id/btn_add_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/txt_add_text"
+                    android:background="@drawable/btn_touch_feedback_rec"/>
+            </LinearLayout>
             <LinearLayout
                 android:id="@+id/layout_file_manager"
                 android:layout_width="match_parent"
@@ -350,6 +389,14 @@
                 android:layout_centerHorizontal="true"
                 android:background="#1083ef"
                 android:orientation="horizontal"/>
+            <RelativeLayout
+                android:id="@+id/layout_edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:background="#3a3838">
+
+            </RelativeLayout>
         </RelativeLayout>
     </LinearLayout>
 

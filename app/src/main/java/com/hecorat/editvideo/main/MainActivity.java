@@ -3,9 +3,10 @@ package com.hecorat.editvideo.main;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -27,6 +28,8 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.addimage.FloatImage;
+import com.hecorat.editvideo.addtext.FloatText;
 import com.hecorat.editvideo.filemanager.FragmentAudioGallery;
 import com.hecorat.editvideo.filemanager.FragmentImagesGallery;
 import com.hecorat.editvideo.filemanager.FragmentVideosGallery;
@@ -43,14 +46,12 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements MainTimeLineControl.OnControlTimeLineChanged, ExtraTimeLineControl.OnExtraTimeLineControlChanged, AudioTimeLineControl.OnAudioControlTimeLineChanged {
     private RelativeLayout mVideoViewLayout;
-    private ArrayList<MainTimeLine> mVideoList;
     private RelativeLayout mLayoutVideo, mLayoutImage, mLayoutText, mLayoutAudio;
     private RelativeLayout mTimeLineVideo, mTimeLineImage, mTimeLineText, mTimeLineAudio;
     private MainTimeLine mSelectedMainTimeLine, mCurrentMainTimeLine;
     private MainTimeLineControl mMainTimeLineControl;
     private CustomHorizontalScrollView mScrollView;
     private LinearLayout mLayoutScrollView;
-
     private ExtraTimeLine mSelectedExtraTimeLine;
     private ExtraTimeLineControl mExtraTimeLineControl;
     private ImageView mImageShadow;
@@ -64,7 +65,8 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private FragmentVideosGallery mFragmentVideosGallery;
     private FragmentImagesGallery mFragmentImagesGallery;
     private FragmentAudioGallery mFragmentAudioGallery;
-    private ImageView mBtnBack, mBtnAdd, mBtnUndo, mBtnExport, mBtnPlay, mBtnDelete;
+    private ImageView mBtnBack, mBtnAdd, mBtnUndo, mBtnExport,
+            mBtnPlay, mBtnDelete, mBtnEditText;
     private LinearLayout mFileManager;
     private ImageView mVideoTab, mImageTab, mAudioTab;
     private LinearLayout mVideoTabLayout, mImageTabLayout, mAudioTabLayout;
@@ -72,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private RelativeLayout mLayoutTimeLine;
     private FrameLayout mLimitTimeLineVideo, mLimitTimeLineImage, mLimitTimeLineText,
                         mLimitTimeLineAudio, mSeperateLineVideo, mSeperateLineImage, mSeperateLineText;
+    private LinearLayout mLayoutAdd;
+    private TextView mBtnAddMedia, mBtnAddText;
+    private RelativeLayout mLayoutEditText;
 
 
     private int mDragCode = DRAG_VIDEO;
@@ -88,9 +93,13 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private int mMaxTimeLine;
     public int mLeftMarginTimeLine = Constants.MARGIN_LEFT_TIME_LINE;
     private boolean mScroll;
+    private boolean mOpenLayoutAdd, mOpenLayoutEditText, mShowBtnEditText;
 
     private Thread mThreadPreviewVideo;
     private MainActivity mActivity;
+    private ArrayList<MainTimeLine> mVideoList;
+    private ArrayList<ExtraTimeLine> mImageList;
+    private ArrayList<ExtraTimeLine> mTextList;
 
     public static final int DRAG_VIDEO = 0;
     public static final int DRAG_EXTRA = 1;
@@ -147,7 +156,11 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mViewPager = (ViewPager) findViewById(R.id.view_pager);
         mBtnDelete = (ImageView) findViewById(R.id.btn_delete);
         mFolderName = (TextView) findViewById(R.id.text_folder_name);
-
+        mLayoutAdd = (LinearLayout) findViewById(R.id.layout_add);
+        mBtnAddMedia = (TextView) findViewById(R.id.btn_add_media);
+        mBtnAddText = (TextView) findViewById(R.id.btn_add_text);
+        mBtnEditText = (ImageView) findViewById(R.id.btn_edit_text);
+        mLayoutEditText = (RelativeLayout) findViewById(R.id.layout_edit_text);
 
         mVideoTabLayout.setOnClickListener(onTabLayoutClick);
         mImageTabLayout.setOnClickListener(onTabLayoutClick);
@@ -164,6 +177,8 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mActivity = this;
         setVideoRatio();
         mVideoList = new ArrayList<>();
+        mImageList = new ArrayList<>();
+        mTextList = new ArrayList<>();
 
         GalleryPagerAdapter galleryPagerAdapter = new GalleryPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(galleryPagerAdapter);
@@ -178,6 +193,9 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mBtnExport.setOnClickListener(onBtnExportClick);
         mBtnUndo.setOnClickListener(onBtnUndoClick);
         mBtnDelete.setOnClickListener(onBtnDeleteClick);
+        mBtnAddMedia.setOnClickListener(onBtnAddMediaClick);
+        mBtnAddText.setOnClickListener(onBtnAddTextClick);
+        mBtnEditText.setOnClickListener(onBtnEditTextClick);
 
         mTimeLineImage.setOnDragListener(onExtraDragListener);
         mTimeLineVideo.setOnDragListener(onExtraDragListener);
@@ -194,28 +212,65 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mScrollView.setOnCustomScrollChanged(onCustomScrollChanged);
         mLayoutTimeLine.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutTimeLineCreated);
         mScroll = true;
+        mOpenLayoutAdd = false;
     }
+
+    View.OnClickListener onBtnEditTextClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mOpenLayoutEditText) {
+                openEditText(false);
+            } else {
+                openEditText(true);
+            }
+        }
+    };
+
+    private void openEditText(boolean open) {
+        int visible = open? View.VISIBLE:View.GONE;
+        mLayoutEditText.setVisibility(visible);
+        mOpenLayoutEditText = open;
+    }
+
+    View.OnClickListener onBtnAddMediaClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            openFileManager(true);
+            openAddLayout(false);
+        }
+    };
+
+    View.OnClickListener onBtnAddTextClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            addText();
+            openAddLayout(false);
+        }
+    };
 
     View.OnClickListener onBtnDeleteClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            mVideoList.remove(mSelectedMainTimeLine);
-            mLayoutVideo.removeView(mSelectedMainTimeLine);
-            invisibleMainControl();
-            mCountVideo--;
-            mCurrentVideoId--;
-            if (mCountVideo>0) {
-                getLeftMargin(mCountVideo-1);
-                mMaxTimeLine = mVideoList.get(mCountVideo-1).endInTimeLine;
-                if (mCurrentVideoId<0) {
-                    mCurrentVideoId = 0;
-                }
-                mSelectedMainTimeLine = mVideoList.get(mCurrentVideoId);
-                mActiveVideoView.setVideoPath(mSelectedMainTimeLine.videoPath);
-                mScrollView.scrollTo(mSelectedMainTimeLine.startInTimeLine/Constants.SCALE_VALUE, 0);
-            } else {
-                mMaxTimeLine = 0;
+        mVideoList.remove(mSelectedMainTimeLine);
+        mLayoutVideo.removeView(mSelectedMainTimeLine);
+        invisibleMainControl();
+        mCountVideo--;
+        mCurrentVideoId--;
+        if (mCountVideo>0) {
+            getLeftMargin(mCountVideo-1);
+            mMaxTimeLine = mVideoList.get(mCountVideo-1).endInTimeLine;
+            if (mCurrentVideoId<0) {
+                mCurrentVideoId = 0;
             }
+            mSelectedMainTimeLine = mVideoList.get(mCurrentVideoId);
+            mActiveVideoView.setVideoPath(mSelectedMainTimeLine.videoPath);
+            mScrollView.scrollTo(mSelectedMainTimeLine.startInTimeLine/Constants.SCALE_VALUE, 0);
+        } else {
+            mMaxTimeLine = 0;
+            mActiveVideoView.stopPlayback();
+            mActiveVideoView.setVisibility(View.GONE);
+            mActiveVideoView.setVisibility(View.VISIBLE);
+        }
         }
     };
 
@@ -283,55 +338,81 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
                     updatePreviewStatus();
                     updateBtnPlay();
                     updateVideoView();
+                    updateImageVisibility();
+                    updateTextVisibility();
                     break;
             }
         }
     };
 
+    private void updateImageVisibility(){
+        for (int i=0; i<mImageList.size(); i++){
+            ExtraTimeLine image = mImageList.get(i);
+            FloatImage floatImage = image.floatImage;
+            if (mCurrentPosition>=image.startInTimeLine && mCurrentPosition<=image.endInTimeLine){
+                floatImage.setVisibility(View.VISIBLE);
+            } else {
+                floatImage.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void updateTextVisibility(){
+        for (int i=0; i<mTextList.size(); i++){
+            ExtraTimeLine text = mTextList.get(i);
+            FloatText floatText = text.floatText;
+            if (mCurrentPosition>=text.startInTimeLine && mCurrentPosition<=text.endInTimeLine){
+                floatText.setVisibility(View.VISIBLE);
+            } else {
+                floatText.setVisibility(View.GONE);
+            }
+        }
+    }
+
     CustomHorizontalScrollView.OnCustomScrollChanged onCustomScrollChanged = new CustomHorizontalScrollView.OnCustomScrollChanged() {
         @Override
         public void onScrollChanged() {
-            log("scroll: "+mScrollView.getScrollX());
-            if (mCountVideo < 1){
-                return;
-            }
-            int scrollPosition = mScrollView.getScrollX();
-            mCurrentPosition = scrollPosition * Constants.SCALE_VALUE;
+        log("scroll: "+mScrollView.getScrollX());
+        if (mCountVideo < 1){
+            return;
+        }
+        int scrollPosition = mScrollView.getScrollX();
+        mCurrentPosition = scrollPosition * Constants.SCALE_VALUE;
 
 //            if (mCurrentPosition > mMaxTimeLine) {
 //                mCurrentPosition = mMaxTimeLine;
 //            }
 
-            log("current position: "+mCurrentPosition);
-            log("max timeline: "+mMaxTimeLine);
+        log("current position: "+mCurrentPosition);
+        log("max timeline: "+mMaxTimeLine);
 
-            MainTimeLine mainTimeLine = null;
-            int timelineId=0;
-            for (int i=0; i<mVideoList.size(); i++){
-                mainTimeLine = mVideoList.get(i);
-                if (mCurrentPosition >= mainTimeLine.startInTimeLine && mCurrentPosition <= mainTimeLine.endInTimeLine) {
-                    timelineId = i;
-                    break;
-                }
+        MainTimeLine mainTimeLine = null;
+        int timelineId=0;
+        for (int i=0; i<mVideoList.size(); i++){
+            mainTimeLine = mVideoList.get(i);
+            if (mCurrentPosition >= mainTimeLine.startInTimeLine && mCurrentPosition <= mainTimeLine.endInTimeLine) {
+                timelineId = i;
+                break;
             }
-            int positionInVideo=0;
-            if (timelineId > 0) {
-                MainTimeLine previousTimeLine = mVideoList.get(timelineId-1);
-                positionInVideo = mCurrentPosition - previousTimeLine.endInTimeLine + mainTimeLine.startTime;
-            } else {
-                positionInVideo = mCurrentPosition + mainTimeLine.startTime;
-            }
+        }
+        int positionInVideo=0;
+        if (timelineId > 0) {
+            MainTimeLine previousTimeLine = mVideoList.get(timelineId-1);
+            positionInVideo = mCurrentPosition - previousTimeLine.endInTimeLine + mainTimeLine.startTime;
+        } else {
+            positionInVideo = mCurrentPosition + mainTimeLine.startTime;
+        }
 
-            if (mCurrentVideoId != timelineId && mainTimeLine!=null) {
-                mCurrentVideoId = timelineId;
-                mActiveVideoView.setVideoPath(mainTimeLine.videoPath);
+        if (mCurrentVideoId != timelineId && mainTimeLine!=null) {
+            mCurrentVideoId = timelineId;
+            mActiveVideoView.setVideoPath(mainTimeLine.videoPath);
 //                if (mPreviewStatus == PLAY) {
 //                    mActiveVideoView.start();
 //                }
-            }
+        }
 
-            mActiveVideoView.seekTo(positionInVideo);
-            log("mActiveVideo: "+mActiveVideoView.getCurrentPosition());
+        mActiveVideoView.seekTo(positionInVideo);
+        log("mActiveVideo: "+mActiveVideoView.getCurrentPosition());
         }
     };
 
@@ -408,7 +489,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
                 mInActiveVideoView.seekTo(10);
             }
         }
-//        log("video id "+mCurrentVideoId+" timeline id "+timelineId);
+
         if (mCurrentVideoId != timelineId && mainTimeLine!=null) {
             if (mCurrentVideoId != mCountVideo-1) {
                 toggleVideoView();
@@ -420,7 +501,6 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             mActiveVideoView.seekTo(mainTimeLine.startTime);
             mActiveVideoView.start();
         }
-
 
         if (mCurrentVideoId != -1 && mCountVideo>0) {
             mCurrentMainTimeLine = mVideoList.get(mCurrentVideoId);
@@ -484,9 +564,55 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
 
     public void addImage(String imagePath){
         ExtraTimeLine extraTimeLine = new ExtraTimeLine(this, imagePath, mTimeLineImageHeight, mLeftMarginTimeLine, true);
+        restoreExtraControl(extraTimeLine);
+        setExtraControlVisible(true);
         extraTimeLine.setOnClickListener(onExtraTimeLineClick);
         extraTimeLine.setOnLongClickListener(onExtraTimelineLongClick);
         mLayoutImage.addView(extraTimeLine);
+        mImageList.add(extraTimeLine);
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+        FloatImage floatImage = new FloatImage(this, bitmap);
+        extraTimeLine.floatImage = floatImage;
+        floatImage.timeline = extraTimeLine;
+        mVideoViewLayout.addView(floatImage);
+        setFloatImageVisible(mSelectedExtraTimeLine);
+        setFloatTextVisible(null);
+    }
+
+    public void addText(){
+        String text = "Lai Trung Tien";
+        ExtraTimeLine extraTimeLine = new ExtraTimeLine(this, text, mTimeLineImageHeight, mLeftMarginTimeLine, false);
+        extraTimeLine.setOnClickListener(onExtraTimeLineClick);
+        extraTimeLine.setOnLongClickListener(onExtraTimelineLongClick);
+        mLayoutText.addView(extraTimeLine);
+        mTextList.add(extraTimeLine);
+        FloatText floatText = new FloatText(this, text);
+        mVideoViewLayout.addView(floatText);
+        extraTimeLine.floatText = floatText;
+        floatText.timeline = extraTimeLine;
+        restoreExtraControl(extraTimeLine);
+        setExtraControlVisible(true);
+        setFloatImageVisible(null);
+        mSelectedExtraTimeLine = extraTimeLine;
+        setFloatTextVisible(extraTimeLine);
+    }
+
+    public void restoreExtraControl(ExtraTimeLine extraTimeLine){
+        mExtraTimeLineControl.restoreTimeLineStatus(extraTimeLine);
+        readdExtraControl();
+        mSelectedExtraTimeLine = extraTimeLine;
+    }
+
+    private void readdExtraControl(){
+        ViewGroup parent = (ViewGroup) mExtraTimeLineControl.getParent();
+        if (parent!=null) {
+            parent.removeView(mExtraTimeLineControl);
+        }
+        if (mExtraTimeLineControl.inLayoutImage){
+            mTimeLineImage.addView(mExtraTimeLineControl);
+        } else {
+            mTimeLineText.addView(mExtraTimeLineControl);
+        }
     }
 
     public void addAudio(String audioPath) {
@@ -523,14 +649,23 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     public void setFolderName(String name) {
         mFolderName.setText(name);
     }
+    private void openAddLayout(boolean open) {
+        int visible = open? View.VISIBLE: View.GONE;
+        mLayoutAdd.setVisibility(visible);
+        mOpenLayoutAdd = open;
+    }
 
     View.OnClickListener onBtnAddClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             if (mOpenFileManager) {
                 openFileManager(false);
+                return;
+            }
+            if (mOpenLayoutAdd) {
+                openAddLayout(false);
             } else {
-                openFileManager(true);
+                openAddLayout(true);
             }
         }
     };
@@ -898,20 +1033,55 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             mSelectedExtraTimeLine = (ExtraTimeLine) view;
             setExtraControlVisible(true);
             mExtraTimeLineControl.restoreTimeLineStatus(mSelectedExtraTimeLine);
-
-            ViewGroup parent = (ViewGroup) mExtraTimeLineControl.getParent();
-            if (parent != null) {
-                parent.removeView(mExtraTimeLineControl);
-            }
-            if (mExtraTimeLineControl.inLayoutImage) {
-                mTimeLineImage.addView(mExtraTimeLineControl);
+            mScrollView.scrollTo(mSelectedExtraTimeLine.startInTimeLine/Constants.SCALE_VALUE, 0);
+            onCustomScrollChanged.onScrollChanged();
+            readdExtraControl();
+            if (mSelectedExtraTimeLine.isPicture){
+                setFloatImageVisible(mSelectedExtraTimeLine);
+                setFloatTextVisible(null);
             } else {
-                mTimeLineText.addView(mExtraTimeLineControl);
+                setFloatImageVisible(null);
+                setFloatTextVisible(mSelectedExtraTimeLine);
+                showBtnEditText(true);
             }
         }
     };
 
-    private void setExtraControlVisible(boolean visible) {
+    public void showBtnEditText(boolean show) {
+        if (show) {
+            mBtnEditText.setVisibility(View.VISIBLE);
+            mBtnAdd.setVisibility(View.GONE);
+            mShowBtnEditText = true;
+        } else {
+            mBtnEditText.setVisibility(View.GONE);
+            mBtnAdd.setVisibility(View.VISIBLE);
+            mShowBtnEditText = false;
+        }
+    }
+
+    public void setFloatTextVisible(ExtraTimeLine extraTimeLine) {
+        for (int i=0; i<mTextList.size(); i++){
+            FloatText floatText = mTextList.get(i).floatText;
+            if (mTextList.get(i).equals(extraTimeLine)){
+                floatText.drawBorder(true);
+            } else {
+                floatText.drawBorder(false);
+            }
+        }
+    }
+
+    public void setFloatImageVisible(ExtraTimeLine extraTimeLine) {
+        for (int i=0; i<mImageList.size(); i++){
+            FloatImage floatImage = mImageList.get(i).floatImage;
+            if (mImageList.get(i).equals(extraTimeLine)){
+                floatImage.drawBorder(true);
+            } else {
+                floatImage.drawBorder(false);
+            }
+        }
+    }
+
+    public void setExtraControlVisible(boolean visible) {
         if (visible) {
             mExtraTimeLineControl.setVisibility(View.VISIBLE);
             mScrollView.scroll = false;
@@ -920,6 +1090,13 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         } else {
             mExtraTimeLineControl.setVisibility(View.GONE);
             mScrollView.scroll = true;
+            if (mSelectedExtraTimeLine!=null) {
+                if (mSelectedExtraTimeLine.isPicture) {
+                    mSelectedExtraTimeLine.floatImage.drawBorder(false);
+                } else {
+                    mSelectedExtraTimeLine.floatText.drawBorder(false);
+                }
+            }
         }
     }
 
@@ -1001,6 +1178,9 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     @Override
     public void invisibleExtraControl() {
         setExtraControlVisible(false);
+        if (!mSelectedExtraTimeLine.isPicture){
+            showBtnEditText(false);
+        }
     }
 
     @Override
@@ -1051,15 +1231,9 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mTimeLineAudio.addView(mAudioTimeLineControl);
         setAudioControlVisible(false);
 
-        int left = mLeftMarginTimeLine;
-        ExtraTimeLine extraTimeLine2 = new ExtraTimeLine(this, "Lai Trung Tien", mTimeLineImageHeight, left, false);
-        extraTimeLine2.setOnClickListener(onExtraTimeLineClick);
-        extraTimeLine2.setOnLongClickListener(onExtraTimelineLongClick);
-        mLayoutText.addView(extraTimeLine2);
+
 
     }
-
-
 
     private void updateLayoutTimeLine() {
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mLimitTimeLineVideo.getLayoutParams();

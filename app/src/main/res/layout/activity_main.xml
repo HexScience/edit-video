@@ -389,14 +389,128 @@
                 android:layout_centerHorizontal="true"
                 android:background="#1083ef"
                 android:orientation="horizontal"/>
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/layout_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:orientation="horizontal"
                 android:visibility="gone"
                 android:background="#3a3838">
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+                    <EditText
+                        android:id="@+id/edittext_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="top"
+                        android:background="@drawable/edittext_border"
+                        android:layout_margin="20dp"
+                        android:padding="5dp"/>
+                </RelativeLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/margin_bottom_edittext"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Text color"/>
+                        <LinearLayout
+                            android:layout_width="@dimen/dimen_layout_text_background"
+                            android:layout_height="@dimen/dimen_layout_text_background"
+                            android:clickable="true"
+                            android:layout_gravity="end"
+                            android:gravity="center"
+                            android:background="@drawable/btn_touch_feedback_oval">
+                            <ImageView
+                                android:layout_width="@dimen/dimen_btn_text_background"
+                                android:layout_height="@dimen/dimen_btn_text_background"
+                                android:layout_margin="5dp"
+                                android:src="@drawable/ic_text_background"/>
+                        </LinearLayout>
+                    </RelativeLayout>
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="@dimen/margin_bottom_edittext"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Background"/>
+                        <LinearLayout
+                            android:layout_width="@dimen/dimen_layout_text_background"
+                            android:layout_height="@dimen/dimen_layout_text_background"
+                            android:layout_gravity="end"
+                            android:gravity="center"
+                            android:background="@drawable/btn_touch_feedback_oval">
+                            <ImageView
+                                android:layout_width="@dimen/dimen_btn_text_background"
+                                android:layout_height="@dimen/dimen_btn_text_background"
+                                android:layout_margin="5dp"
+                                android:src="@drawable/ic_text_background"/>
+                        </LinearLayout>
+                    </RelativeLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_marginBottom="@dimen/margin_bottom_edittext"
+                        android:layout_height="wrap_content">
+                        <LinearLayout
+                            android:id="@+id/layout_btn_bold"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
+                            android:background="@drawable/btn_touch_feedback_oval"
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:id="@+id/btn_bold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/ic_bold"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/layout_btn_italic"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
+                            android:background="@drawable/btn_touch_feedback_oval"
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:id="@+id/btn_italic"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/ic_italic"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_bottom_edittext"
+                        android:gravity="center_horizontal">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Font"/>
+                        <Spinner
+                            android:id="@+id/font_spinner"
+                            android:layout_width="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
 
-            </RelativeLayout>
+                </LinearLayout>
+            </LinearLayout>
         </RelativeLayout>
     </LinearLayout>
 

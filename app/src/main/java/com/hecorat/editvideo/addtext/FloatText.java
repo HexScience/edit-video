@@ -9,6 +9,10 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,6 +38,9 @@ public class FloatText extends ImageView {
     public ExtraTimeLine timeline;
     public Point initScalePoint, initCenterPoint, initRotatePoint;
     public String text;
+    public TextPaint textPaint;
+    public Rect bound;
+    public Typeface mTypeface;
 
     public int width, height;
     public int x, y, translateX, translateY;
@@ -44,6 +51,7 @@ public class FloatText extends ImageView {
     public boolean isCompact;
     public boolean drawBorder;
     public int maxDimensionLayout;
+    public int mStyle;
 
     public static final int ROTATE_CONSTANT = 30;
     public static final int INIT_X = 300, INIT_Y = 300;
@@ -56,18 +64,10 @@ public class FloatText extends ImageView {
         this.text = text;
         mActivity = (MainActivity) context;
         paint = new Paint();
-        paint.setTextSize(60);
-        Rect bound = new Rect();
-        paint.getTextBounds(text, 0, text.length(), bound);
-        width = (int) paint.measureText(text);
-        height = bound.height();
-        rectBorder = new Rect(-PADDING, -height-PADDING, width+PADDING, PADDING);
-        widthScale = width;
-        heightScale = height;
+        textPaint = new TextPaint();
+        textPaint.setTextSize(60);
+        setText(text);
 
-        initRotatePoint = new Point(-PADDING, -height-PADDING);
-        initCenterPoint = new Point(width/2, -height/2);
-        initScalePoint = new Point(width+PADDING, PADDING);
         rotatePoint = new float[2];
         scalePoint = new float[2];
         centerPoint = new float[2];
@@ -85,6 +85,37 @@ public class FloatText extends ImageView {
         setOnTouchListener(onTouchListener);
         setOnClickListener(onClickListener);
         drawBorder(true);
+    }
+
+    public void setText(String text){
+        this.text = text;
+        resetLayout();
+    }
+
+    public void setStyle(int style){
+        mStyle = style;
+        resetLayout();
+    }
+
+    public void setFont(Typeface typeface){
+        mTypeface = typeface;
+        resetLayout();
+    }
+
+    public void resetLayout(){
+        textPaint.setTypeface(Typeface.create(mTypeface, mStyle));
+        bound = new Rect();
+        textPaint.getTextBounds(text, 0, text.length(), bound);
+        width = (int) textPaint.measureText(text);
+        height = bound.height();
+        rectBorder = new Rect(-PADDING, -PADDING, width+PADDING, height+PADDING);
+        widthScale = width*scaleValue;
+        heightScale = height*scaleValue;
+
+        initRotatePoint = new Point(-PADDING, -PADDING);
+        initCenterPoint = new Point(width/2, height/2);
+        initScalePoint = new Point(width+PADDING, height+PADDING);
+        invalidate();
     }
 
     public void drawBorder(boolean draw){
@@ -194,13 +225,14 @@ public class FloatText extends ImageView {
                     oldY = motionEvent.getY();
                     startAngle = getAngle(oldX, oldY);
                     int eps = 75;
+                    float epsMove = Math.max(widthScale/2, heightScale/2);
                     if (oldX < scalePoint[0]+eps && oldX > scalePoint[0]-eps && oldY < scalePoint[1]+eps && oldY > scalePoint[1]-eps){
                         touch = 1;
-                    } else if (oldX < centerPoint[0]+eps && oldX > centerPoint[0]-eps && oldY < centerPoint[1]+eps && oldY > centerPoint[1]-eps) {
-                        touch = 2;
                     } else if (oldX < rotatePoint[0]+eps && oldX > rotatePoint[0]-eps && oldY < rotatePoint[1]+eps && oldY > rotatePoint[1]-eps){
                         touch = 3;
-                    } else {
+                    } else if (oldX < centerPoint[0]+epsMove && oldX > centerPoint[0]-epsMove && oldY < centerPoint[1]+epsMove && oldY > centerPoint[1]-epsMove) {
+                        touch = 2;
+                    }  else {
                         touch = 0;
                     }
 
@@ -262,16 +294,20 @@ public class FloatText extends ImageView {
         matrix.mapPoints(centerPoint);
 
         matrix.postScale(scaleValue, scaleValue, centerPoint[0], centerPoint[1]);
-
         matrix.postRotate(-rotation, centerPoint[0], centerPoint[1]);
+
         matrix.mapPoints(scalePoint);
         matrix.mapPoints(rotatePoint);
         log("center: "+centerPoint[0]+" : "+centerPoint[1]);
         log("rotate: "+rotatePoint[0]+" : "+rotatePoint[1]);
         log("scale: "+scalePoint[0]+" : "+scalePoint[1]);
         canvas.setMatrix(matrix);
-        paint.setColor(Color.RED);
-        canvas.drawText(text, 0, 0, paint);
+        textPaint.setColor(Color.RED);
+
+        canvas.setMatrix(matrix);
+        StaticLayout textLayout = new StaticLayout(text, textPaint,canvas.getWidth(),
+                Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
+        textLayout.draw(canvas);
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.MAGENTA);
         paint.setStrokeWidth(3);
@@ -287,18 +323,18 @@ public class FloatText extends ImageView {
     OnClickListener onClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (drawBorder) {
-                drawBorder(false);
-                mActivity.setExtraControlVisible(false);
-                mActivity.showBtnEditText(false);
-            } else {
-                drawBorder(true);
-                mActivity.setExtraControlVisible(true);
-                mActivity.restoreExtraControl(timeline);
-                mActivity.setFloatTextVisible(timeline);
-                mActivity.showBtnEditText(true);
-            }
-            invalidate();
+        if (drawBorder) {
+            drawBorder(false);
+            mActivity.setExtraControlVisible(false);
+            mActivity.showBtnEditText(false);
+        } else {
+            drawBorder(true);
+            mActivity.setExtraControlVisible(true);
+            mActivity.restoreExtraControl(timeline);
+            mActivity.setFloatTextVisible(timeline);
+            mActivity.showBtnEditText(true);
+        }
+        invalidate();
         }
     };
     private void log(String msg){

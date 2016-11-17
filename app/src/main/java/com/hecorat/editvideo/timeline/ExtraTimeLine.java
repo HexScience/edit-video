@@ -62,6 +62,12 @@ public class ExtraTimeLine extends ImageView {
         drawTimeLine(left, right);
         getTimeLineStatus();
     }
+
+    public void setText(String text) {
+        this.text = text;
+        invalidate();
+    }
+
     public void getTimeLineStatus(){
         startInTimeLine = (left - leftMarginTimeLine)*Constants.SCALE_VALUE;
         endInTimeLine = (right - leftMarginTimeLine)*Constants.SCALE_VALUE;

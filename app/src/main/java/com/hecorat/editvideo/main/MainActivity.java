@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,19 +20,27 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.DragEvent;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.addimage.FloatImage;
 import com.hecorat.editvideo.addtext.FloatText;
+import com.hecorat.editvideo.addtext.Font;
+import com.hecorat.editvideo.addtext.FontAdapter;
+import com.hecorat.editvideo.addtext.FontManager;
 import com.hecorat.editvideo.filemanager.FragmentAudioGallery;
 import com.hecorat.editvideo.filemanager.FragmentImagesGallery;
 import com.hecorat.editvideo.filemanager.FragmentVideosGallery;
@@ -76,7 +87,11 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
                         mLimitTimeLineAudio, mSeperateLineVideo, mSeperateLineImage, mSeperateLineText;
     private LinearLayout mLayoutAdd;
     private TextView mBtnAddMedia, mBtnAddText;
-    private RelativeLayout mLayoutEditText;
+    private LinearLayout mLayoutEditText;
+    private EditText mEditText;
+    private Spinner mFontSpinner;
+    private ImageView mBtnBold, mBtnItalic;
+    private LinearLayout mLayoutBtnBold, mLayoutBtnItalic;
 
 
     private int mDragCode = DRAG_VIDEO;
@@ -94,12 +109,15 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     public int mLeftMarginTimeLine = Constants.MARGIN_LEFT_TIME_LINE;
     private boolean mScroll;
     private boolean mOpenLayoutAdd, mOpenLayoutEditText, mShowBtnEditText;
+    private boolean mStyleBold, mStyleItalic;
 
     private Thread mThreadPreviewVideo;
     private MainActivity mActivity;
     private ArrayList<MainTimeLine> mVideoList;
     private ArrayList<ExtraTimeLine> mImageList;
     private ArrayList<ExtraTimeLine> mTextList;
+    private ArrayList<String> mFontPath, mFontName;
+    private FontAdapter mFontAdapter;
 
     public static final int DRAG_VIDEO = 0;
     public static final int DRAG_EXTRA = 1;
@@ -160,7 +178,13 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mBtnAddMedia = (TextView) findViewById(R.id.btn_add_media);
         mBtnAddText = (TextView) findViewById(R.id.btn_add_text);
         mBtnEditText = (ImageView) findViewById(R.id.btn_edit_text);
-        mLayoutEditText = (RelativeLayout) findViewById(R.id.layout_edit_text);
+        mLayoutEditText = (LinearLayout) findViewById(R.id.layout_edit_text);
+        mEditText = (EditText) findViewById(R.id.edittext_input);
+        mFontSpinner = (Spinner) findViewById(R.id.font_spinner);
+        mBtnBold = (ImageView) findViewById(R.id.btn_bold);
+        mBtnItalic = (ImageView) findViewById(R.id.btn_italic);
+        mLayoutBtnBold = (LinearLayout) findViewById(R.id.layout_btn_bold);
+        mLayoutBtnItalic = (LinearLayout) findViewById(R.id.layout_btn_italic);
 
         mVideoTabLayout.setOnClickListener(onTabLayoutClick);
         mImageTabLayout.setOnClickListener(onTabLayoutClick);
@@ -196,6 +220,10 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mBtnAddMedia.setOnClickListener(onBtnAddMediaClick);
         mBtnAddText.setOnClickListener(onBtnAddTextClick);
         mBtnEditText.setOnClickListener(onBtnEditTextClick);
+        mLayoutBtnBold.setOnClickListener(onLayoutBtnBold);
+        mLayoutBtnItalic.setOnClickListener(onLayoutBtnItalic);
+
+        mEditText.setOnEditorActionListener(onEditorActionListener);
 
         mTimeLineImage.setOnDragListener(onExtraDragListener);
         mTimeLineVideo.setOnDragListener(onExtraDragListener);
@@ -212,8 +240,96 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mScrollView.setOnCustomScrollChanged(onCustomScrollChanged);
         mLayoutTimeLine.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutTimeLineCreated);
         mScroll = true;
-        mOpenLayoutAdd = false;
+
+        mFontPath = FontManager.getFontPaths();
+        mFontName = FontManager.getFontName();
+        mFontAdapter = new FontAdapter(this, android.R.layout.simple_spinner_item, mFontName);
+        mFontSpinner.setAdapter(mFontAdapter);
+        mFontSpinner.setOnItemSelectedListener(onFontSelectedListener);
     }
+
+    View.OnClickListener onLayoutBtnBold = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mStyleBold) {
+                setBoldStyle(false);
+            } else {
+                setBoldStyle(true);
+            }
+        }
+    };
+
+    private void setBoldStyle(boolean bold){
+        int color = bold? Color.CYAN: Color.TRANSPARENT;
+        mBtnBold.setBackgroundColor(color);
+        mStyleBold = bold;
+        updateTextStyle();
+    }
+
+    private void updateTextStyle(){
+        FloatText floatText = mSelectedExtraTimeLine.floatText;
+        if (mStyleBold) {
+            if (mStyleItalic) {
+                floatText.setStyle(Typeface.BOLD_ITALIC);
+            } else {
+                floatText.setStyle(Typeface.BOLD);
+            }
+        } else {
+            if (mStyleItalic) {
+                floatText.setStyle(Typeface.ITALIC);
+            } else {
+                floatText.setStyle(Typeface.NORMAL);
+            }
+        }
+    }
+
+    private void setItalicStyle(boolean italic){
+        int color = italic? Color.CYAN: Color.TRANSPARENT;
+        mBtnItalic.setBackgroundColor(color);
+        mStyleItalic = italic;
+        updateTextStyle();
+    }
+
+    View.OnClickListener onLayoutBtnItalic = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mStyleItalic) {
+                setItalicStyle(false);
+            } else {
+                setItalicStyle(true);
+            }
+        }
+    };
+
+    AdapterView.OnItemSelectedListener onFontSelectedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            String font = mFontPath.get(position);
+            Typeface typeface = Typeface.createFromFile(font);
+            if (mSelectedExtraTimeLine!=null) {
+                mSelectedExtraTimeLine.floatText.setFont(typeface);
+            }
+            mFontAdapter.setSelectedItem(position);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    };
+
+    TextView.OnEditorActionListener onEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                String text = mEditText.getText().toString();
+                mSelectedExtraTimeLine.setText(text);
+                mSelectedExtraTimeLine.floatText.setText(text);
+                mEditText.clearFocus();
+            }
+            return false;
+        }
+    };
 
     View.OnClickListener onBtnEditTextClick = new View.OnClickListener() {
         @Override
@@ -230,6 +346,10 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         int visible = open? View.VISIBLE:View.GONE;
         mLayoutEditText.setVisibility(visible);
         mOpenLayoutEditText = open;
+        if (open) {
+            mEditText.setText(mSelectedExtraTimeLine.text);
+
+        }
     }
 
     View.OnClickListener onBtnAddMediaClick = new View.OnClickListener() {
@@ -580,7 +700,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     }
 
     public void addText(){
-        String text = "Lai Trung Tien";
+        String text = "Lai Trung\nTien";
         ExtraTimeLine extraTimeLine = new ExtraTimeLine(this, text, mTimeLineImageHeight, mLeftMarginTimeLine, false);
         extraTimeLine.setOnClickListener(onExtraTimeLineClick);
         extraTimeLine.setOnLongClickListener(onExtraTimelineLongClick);
@@ -595,6 +715,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         setFloatImageVisible(null);
         mSelectedExtraTimeLine = extraTimeLine;
         setFloatTextVisible(extraTimeLine);
+        showBtnEditText(true);
     }
 
     public void restoreExtraControl(ExtraTimeLine extraTimeLine){
@@ -683,6 +804,10 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     View.OnClickListener onBtnBackClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            if (mOpenLayoutEditText) {
+                openEditText(false);
+            }
+
             switch (mFragmentCode) {
                 case VIDEO_TAB:
                     if (mOpenVideoSubFolder) {

@@ -11,4 +11,7 @@
     <dimen name="seperate_line_height">0.5dp</dimen>
     <dimen name="layout_timeline_height">20dp</dimen>
     <dimen name="gridview_item_dimen">70dp</dimen>
+    <dimen name="margin_bottom_edittext">10dp</dimen>
+    <dimen name="dimen_btn_text_background">20dp</dimen>
+    <dimen name="dimen_layout_text_background">30dp</dimen>
 </resources>

@@ -33,7 +33,7 @@ public class FloatText extends ImageView {
     public Bitmap bitmap, mainBitmap, rotateBitmap, scaleBitmap;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
-    public Rect rectBorder;
+    public Rect rectBorder, rectBackground;
     public MainActivity mActivity;
     public ExtraTimeLine timeline;
     public Point initScalePoint, initCenterPoint, initRotatePoint;
@@ -52,6 +52,8 @@ public class FloatText extends ImageView {
     public boolean drawBorder;
     public int maxDimensionLayout;
     public int mStyle;
+    public int mColor;
+    public int mBackgroundColor;
 
     public static final int ROTATE_CONSTANT = 30;
     public static final int INIT_X = 300, INIT_Y = 300;
@@ -85,6 +87,18 @@ public class FloatText extends ImageView {
         setOnTouchListener(onTouchListener);
         setOnClickListener(onClickListener);
         drawBorder(true);
+        mColor = Color.RED;
+        mBackgroundColor = Color.BLUE;
+    }
+
+    public void setTextBgrColor(int color){
+        mBackgroundColor = color;
+        invalidate();
+    }
+
+    public void setTextColor(int color){
+        mColor = color;
+        invalidate();
     }
 
     public void setText(String text){
@@ -109,6 +123,7 @@ public class FloatText extends ImageView {
         width = (int) textPaint.measureText(text);
         height = bound.height();
         rectBorder = new Rect(-PADDING, -PADDING, width+PADDING, height+PADDING);
+        rectBackground = new Rect(-PADDING, -PADDING, width+PADDING, height+PADDING);
         widthScale = width*scaleValue;
         heightScale = height*scaleValue;
 
@@ -209,6 +224,55 @@ public class FloatText extends ImageView {
         invalidate();
     }
 
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        canvas.save();
+        Matrix matrix = new Matrix();
+        matrix.postTranslate(translateX, translateY);
+        rotatePoint[0] = initRotatePoint.x;
+        rotatePoint[1] = initRotatePoint.y;
+        scalePoint[0] = initScalePoint.x;
+        scalePoint[1] = initScalePoint.y;
+        centerPoint[0] = initCenterPoint.x;
+        centerPoint[1] = initCenterPoint.y;
+        log("center init: "+centerPoint[0]+" : "+centerPoint[1]);
+        log("rotate init: "+rotatePoint[0]+" : "+rotatePoint[1]);
+        log("scale init: "+scalePoint[0]+" : "+scalePoint[1]);
+        matrix.mapPoints(centerPoint);
+
+        matrix.postScale(scaleValue, scaleValue, centerPoint[0], centerPoint[1]);
+        matrix.postRotate(-rotation, centerPoint[0], centerPoint[1]);
+
+        matrix.mapPoints(scalePoint);
+        matrix.mapPoints(rotatePoint);
+        log("center: "+centerPoint[0]+" : "+centerPoint[1]);
+        log("rotate: "+rotatePoint[0]+" : "+rotatePoint[1]);
+        log("scale: "+scalePoint[0]+" : "+scalePoint[1]);
+        canvas.setMatrix(matrix);
+        textPaint.setColor(mColor);
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(mBackgroundColor);
+        canvas.drawRect(rectBackground, paint);
+
+        StaticLayout textLayout = new StaticLayout(text, textPaint,canvas.getWidth(),
+                Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
+        textLayout.draw(canvas);
+
+        if (!drawBorder) {
+            return;
+        }
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.MAGENTA);
+        paint.setStrokeWidth(3);
+        canvas.drawRect(rectBorder, paint);
+        canvas.restore();
+
+        canvas.drawBitmap(rotateBitmap, rotatePoint[0]-ROTATE_CONSTANT, rotatePoint[1]-ROTATE_CONSTANT, paint);
+        canvas.drawBitmap(scaleBitmap, scalePoint[0]-ROTATE_CONSTANT, scalePoint[1]-ROTATE_CONSTANT, paint);
+    }
+
     OnTouchListener onTouchListener = new OnTouchListener() {
         float oldX, oldY, moveX, moveY;
         double startAngle, currentAngle;
@@ -276,50 +340,7 @@ public class FloatText extends ImageView {
         }
     };
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        canvas.save();
-        Matrix matrix = new Matrix();
-        matrix.postTranslate(translateX, translateY);
-        rotatePoint[0] = initRotatePoint.x;
-        rotatePoint[1] = initRotatePoint.y;
-        scalePoint[0] = initScalePoint.x;
-        scalePoint[1] = initScalePoint.y;
-        centerPoint[0] = initCenterPoint.x;
-        centerPoint[1] = initCenterPoint.y;
-        log("center init: "+centerPoint[0]+" : "+centerPoint[1]);
-        log("rotate init: "+rotatePoint[0]+" : "+rotatePoint[1]);
-        log("scale init: "+scalePoint[0]+" : "+scalePoint[1]);
-        matrix.mapPoints(centerPoint);
 
-        matrix.postScale(scaleValue, scaleValue, centerPoint[0], centerPoint[1]);
-        matrix.postRotate(-rotation, centerPoint[0], centerPoint[1]);
-
-        matrix.mapPoints(scalePoint);
-        matrix.mapPoints(rotatePoint);
-        log("center: "+centerPoint[0]+" : "+centerPoint[1]);
-        log("rotate: "+rotatePoint[0]+" : "+rotatePoint[1]);
-        log("scale: "+scalePoint[0]+" : "+scalePoint[1]);
-        canvas.setMatrix(matrix);
-        textPaint.setColor(Color.RED);
-
-        canvas.setMatrix(matrix);
-        StaticLayout textLayout = new StaticLayout(text, textPaint,canvas.getWidth(),
-                Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
-        textLayout.draw(canvas);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.MAGENTA);
-        paint.setStrokeWidth(3);
-        if (!drawBorder) {
-            return;
-        }
-        canvas.drawRect(rectBorder, paint);
-        canvas.restore();
-
-        canvas.drawBitmap(rotateBitmap, rotatePoint[0]-ROTATE_CONSTANT, rotatePoint[1]-ROTATE_CONSTANT, paint);
-        canvas.drawBitmap(scaleBitmap, scalePoint[0]-ROTATE_CONSTANT, scalePoint[1]-ROTATE_CONSTANT, paint);
-    }
     OnClickListener onClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {

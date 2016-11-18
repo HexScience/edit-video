@@ -47,6 +47,7 @@
             android:layout_height="@dimen/toolbar_icon_dimension"
             android:padding="@dimen/toolbar_icon_padding"
             android:src="@drawable/ic_undo"
+            android:visibility="gone"
             android:clickable="true"
             android:layout_marginBottom="@dimen/margin_bottom_toolbar"
             android:background="@drawable/btn_touch_feedback_oval"/>
@@ -67,6 +68,7 @@
             android:padding="@dimen/toolbar_icon_padding"
             android:src="@drawable/ic_export"
             android:clickable="true"
+            android:visibility="gone"
             android:layout_marginBottom="@dimen/margin_bottom_toolbar"
             android:background="@drawable/btn_touch_feedback_oval"/>
         <ImageView
@@ -75,6 +77,7 @@
             android:layout_height="@dimen/toolbar_icon_dimension"
             android:padding="@dimen/toolbar_icon_padding"
             android:src="@drawable/ic_play"
+            android:visibility="gone"
             android:clickable="true"
             android:layout_marginBottom="@dimen/margin_bottom_toolbar"
             android:background="@drawable/btn_touch_feedback_oval"/>
@@ -393,8 +396,8 @@
                 android:id="@+id/layout_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal"
                 android:visibility="gone"
+                android:orientation="horizontal"
                 android:background="#3a3838">
                 <RelativeLayout
                     android:layout_width="0dp"
@@ -408,6 +411,53 @@
                         android:background="@drawable/edittext_border"
                         android:layout_margin="20dp"
                         android:padding="5dp"/>
+                    <LinearLayout
+                        android:id="@+id/layout_color_picker"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:visibility="gone"
+                        android:background="#444444">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:background="#333333"
+                            android:orientation="vertical"
+                            android:gravity="center_horizontal|bottom"
+                            android:layout_height="match_parent">
+                            <Button
+                                android:id="@+id/btn_close_colorpicker"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+                                android:layout_marginBottom="20dp"
+                                android:text="OK"/>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="#"/>
+                                <EditText
+                                    android:id="@+id/edt_color_hex"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="30dp"
+                                    android:layout_marginBottom="10dp"
+                                    android:layout_marginEnd="5dp"
+                                    android:imeOptions="actionDone"
+                                    android:background="@drawable/edittext_border"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                        <com.hecorat.editvideo.addtext.ColorPickerView
+                            android:id="@+id/color_picker"
+                            android:layout_width="0dp"
+                            android:layout_weight="1.5"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:layerType="software"
+                            android:tag="portrait"/>
+                    </LinearLayout>
                 </RelativeLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -418,25 +468,41 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
+                        android:layout_marginTop="10dp"
                         android:layout_marginBottom="@dimen/margin_bottom_edittext"
                         android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Text color"/>
-                        <LinearLayout
-                            android:layout_width="@dimen/dimen_layout_text_background"
+                        <ImageView
+                            android:id="@+id/indicator_textcolor"
+                            android:layout_width="@dimen/indicator_text_color"
+                            android:layout_height="@dimen/indicator_text_color"
+                            android:layout_centerVertical="true"
+                            android:visibility="invisible"
+                            android:layout_marginStart="5dp"
+                            android:src="@drawable/ic_left_arrow"/>
+
+
+                        <RelativeLayout
+                            android:id="@+id/layout_btn_text_color"
+                            android:layout_width="match_parent"
                             android:layout_height="@dimen/dimen_layout_text_background"
-                            android:clickable="true"
-                            android:layout_gravity="end"
-                            android:gravity="center"
-                            android:background="@drawable/btn_touch_feedback_oval">
+                            android:layout_toEndOf="@+id/indicator_textcolor"
+                            android:layout_marginStart="@dimen/margin_start_text_background"
+                            android:layout_alignParentEnd="true"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/btn_touch_feedback_rec_nobackground">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="5dp"
+                                android:text="Text color"/>
                             <ImageView
+                                android:id="@+id/btn_text_color"
                                 android:layout_width="@dimen/dimen_btn_text_background"
                                 android:layout_height="@dimen/dimen_btn_text_background"
-                                android:layout_margin="5dp"
+                                android:layout_alignParentEnd="true"
+                                android:layout_marginEnd="40dp"
                                 android:src="@drawable/ic_text_background"/>
-                        </LinearLayout>
+                        </RelativeLayout>
                     </RelativeLayout>
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -445,22 +511,36 @@
                         android:gravity="center_vertical"
                         android:layout_marginBottom="@dimen/margin_bottom_edittext"
                         android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Background"/>
-                        <LinearLayout
-                            android:layout_width="@dimen/dimen_layout_text_background"
+                        <ImageView
+                            android:id="@+id/indicator_textbackground"
+                            android:layout_width="@dimen/indicator_text_color"
+                            android:layout_height="@dimen/indicator_text_color"
+                            android:visibility="invisible"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="5dp"
+                            android:src="@drawable/ic_left_arrow"/>
+                        <RelativeLayout
+                            android:id="@+id/layout_btn_text_bgr_color"
+                            android:layout_width="match_parent"
                             android:layout_height="@dimen/dimen_layout_text_background"
-                            android:layout_gravity="end"
-                            android:gravity="center"
-                            android:background="@drawable/btn_touch_feedback_oval">
+                            android:layout_toEndOf="@+id/indicator_textbackground"
+                            android:layout_marginStart="@dimen/margin_start_text_background"
+                            android:layout_alignParentEnd="true"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/btn_touch_feedback_rec_nobackground">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="5dp"
+                                android:text="Background"/>
                             <ImageView
+                                android:id="@+id/btn_text_background_color"
                                 android:layout_width="@dimen/dimen_btn_text_background"
                                 android:layout_height="@dimen/dimen_btn_text_background"
-                                android:layout_margin="5dp"
+                                android:layout_alignParentEnd="true"
+                                android:layout_marginEnd="40dp"
                                 android:src="@drawable/ic_text_background"/>
-                        </LinearLayout>
+                        </RelativeLayout>
                     </RelativeLayout>
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -471,7 +551,7 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:gravity="center_horizontal"
-                            android:background="@drawable/btn_touch_feedback_oval"
+                            android:background="@drawable/btn_touch_feedback_oval_nobackground"
                             android:layout_height="wrap_content">
                             <ImageView
                                 android:id="@+id/btn_bold"
@@ -484,7 +564,7 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:gravity="center_horizontal"
-                            android:background="@drawable/btn_touch_feedback_oval"
+                            android:background="@drawable/btn_touch_feedback_oval_nobackground"
                             android:layout_height="wrap_content">
                             <ImageView
                                 android:id="@+id/btn_italic"

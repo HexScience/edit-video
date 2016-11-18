@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,8 +23,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -37,8 +38,9 @@ import android.widget.VideoView;
 
 import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.addimage.FloatImage;
+import com.hecorat.editvideo.addtext.AlphaColorDrawable;
+import com.hecorat.editvideo.addtext.ColorPickerView;
 import com.hecorat.editvideo.addtext.FloatText;
-import com.hecorat.editvideo.addtext.Font;
 import com.hecorat.editvideo.addtext.FontAdapter;
 import com.hecorat.editvideo.addtext.FontManager;
 import com.hecorat.editvideo.filemanager.FragmentAudioGallery;
@@ -55,7 +57,7 @@ import com.hecorat.editvideo.timeline.MainTimeLineControl;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements MainTimeLineControl.OnControlTimeLineChanged, ExtraTimeLineControl.OnExtraTimeLineControlChanged, AudioTimeLineControl.OnAudioControlTimeLineChanged {
+public class MainActivity extends AppCompatActivity implements MainTimeLineControl.OnControlTimeLineChanged, ExtraTimeLineControl.OnExtraTimeLineControlChanged, AudioTimeLineControl.OnAudioControlTimeLineChanged, ColorPickerView.OnColorChangedListener {
     private RelativeLayout mVideoViewLayout;
     private RelativeLayout mLayoutVideo, mLayoutImage, mLayoutText, mLayoutAudio;
     private RelativeLayout mTimeLineVideo, mTimeLineImage, mTimeLineText, mTimeLineAudio;
@@ -88,11 +90,15 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private LinearLayout mLayoutAdd;
     private TextView mBtnAddMedia, mBtnAddText;
     private LinearLayout mLayoutEditText;
-    private EditText mEditText;
+    private EditText mEditText, mEdtColorHex;
     private Spinner mFontSpinner;
-    private ImageView mBtnBold, mBtnItalic;
+    private ImageView mBtnBold, mBtnItalic, mBtnTextColor, mBtnTextBgrColor;
     private LinearLayout mLayoutBtnBold, mLayoutBtnItalic;
-
+    private ColorPickerView mColorPicker;
+    private LinearLayout  mLayoutColorPicker;
+    private RelativeLayout mLayoutBtnTextColor, mLayoutBtnTextBgrColor;
+    private Button mBtnCloseColorPicker;
+    private ImageView mIndicatorTextColor, mIndicatorTextBgr;
 
     private int mDragCode = DRAG_VIDEO;
     private int mCountVideo = 0;
@@ -110,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private boolean mScroll;
     private boolean mOpenLayoutAdd, mOpenLayoutEditText, mShowBtnEditText;
     private boolean mStyleBold, mStyleItalic;
+    private boolean mShowColorPicker, mChooseTextColor;
 
     private Thread mThreadPreviewVideo;
     private MainActivity mActivity;
@@ -185,6 +192,19 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mBtnItalic = (ImageView) findViewById(R.id.btn_italic);
         mLayoutBtnBold = (LinearLayout) findViewById(R.id.layout_btn_bold);
         mLayoutBtnItalic = (LinearLayout) findViewById(R.id.layout_btn_italic);
+        mColorPicker = (ColorPickerView) findViewById(R.id.color_picker);
+        mBtnTextColor = (ImageView) findViewById(R.id.btn_text_color);
+        mBtnTextBgrColor = (ImageView) findViewById(R.id.btn_text_background_color);
+        mEdtColorHex = (EditText) findViewById(R.id.edt_color_hex);
+        mLayoutBtnTextColor = (RelativeLayout) findViewById(R.id.layout_btn_text_color);
+        mLayoutBtnTextBgrColor = (RelativeLayout) findViewById(R.id.layout_btn_text_bgr_color);
+        mLayoutColorPicker = (LinearLayout) findViewById(R.id.layout_color_picker);
+        mBtnCloseColorPicker = (Button) findViewById(R.id.btn_close_colorpicker);
+        mIndicatorTextColor = (ImageView) findViewById(R.id.indicator_textcolor);
+        mIndicatorTextBgr = (ImageView) findViewById(R.id.indicator_textbackground);
+
+        mColorPicker.setAlphaSliderVisible(true);
+        mColorPicker.setOnColorChangedListener(this);
 
         mVideoTabLayout.setOnClickListener(onTabLayoutClick);
         mImageTabLayout.setOnClickListener(onTabLayoutClick);
@@ -222,8 +242,12 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mBtnEditText.setOnClickListener(onBtnEditTextClick);
         mLayoutBtnBold.setOnClickListener(onLayoutBtnBold);
         mLayoutBtnItalic.setOnClickListener(onLayoutBtnItalic);
+        mLayoutBtnTextColor.setOnClickListener(onLayoutBtnTextColorClick);
+        mLayoutBtnTextBgrColor.setOnClickListener(onLayoutBtnTextBgrColorClick);
+        mBtnCloseColorPicker.setOnClickListener(onBtnCloseColorPickerClick);
 
-        mEditText.setOnEditorActionListener(onEditorActionListener);
+        mEditText.setOnEditorActionListener(onEditTextActionListener);
+        mEdtColorHex.setOnEditorActionListener(onEditColorActionListener);
 
         mTimeLineImage.setOnDragListener(onExtraDragListener);
         mTimeLineVideo.setOnDragListener(onExtraDragListener);
@@ -246,6 +270,141 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mFontAdapter = new FontAdapter(this, android.R.layout.simple_spinner_item, mFontName);
         mFontSpinner.setAdapter(mFontAdapter);
         mFontSpinner.setOnItemSelectedListener(onFontSelectedListener);
+    }
+
+    private void setToolbarVisible(View view, boolean show) {
+        view.setVisibility(show?View.VISIBLE:View.GONE);
+        TranslateAnimation animation;
+        if (show) {
+            animation = new TranslateAnimation(-Utils.dpToPixel(this, 50), 0, 0, 0);
+        } else {
+            animation = new TranslateAnimation(0, -Utils.dpToPixel(this, 50), 0, 0);
+        }
+        animation.setDuration(200);
+        view.startAnimation(animation);
+    }
+
+    View.OnClickListener onBtnCloseColorPickerClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            showColorPicker(false, true);
+        }
+    };
+
+    TextView.OnEditorActionListener onEditColorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                int color = convertToIntegerColor(mEdtColorHex.getText().toString());
+                mColorPicker.setColor(color);
+                setColorForViews(color);
+                mEdtColorHex.clearFocus();
+            }
+            return false;
+        }
+    };
+
+    View.OnClickListener onLayoutBtnTextBgrColorClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mShowColorPicker) {
+                if (!mChooseTextColor) {
+                    showColorPicker(false, true);
+                } else {
+                    mChooseTextColor = false;
+                    showColorPicker(true, false);
+                }
+            } else {
+                mChooseTextColor = false;
+                showColorPicker(true, true);
+            }
+        }
+    };
+
+    View.OnClickListener onLayoutBtnTextColorClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mShowColorPicker) {
+                if (mChooseTextColor) {
+                    showColorPicker(false, true);
+                } else {
+                    mChooseTextColor = true;
+                    showColorPicker(true, false);
+                }
+            } else {
+                mChooseTextColor = true;
+                showColorPicker(true, true);
+            }
+        }
+    };
+
+    private void showColorPicker(boolean show, boolean animation){
+        mShowColorPicker = show;
+        if (show) {
+            mLayoutColorPicker.setVisibility(View.VISIBLE);
+            int color;
+            if (mChooseTextColor) {
+                color = mSelectedExtraTimeLine.floatText.mColor;
+                mIndicatorTextColor.setVisibility(View.VISIBLE);
+                mIndicatorTextBgr.setVisibility(View.INVISIBLE);
+            } else {
+                color = mSelectedExtraTimeLine.floatText.mBackgroundColor;
+                mIndicatorTextBgr.setVisibility(View.VISIBLE);
+                mIndicatorTextColor.setVisibility(View.INVISIBLE);
+            }
+            mColorPicker.setColor(color);
+            mEdtColorHex.setText(convertToHexColor(color, false));
+        } else {
+            mLayoutColorPicker.setVisibility(View.GONE);
+            mIndicatorTextBgr.setVisibility(View.INVISIBLE);
+            mIndicatorTextColor.setVisibility(View.INVISIBLE);
+        }
+        if (animation) {
+            slideColorPicker(show);
+        }
+    }
+
+    private void slideColorPicker(boolean show) {
+        TranslateAnimation animation;
+        if (show) {
+            animation = new TranslateAnimation(mScrollView.getWidth()/2, 0, 0, 0);
+        } else {
+            animation = new TranslateAnimation(0, mScrollView.getWidth()/2, 0, 0);
+        }
+        animation.setDuration(300);
+        mLayoutColorPicker.startAnimation(animation);
+    }
+
+    @Override
+    public void onColorChanged(int color) {
+        mEdtColorHex.setText(convertToHexColor(color, false));
+        setColorForViews(color);
+    }
+
+    private void setColorForViews(int color){
+        FloatText floatText = mSelectedExtraTimeLine.floatText;
+        if (mChooseTextColor) {
+            floatText.setTextColor(color);
+            mBtnTextColor.setBackground(new AlphaColorDrawable(color));
+        } else {
+            floatText.setTextBgrColor(color);
+            mBtnTextBgrColor.setBackground(new AlphaColorDrawable(color));
+        }
+    }
+
+    private int convertToIntegerColor(String hexColor) {
+        return Color.parseColor("#"+hexColor);
+    }
+
+    public String convertToHexColor(int color, boolean export) {
+        String resultColor = "";
+        String s = String.format("%08X", (0xFFFFFFFF & color));
+        if (export) {
+            resultColor += s.substring(2) + "@0x" + s.substring(0, 2);
+        } else {
+            resultColor += s;
+        }
+        return resultColor;
     }
 
     View.OnClickListener onLayoutBtnBold = new View.OnClickListener() {
@@ -318,7 +477,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         }
     };
 
-    TextView.OnEditorActionListener onEditorActionListener = new TextView.OnEditorActionListener() {
+    TextView.OnEditorActionListener onEditTextActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -345,11 +504,28 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private void openEditText(boolean open) {
         int visible = open? View.VISIBLE:View.GONE;
         mLayoutEditText.setVisibility(visible);
+        slideEditText(open);
         mOpenLayoutEditText = open;
         if (open) {
             mEditText.setText(mSelectedExtraTimeLine.text);
-
+            FloatText floatText = mSelectedExtraTimeLine.floatText;
+            mBtnTextColor.setBackground(new AlphaColorDrawable(floatText.mColor));
+            mBtnTextBgrColor.setBackground(new AlphaColorDrawable(floatText.mBackgroundColor));
+            log(mScrollView.getHeight()+" -> Height");
+        } else {
+            showColorPicker(false, false);
         }
+    }
+
+    private void slideEditText(boolean open){
+        TranslateAnimation animation;
+        if (open) {
+            animation = new TranslateAnimation(0, 0, mScrollView.getHeight(), 0);
+        } else {
+            animation = new TranslateAnimation(0, 0, 0, mScrollView.getHeight());
+        }
+        animation.setDuration(300);
+        mLayoutEditText.startAnimation(animation);
     }
 
     View.OnClickListener onBtnAddMediaClick = new View.OnClickListener() {
@@ -357,6 +533,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         public void onClick(View v) {
             openFileManager(true);
             openAddLayout(false);
+
         }
     };
 
@@ -680,6 +857,9 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mCurrentPosition = mainTimeLine.startInTimeLine;
         mActiveVideoView.setVideoPath(mainTimeLine.videoPath);
         mCurrentVideoId = mCountVideo-1;
+        if (mCountVideo == 1) {
+            setToolbarVisible(mBtnPlay, true);
+        }
     }
 
     public void addImage(String imagePath){
@@ -700,7 +880,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     }
 
     public void addText(){
-        String text = "Lai Trung\nTien";
+        String text = "Lai Trung Tien";
         ExtraTimeLine extraTimeLine = new ExtraTimeLine(this, text, mTimeLineImageHeight, mLeftMarginTimeLine, false);
         extraTimeLine.setOnClickListener(onExtraTimeLineClick);
         extraTimeLine.setOnLongClickListener(onExtraTimelineLongClick);
@@ -781,6 +961,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         public void onClick(View view) {
             if (mOpenFileManager) {
                 openFileManager(false);
+
                 return;
             }
             if (mOpenLayoutAdd) {
@@ -795,9 +976,11 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         if (open) {
             mFileManager.setVisibility(View.VISIBLE);
             mOpenFileManager = true;
+            mBtnAdd.setImageResource(R.drawable.ic_close);
         } else {
             mFileManager.setVisibility(View.GONE);
             mOpenFileManager = false;
+            mBtnAdd.setImageResource(R.drawable.ic_add_media);
         }
     }
 
@@ -1152,6 +1335,16 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         }
     };
 
+    @Override
+    public void onBackPressed() {
+
+        if (mOpenLayoutEditText) {
+            openEditText(false);
+            return;
+        }
+        super.onBackPressed();
+    }
+
     View.OnClickListener onExtraTimeLineClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -1173,14 +1366,10 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     };
 
     public void showBtnEditText(boolean show) {
-        if (show) {
-            mBtnEditText.setVisibility(View.VISIBLE);
-            mBtnAdd.setVisibility(View.GONE);
-            mShowBtnEditText = true;
-        } else {
-            mBtnEditText.setVisibility(View.GONE);
-            mBtnAdd.setVisibility(View.VISIBLE);
-            mShowBtnEditText = false;
+        mShowBtnEditText = show;
+        setToolbarVisible(mBtnEditText, show);
+        if (!show&&mOpenLayoutEditText) {
+            openEditText(false);
         }
     }
 
@@ -1355,9 +1544,6 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mAudioTimeLineControl = new AudioTimeLineControl(this, mLeftMarginTimeLine, mLeftMarginTimeLine+500, mTimeLineImageHeight);
         mTimeLineAudio.addView(mAudioTimeLineControl);
         setAudioControlVisible(false);
-
-
-
     }
 
     private void updateLayoutTimeLine() {

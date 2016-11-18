@@ -14,4 +14,7 @@
     <dimen name="margin_bottom_edittext">10dp</dimen>
     <dimen name="dimen_btn_text_background">20dp</dimen>
     <dimen name="dimen_layout_text_background">30dp</dimen>
+    <dimen name="margin_end_text_background">30dp</dimen>
+    <dimen name="margin_start_text_background">15dp</dimen>
+    <dimen name="indicator_text_color">20dp</dimen>
 </resources>

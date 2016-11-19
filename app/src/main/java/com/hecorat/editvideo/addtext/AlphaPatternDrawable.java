@@ -118,11 +118,7 @@ public class AlphaPatternDrawable extends Drawable {
 
 				isWhite = !isWhite;
 			}
-
 			verticalStartWhite = !verticalStartWhite;
-			
 		}
-
 	}
-
 }

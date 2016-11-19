@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -27,7 +28,10 @@ public class AudioTimeLine extends ImageView {
     public int startTime, endTime;
     public int start;
     public int duration;
-    public String name;
+    public int startInTimeline, endInTimeline;
+    public int leftMargin;
+
+    public String name, path;
     public Rect bacgroundRect;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
@@ -37,6 +41,7 @@ public class AudioTimeLine extends ImageView {
 
     public AudioTimeLine(Context context, String audioPath, int height, int leftMargin) {
         super(context);
+        path = audioPath;
         retriever = new MediaMetadataRetriever();
         retriever.setDataSource(audioPath);
         duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
@@ -44,10 +49,8 @@ public class AudioTimeLine extends ImageView {
         defaultBitmap = createDefaultBitmap();
         listBitmap = new ArrayList<>();
 
-        startTime = 0;
-        endTime = duration;
-        width = endTime/ Constants.SCALE_VALUE;
-
+        width = duration/ Constants.SCALE_VALUE;
+        this.leftMargin = leftMargin;
         this.height = height;
         left = leftMargin;
         right = leftMargin + width;
@@ -57,7 +60,7 @@ public class AudioTimeLine extends ImageView {
         params = new RelativeLayout.LayoutParams(width, height);
         seekTimeLine(left, right);
         paint = new Paint();
-//        new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        updateTimeLineStatus();
     }
 
     public void seekTimeLine(int left, int right){
@@ -65,13 +68,13 @@ public class AudioTimeLine extends ImageView {
         this.right = right;
         width = right - left;
         start = left - min; // it for visualation after
-        startTime = start*Constants.SCALE_VALUE;
-        endTime = (start + width)*Constants.SCALE_VALUE;
+
         bacgroundRect = new Rect(0, 0, width, height);
         params.width = width;
         params.leftMargin = left;
         setLayoutParams(params);
         invalidate();
+        updateTimeLineStatus();
     }
 
     public void moveTimeLine(int leftMargin) {
@@ -82,6 +85,15 @@ public class AudioTimeLine extends ImageView {
         max += moveX;
         params.leftMargin = left;
         invalidate();
+        updateTimeLineStatus();
+    }
+
+    public void updateTimeLineStatus(){
+        startTime = start*Constants.SCALE_VALUE;
+        endTime = (start + width)*Constants.SCALE_VALUE;
+        startInTimeline = (left-leftMargin)*Constants.SCALE_VALUE;
+        endInTimeline = (right-leftMargin)*Constants.SCALE_VALUE;
+        log("start: "+startTime);
     }
 
     @Override
@@ -95,7 +107,6 @@ public class AudioTimeLine extends ImageView {
             canvas.drawBitmap(listBitmap.get(i), i*150 - start, 0, paint);
         }
         canvas.drawText(name, 20, 50, paint);
-
     }
 
     private Bitmap createDefaultBitmap(){
@@ -136,5 +147,9 @@ public class AudioTimeLine extends ImageView {
             super.onProgressUpdate(values);
             invalidate();
         }
+    }
+
+    private void log(String msg) {
+        Log.e("Log for audio", msg);
     }
 }

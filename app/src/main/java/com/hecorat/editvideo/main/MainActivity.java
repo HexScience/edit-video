@@ -877,7 +877,6 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         }
         if (start) {
             mMediaPlayer.start();
-            log("play");
         } else {
 
             if (mMediaPlayer.isPlaying()){
@@ -886,6 +885,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             }
         }
     }
+
 
     private void playVideo() {
         if (mPreviewStatus == BEGIN || mPreviewStatus == END) {

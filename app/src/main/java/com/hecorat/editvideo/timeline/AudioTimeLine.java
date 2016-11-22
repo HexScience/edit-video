@@ -31,7 +31,7 @@ public class AudioTimeLine extends ImageView {
     public int startInTimeline, endInTimeline;
     public int leftMargin;
 
-    public String name, path;
+    public String name, audioPath;
     public Rect bacgroundRect;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
@@ -41,7 +41,7 @@ public class AudioTimeLine extends ImageView {
 
     public AudioTimeLine(Context context, String audioPath, int height, int leftMargin) {
         super(context);
-        path = audioPath;
+        this.audioPath = audioPath;
         retriever = new MediaMetadataRetriever();
         retriever.setDataSource(audioPath);
         duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));

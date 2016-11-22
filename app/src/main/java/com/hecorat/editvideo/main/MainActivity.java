@@ -9,8 +9,10 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -45,6 +47,8 @@ import com.hecorat.editvideo.addtext.ColorPickerView;
 import com.hecorat.editvideo.addtext.FloatText;
 import com.hecorat.editvideo.addtext.FontAdapter;
 import com.hecorat.editvideo.addtext.FontManager;
+import com.hecorat.editvideo.export.ExportTask;
+import com.hecorat.editvideo.export.FFmpeg;
 import com.hecorat.editvideo.filemanager.FragmentAudioGallery;
 import com.hecorat.editvideo.filemanager.FragmentImagesGallery;
 import com.hecorat.editvideo.filemanager.FragmentVideosGallery;
@@ -56,8 +60,6 @@ import com.hecorat.editvideo.timeline.ExtraTimeLine;
 import com.hecorat.editvideo.timeline.ExtraTimeLineControl;
 import com.hecorat.editvideo.timeline.MainTimeLine;
 import com.hecorat.editvideo.timeline.MainTimeLineControl;
-
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements MainTimeLineControl.OnControlTimeLineChanged,
@@ -149,8 +151,8 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         mVideoViewLayout = (RelativeLayout) findViewById(R.id.video_view_layout);
@@ -281,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mFontSpinner.setOnItemSelectedListener(onFontSelectedListener);
 
         mMediaPlayer = new MediaPlayer();
+
     }
 
     private void setToolbarVisible(View view, boolean show) {
@@ -310,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
                 mColorPicker.setColor(color);
                 setColorForViews(color);
                 mEdtColorHex.clearFocus();
+                hideStatusBar();
             }
             return false;
         }
@@ -496,6 +500,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
                 mSelectedExtraTimeLine.setText(text);
                 mSelectedExtraTimeLine.floatText.setText(text);
                 mEditText.clearFocus();
+                hideStatusBar();
             }
             return false;
         }
@@ -608,7 +613,8 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     View.OnClickListener onBtnExportClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-
+            ExportTask exportTask = new ExportTask(mActivity, mVideoList, mImageList, mTextList, mAudioList);
+            exportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     };
 
@@ -667,13 +673,13 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
                 if (!audio.equals(mCurrentAudio)) {
                     mCurrentAudio = audio;
                     stopPlayAudio();
-                    playAudio(audio.path, audio.startTime);
+                    playAudio(audio.audioPath, audio.startTime);
                     log("change");
                     return;
                 } else {
                     int seekTime = mCurrentPosition - audio.startInTimeline + audio.startTime;
                     if (mMediaPlayer == null) {
-                        playAudio(audio.path, seekTime);
+                        playAudio(audio.audioPath, seekTime);
                         log("again");
                     }
                 }

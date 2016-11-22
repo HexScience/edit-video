@@ -37,6 +37,7 @@ public class ExtraTimeLine extends ImageView {
     public String text;
     public FloatImage floatImage;
     public FloatText floatText;
+    public String imagePath;
 
     public ExtraTimeLine(Context context, String pathOrText, int height, int leftMargin, boolean isPicture) {
         super(context);
@@ -47,6 +48,7 @@ public class ExtraTimeLine extends ImageView {
         paint = new Paint();
         if (isPicture) {
             bitmap = getBitmap(pathOrText);
+            imagePath = pathOrText;
             inLayoutImage = true;
         } else {
             text = pathOrText;

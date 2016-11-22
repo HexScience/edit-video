@@ -99,7 +99,7 @@ public class FragmentVideosGallery extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             String videoPath = mListVideo.get(i);
-            log("this video path: "+mListVideo.get(i));
+            log("this video audioPath: "+mListVideo.get(i));
             mActivity.addVideo(videoPath);
         }
     };

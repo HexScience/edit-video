@@ -36,13 +36,13 @@ public class FFmpeg {
             ffmpegProcess = procBuilder.redirectErrorStream(true).start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(
                     ffmpegProcess.getInputStream()));
-            System.err
+            System.out
                     .println("***Starting FFMPEG***" + procBuilder.toString());
             String mLineLog;
             while ((mLineLog = reader.readLine()) != null) {
-                System.err.println("***" + mLineLog + "***");
+                System.out.println("***" + mLineLog + "***");
             }
-            System.err.println("***Ending FFMPEG***");
+            System.out.println("***Ending FFMPEG***");
 
         } catch (IOException e) {
             e.printStackTrace();

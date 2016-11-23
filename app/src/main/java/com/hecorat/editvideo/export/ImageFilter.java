@@ -1,6 +1,6 @@
 package com.hecorat.editvideo.export;
 
-import com.hecorat.editvideo.timeline.ExtraTimeLine;
+import android.media.Image;
 
 import java.util.ArrayList;
 
@@ -9,28 +9,31 @@ import java.util.ArrayList;
  */
 
 public class ImageFilter {
-    public static String filter="a";
-    public static String getFilter(String input, String output, ArrayList<ExportTask.ImageHolder> listImage){
-        filterImage(listImage);
-        addImage(input, output, listImage);
+
+    public static String getFilter(String input, String output, ArrayList<ExportTask.ImageHolder> listImage, int order){
+        String filter="";
+        for (int i=0; i<listImage.size(); i++){
+            ExportTask.ImageHolder image = listImage.get(i);
+            int index = i+order;
+            String in = i==0?input:"[out"+index+"]";
+            String out = i==listImage.size()-1?output:"[out"+(index+1)+"];";
+            filter += prepareImage(image, index);
+            filter += addImage(in, out, image, index);
+        }
         return filter;
     }
 
-    private static void filterImage(ArrayList<ExportTask.ImageHolder> listImage){
-        for (int i=0; i<listImage.size(); i++){
-            ExportTask.ImageHolder image = listImage.get(i);
-            filter+="["+(i+1)+":v]scale="+image.width+":"
+    private static String prepareImage(ExportTask.ImageHolder image, int index){
+        String filter = "["+index+":v]scale="+image.width+":"
                     +image.height+",rotate="+image.rotate+":c=none:ow=rotw("+image.rotate
-                    +"):oh=roth("+image.rotate+")[ov"+(i+1)+"];";
-        }
+                    +"):oh=roth("+image.rotate+")[ov"+index+"];";
+        return filter;
     }
 
-    private static void addImage(String input, String output, ArrayList<ExportTask.ImageHolder> listImage){
-        for (int i=0; i<listImage.size(); i++){
-            ExportTask.ImageHolder image = listImage.get(i);
-            filter+= (i==0?input:"[out"+(i)+"]")+"[ov"+(i+1)+"]overlay="+image.x
+    private static String addImage(String input, String output, ExportTask.ImageHolder image, int index){
+        String filter= input+"[ov"+index+"]overlay="+image.x
                     +":"+image.y+":enable='between=(t,"+image.startTime+","
-                    +image.endTime+")'"+(i==listImage.size()-1?output:"[out"+(i+1)+"];");
-        }
+                    +image.endTime+")'"+output;
+        return filter;
     }
 }

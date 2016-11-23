@@ -66,6 +66,7 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         String inStream = "[0:v]";
         String outStream = "[video]";
         String filter = ImageFilter.getFilter(inStream, outStream, listImage);
+        log(filter);
         command.add("-i");
         command.add(inputVideo);
         command.add("-i");
@@ -99,7 +100,8 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
-        FFmpeg.executeFFmpegCommand(mContext, getCommand());
+//        FFmpeg.executeFFmpegCommand(mContext, getCommand());
+        getCommand();
         return null;
     }
 

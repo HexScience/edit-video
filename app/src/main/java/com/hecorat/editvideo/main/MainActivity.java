@@ -613,6 +613,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     View.OnClickListener onBtnExportClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+
             ExportTask exportTask = new ExportTask(mActivity, mVideoList, mImageList, mTextList, mAudioList);
             exportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }

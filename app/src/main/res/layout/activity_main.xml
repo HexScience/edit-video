@@ -68,7 +68,6 @@
             android:padding="@dimen/toolbar_icon_padding"
             android:src="@drawable/ic_export"
             android:clickable="true"
-            android:visibility="gone"
             android:layout_marginBottom="@dimen/margin_bottom_toolbar"
             android:background="@drawable/btn_touch_feedback_oval"/>
         <ImageView

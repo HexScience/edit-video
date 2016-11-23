@@ -11,11 +11,12 @@ import java.util.ArrayList;
 public class ImageFilter {
     public static String filter="";
     public static String getFilter(String input, String output, ArrayList<ExportTask.ImageHolder> listImage){
-
+        filterImage(listImage);
+        addImage(input, output, listImage);
         return filter;
     }
 
-    private void filterImage(ArrayList<ExportTask.ImageHolder> listImage){
+    private static void filterImage(ArrayList<ExportTask.ImageHolder> listImage){
         for (int i=0; i<listImage.size(); i++){
             ExportTask.ImageHolder image = listImage.get(i);
             filter+="["+(i+1)+":v]scale="+image.width+":"
@@ -24,7 +25,7 @@ public class ImageFilter {
         }
     }
 
-    private void addImage(String input, String output, ArrayList<ExportTask.ImageHolder> listImage){
+    private static void addImage(String input, String output, ArrayList<ExportTask.ImageHolder> listImage){
         for (int i=0; i<listImage.size(); i++){
             ExportTask.ImageHolder image = listImage.get(i);
             filter+= (i==0?input:"[out"+(i+1)+"]")+"[ov"+(i+1)+"]overlay="+image.x

@@ -28,9 +28,9 @@ public class ImageFilter {
     private static void addImage(String input, String output, ArrayList<ExportTask.ImageHolder> listImage){
         for (int i=0; i<listImage.size(); i++){
             ExportTask.ImageHolder image = listImage.get(i);
-            filter+= (i==0?input:"[out"+(i+1)+"]")+"[ov"+(i+1)+"]overlay="+image.x
+            filter+= (i==0?input:"[out"+(i)+"]")+"[ov"+(i+1)+"]overlay="+image.x
                     +":"+image.y+":enable='between=(t,"+image.startTime+","
-                    +image.endTime+")'"+(i==listImage.size()-1?output:"[out"+(i+1)+"]");
+                    +image.endTime+")'"+(i==listImage.size()-1?output:"[out"+(i+1)+"];");
         }
     }
 }

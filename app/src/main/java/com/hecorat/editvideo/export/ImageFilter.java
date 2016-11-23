@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 
 public class ImageFilter {
-    public static String filter="";
+    public static String filter="a";
     public static String getFilter(String input, String output, ArrayList<ExportTask.ImageHolder> listImage){
         filterImage(listImage);
         addImage(input, output, listImage);

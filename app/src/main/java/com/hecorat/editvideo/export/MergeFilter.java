@@ -30,7 +30,7 @@ public class MergeFilter {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(video.videoPath);
         int height = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-        boolean scale = height>720;
+        boolean scale = true;
         String in = "["+index+":v]";
         if (scale){
             filter += in+"scale=-1:720[v_scale];";

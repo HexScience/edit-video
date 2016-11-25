@@ -1,5 +1,6 @@
 package com.hecorat.editvideo.export;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -21,6 +22,7 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
     ArrayList<ExtraTimeLine> mListImage, mListText;
     ArrayList<AudioTimeLine> mListAudio;
     Context mContext;
+    ProgressDialog mProgressDialog;
     public ExportTask(Context context, ArrayList<MainTimeLine> listVideo, ArrayList<ExtraTimeLine> listImage,
                       ArrayList<ExtraTimeLine> listText, ArrayList<AudioTimeLine> listAudio) {
         mContext = context;
@@ -56,18 +58,35 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         String inputBackground = direct + "/background.png";
         String output = direct + "/outputFile.mp4";
 
-        String filter = MergeFilter.getFilter(mListVideo, 1);
-        String inStream = "[v]";
-        String auOutStream = "[aout]";
-        int audioPosition = 1+mListVideo.size();
-        filter += AudioFilter.getFilter(1f, auOutStream+";", mListAudio, audioPosition);
-        String outStream = "[outText];";
-        int imagePosition = audioPosition + mListAudio.size();
-        filter += ImageFilter.getFilter(inStream, outStream, mListImage, imagePosition);
-        inStream = "[outText]";
-        outStream = "[video]";
-        filter += TextFilter.getFilter(inStream, outStream, mListText);
+        String inVideo = "[v]";
+        String outVideo = "[outVideo]";
+        String outAudio = "[outAudio];";
+        int order = 1;
+        String filter = MergeFilter.getFilter(mListVideo, order);
+        if (mListImage.size()==0&&mListText.size()==0){
+            outVideo = "[v]";
+            outAudio = "[outAudio]";
+        }
 
+        int audioPosition = order+mListVideo.size();
+        filter += AudioFilter.getFilter(1f, outAudio, mListAudio, audioPosition);
+        if (mListImage.size()>0){
+            outVideo = "[inText];";
+            if (mListText.size()==0){
+                outVideo="[inText]";
+            }
+            int imagePosition = audioPosition + mListAudio.size();
+            filter += ImageFilter.getFilter(inVideo, outVideo, mListImage, imagePosition);
+        }
+        if (mListText.size()>0){
+            inVideo = "[inText]";
+            outVideo = "[outVideo]";
+            if (mListImage.size()==0){
+                inVideo = "[v]";
+            }
+            filter += TextFilter.getFilter(inVideo, outVideo, mListText);
+        }
+        outAudio = "[outAudio]";
         command.add("-loop");
         command.add("1");
         command.add("-i");
@@ -97,11 +116,11 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         command.add("-filter_complex");
         command.add(filter);
         command.add("-map");
-        command.add(outStream);
+        command.add(outVideo);
         command.add("-map");
-        command.add(auOutStream);
+        command.add(outAudio);
         command.add("-format");
-        command.add("yuv420p");
+        command.add("yuva420p");
         command.add("-preset");
         command.add("ultrafast");
         command.add("-c:a");
@@ -115,12 +134,16 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
     protected void onPreExecute() {
         super.onPreExecute();
         log("Start get info");
+        mProgressDialog = new ProgressDialog(mContext);
+        mProgressDialog.setMessage("Exporting..");
+        mProgressDialog.show();
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         log("End get info");
+        mProgressDialog.dismiss();
     }
 
     @Override

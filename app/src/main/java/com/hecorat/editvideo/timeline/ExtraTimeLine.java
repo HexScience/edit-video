@@ -92,7 +92,7 @@ public class ExtraTimeLine extends ImageView {
         textHolder.y = floatText.y;
         textHolder.startInTimeLine = startInTimeLine/1000f;
         textHolder.endInTimeLine = endInTimeLine/1000f;
-        textHolder.rotate = (float) (floatText.rotation*Math.PI/180);
+        textHolder.rotate = (float) (-floatText.rotation*Math.PI/180);
     }
 
     public String convertToHexColor(int color) {

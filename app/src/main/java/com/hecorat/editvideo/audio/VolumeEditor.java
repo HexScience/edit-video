@@ -23,7 +23,7 @@ public class VolumeEditor extends DialogFragment{
     TextView mTextView;
     static int mVolume;
 
-    static int MAX_VOLUME = 200;
+    static int MAX_VOLUME = 100;
     public static VolumeEditor newInstance(Context context, int volume) {
         mContext = context;
         mVolume = volume;

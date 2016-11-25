@@ -52,6 +52,7 @@ import com.hecorat.editvideo.filemanager.FragmentAudioGallery;
 import com.hecorat.editvideo.filemanager.FragmentImagesGallery;
 import com.hecorat.editvideo.filemanager.FragmentVideosGallery;
 import com.hecorat.editvideo.helper.Utils;
+import com.hecorat.editvideo.preview.CustomVideoView;
 import com.hecorat.editvideo.timeline.AudioTimeLine;
 import com.hecorat.editvideo.timeline.AudioTimeLineControl;
 import com.hecorat.editvideo.timeline.CustomHorizontalScrollView;
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private LinearLayout mFileManager;
     private ImageView mVideoTab, mImageTab, mAudioTab;
     private LinearLayout mVideoTabLayout, mImageTabLayout, mAudioTabLayout;
-    private VideoView mActiveVideoView, mInActiveVideoView, mVideoView1, mVideoView2;
+    private CustomVideoView mActiveVideoView, mInActiveVideoView, mVideoView1, mVideoView2;
     private RelativeLayout mLayoutTimeLine;
     private FrameLayout mLimitTimeLineVideo, mLimitTimeLineImage, mLimitTimeLineText,
             mLimitTimeLineAudio, mSeperateLineVideo, mSeperateLineImage, mSeperateLineText;
@@ -181,8 +182,8 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mVideoTabLayout = (LinearLayout) findViewById(R.id.video_tab_layout);
         mImageTabLayout = (LinearLayout) findViewById(R.id.image_tab_layout);
         mAudioTabLayout = (LinearLayout) findViewById(R.id.audio_tab_layout);
-        mVideoView1 = (VideoView) findViewById(R.id.video_view1);
-        mVideoView2 = (VideoView) findViewById(R.id.video_view2);
+        mVideoView1 = (CustomVideoView) findViewById(R.id.video_view1);
+        mVideoView2 = (CustomVideoView) findViewById(R.id.video_view2);
         mLayoutTimeLine = (RelativeLayout) findViewById(R.id.layout_timeline);
         mLimitTimeLineVideo = (FrameLayout) findViewById(R.id.limit_timeline_video);
         mLimitTimeLineImage = (FrameLayout) findViewById(R.id.limit_timeline_image);
@@ -295,12 +296,29 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     public void onVolumeChanged(int volume) {
         log("Volume: "+volume);
         if (mTimelineCode == TIMELINE_VIDEO){
-            mSelectedMainTimeLine.volume = volume/100f;
+            mSelectedMainTimeLine.volume = convertVolumeToFloat(volume);
         }
 
         if (mTimelineCode == TIMELINE_AUDIO){
-            mSelectedAudioTimeLine.volume = volume/100f;
+            mSelectedAudioTimeLine.volume = convertVolumeToFloat(volume);
         }
+    }
+
+    private float convertVolumeToFloat(int volume){
+        int max = 100;
+        double numerator = max - volume > 0 ? Math.log(max - volume) : 0;
+        float value = (float) (1 - (numerator / Math.log(max)));
+        return value;
+    }
+
+    private int convertVolumeToInt(float volume){
+        int max=100;
+        double numerator = (1f - volume)*Math.log(max);
+        double value = max - Math.exp(numerator);
+        if (value>98){
+            value = 100;
+        }
+        return (int)Math.round(value);
     }
 
     View.OnClickListener onBtnVolumeClick = new View.OnClickListener() {
@@ -308,9 +326,9 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         public void onClick(View v) {
             int volume;
             if (mTimelineCode == TIMELINE_VIDEO){
-                volume = (int)(mSelectedMainTimeLine.volume*100);
+                volume = convertVolumeToInt(mSelectedMainTimeLine.volume);
             } else {
-                volume = (int)(mSelectedAudioTimeLine.volume*100);
+                volume = convertVolumeToInt(mSelectedAudioTimeLine.volume);
             }
             VolumeEditor.newInstance(mActivity, volume).show(getFragmentManager()
                     .beginTransaction(), "volume");
@@ -698,10 +716,10 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             startMediaPlayer(false);
         }
 
-        float volume = 1f;
-        if (mMediaPlayer!=null)
-        mMediaPlayer.setVolume(volume, volume);
-
+        if (mMediaPlayer!=null && mCurrentAudio!=null) {
+            float volume = mCurrentAudio.volume;
+            mMediaPlayer.setVolume(volume, volume);
+        }
         for (int i = 0; i < mAudioList.size(); i++) {
             AudioTimeLine audio = mAudioList.get(i);
 
@@ -842,8 +860,8 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             mActiveVideoView.pause();
             return;
         }
-        float volume = 1f;
-        if (mActiveVideoView!=null) {
+        if (mActiveVideoView!=null && mCurrentMainTimeLine!=null) {
+            mActiveVideoView.setVolume(mCurrentMainTimeLine.volume);
         }
         MainTimeLine mainTimeLine = null;
         int timelineId = mCurrentVideoId;

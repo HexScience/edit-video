@@ -26,7 +26,7 @@ import com.hecorat.editvideo.timeline.ExtraTimeLine;
  */
 
 public class FloatImage extends ImageView {
-    public Bitmap bitmap, mainBitmap, rotateBitmap, scaleBitmap;
+    public Bitmap mainBitmap, rotateBitmap, scaleBitmap;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
     public Rect rectBorder;

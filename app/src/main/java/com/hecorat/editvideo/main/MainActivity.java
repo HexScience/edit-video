@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -47,8 +46,8 @@ import com.hecorat.editvideo.addtext.ColorPickerView;
 import com.hecorat.editvideo.addtext.FloatText;
 import com.hecorat.editvideo.addtext.FontAdapter;
 import com.hecorat.editvideo.addtext.FontManager;
+import com.hecorat.editvideo.audio.VolumeEditor;
 import com.hecorat.editvideo.export.ExportTask;
-import com.hecorat.editvideo.export.FFmpeg;
 import com.hecorat.editvideo.filemanager.FragmentAudioGallery;
 import com.hecorat.editvideo.filemanager.FragmentImagesGallery;
 import com.hecorat.editvideo.filemanager.FragmentVideosGallery;
@@ -64,7 +63,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements MainTimeLineControl.OnControlTimeLineChanged,
         ExtraTimeLineControl.OnExtraTimeLineControlChanged, AudioTimeLineControl.OnAudioControlTimeLineChanged,
-        ColorPickerView.OnColorChangedListener {
+        ColorPickerView.OnColorChangedListener, VolumeEditor.OnVolumeChangedListener {
     private RelativeLayout mVideoViewLayout;
     private RelativeLayout mLayoutVideo, mLayoutImage, mLayoutText, mLayoutAudio;
     private RelativeLayout mTimeLineVideo, mTimeLineImage, mTimeLineText, mTimeLineAudio;
@@ -76,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private ViewPager mViewPager;
     private TextView mFolderName;
     private ImageView mBtnBack, mBtnAdd, mBtnUndo, mBtnExport,
-            mBtnPlay, mBtnDelete, mBtnEditText;
+            mBtnPlay, mBtnDelete, mBtnEditText, mBtnVolume;
     private LinearLayout mFileManager;
     private ImageView mVideoTab, mImageTab, mAudioTab;
     private LinearLayout mVideoTabLayout, mImageTabLayout, mAudioTabLayout;
@@ -101,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private ArrayList<ExtraTimeLine> mImageList;
     private ArrayList<ExtraTimeLine> mTextList;
     private ArrayList<AudioTimeLine> mAudioList;
-    private ArrayList<String> mFontPath, mFontName;
+    public ArrayList<String> mFontPath, mFontName;
 
     private MainActivity mActivity;
     private FontAdapter mFontAdapter;
@@ -135,7 +134,11 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
     private boolean mOpenLayoutAdd, mOpenLayoutEditText, mShowBtnEditText;
     private boolean mStyleBold, mStyleItalic;
     private boolean mShowColorPicker, mChooseTextColor;
+    private int mTimelineCode;
 
+    public static final int TIMELINE_VIDEO = 0;
+    public static final int TIMELINE_EXTRA = 1;
+    public static final int TIMELINE_AUDIO = 2;
     public static final int DRAG_VIDEO = 0;
     public static final int DRAG_EXTRA = 1;
     public static final int DRAG_AUDIO = 2;
@@ -212,6 +215,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mBtnCloseColorPicker = (Button) findViewById(R.id.btn_close_colorpicker);
         mIndicatorTextColor = (ImageView) findViewById(R.id.indicator_textcolor);
         mIndicatorTextBgr = (ImageView) findViewById(R.id.indicator_textbackground);
+        mBtnVolume = (ImageView) findViewById(R.id.btn_volume);
 
         mColorPicker.setAlphaSliderVisible(true);
         mColorPicker.setOnColorChangedListener(this);
@@ -222,7 +226,8 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
 
         mImageShadow = new ImageView(this);
         mImageShadow.setBackgroundResource(R.drawable.shadow);
-        mImageShadowParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        mImageShadowParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
         mShadowIndicator = new ImageView(this);
         mShadowIndicator.setBackgroundResource(R.drawable.shadow_indicator);
         mShadowIndicatorParams = new RelativeLayout.LayoutParams(10, mTimeLineVideoHeight);
@@ -256,6 +261,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mLayoutBtnTextColor.setOnClickListener(onLayoutBtnTextColorClick);
         mLayoutBtnTextBgrColor.setOnClickListener(onLayoutBtnTextBgrColorClick);
         mBtnCloseColorPicker.setOnClickListener(onBtnCloseColorPickerClick);
+        mBtnVolume.setOnClickListener(onBtnVolumeClick);
 
         mEditText.setOnEditorActionListener(onEditTextActionListener);
         mEdtColorHex.setOnEditorActionListener(onEditColorActionListener);
@@ -283,8 +289,33 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mFontSpinner.setOnItemSelectedListener(onFontSelectedListener);
 
         mMediaPlayer = new MediaPlayer();
-
     }
+
+    @Override
+    public void onVolumeChanged(int volume) {
+        log("Volume: "+volume);
+        if (mTimelineCode == TIMELINE_VIDEO){
+            mSelectedMainTimeLine.volume = volume/100f;
+        }
+
+        if (mTimelineCode == TIMELINE_AUDIO){
+            mSelectedAudioTimeLine.volume = volume/100f;
+        }
+    }
+
+    View.OnClickListener onBtnVolumeClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            int volume;
+            if (mTimelineCode == TIMELINE_VIDEO){
+                volume = (int)(mSelectedMainTimeLine.volume*100);
+            } else {
+                volume = (int)(mSelectedAudioTimeLine.volume*100);
+            }
+            VolumeEditor.newInstance(mActivity, volume).show(getFragmentManager()
+                    .beginTransaction(), "volume");
+        }
+    };
 
     private void setToolbarVisible(View view, boolean show) {
         view.setVisibility(show ? View.VISIBLE : View.GONE);
@@ -479,9 +510,8 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             String font = mFontPath.get(position);
-            Typeface typeface = Typeface.createFromFile(font);
             if (mSelectedExtraTimeLine != null) {
-                mSelectedExtraTimeLine.floatText.setFont(typeface);
+                mSelectedExtraTimeLine.floatText.setFont(font);
             }
             mFontAdapter.setSelectedItem(position);
         }
@@ -667,6 +697,11 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         } else {
             startMediaPlayer(false);
         }
+
+        float volume = 1f;
+        if (mMediaPlayer!=null)
+        mMediaPlayer.setVolume(volume, volume);
+
         for (int i = 0; i < mAudioList.size(); i++) {
             AudioTimeLine audio = mAudioList.get(i);
 
@@ -807,6 +842,9 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             mActiveVideoView.pause();
             return;
         }
+        float volume = 1f;
+        if (mActiveVideoView!=null) {
+        }
         MainTimeLine mainTimeLine = null;
         int timelineId = mCurrentVideoId;
         for (int i = 0; i < mVideoList.size(); i++) {
@@ -918,6 +956,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         if (mCountVideo == 1) {
             setToolbarVisible(mBtnPlay, true);
         }
+        mTimelineCode = TIMELINE_VIDEO;
     }
 
     public void addImage(String imagePath) {
@@ -935,6 +974,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mVideoViewLayout.addView(floatImage);
         setFloatImageVisible(mSelectedExtraTimeLine);
         setFloatTextVisible(null);
+        mTimelineCode = TIMELINE_EXTRA;
     }
 
     public void addText() {
@@ -954,6 +994,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         mSelectedExtraTimeLine = extraTimeLine;
         setFloatTextVisible(extraTimeLine);
         showBtnEditText(true);
+        mTimelineCode = TIMELINE_EXTRA;
     }
 
     public void restoreExtraControl(ExtraTimeLine extraTimeLine) {
@@ -981,6 +1022,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
         audioTimeLine.setOnLongClickListener(onAudioLongClick);
         mSelectedAudioTimeLine = audioTimeLine;
         mAudioList.add(audioTimeLine);
+        mTimelineCode = TIMELINE_AUDIO;
     }
 
     private void stopPlayAudio() {
@@ -1306,6 +1348,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             mSelectedAudioTimeLine = (AudioTimeLine) view;
             setAudioControlVisible(true);
             mAudioTimeLineControl.restoreTimeLineStatus(mSelectedAudioTimeLine);
+            mTimelineCode = TIMELINE_AUDIO;
         }
     };
 
@@ -1428,6 +1471,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             mScrollView.scrollTo(mSelectedExtraTimeLine.startInTimeLine / Constants.SCALE_VALUE, 0);
             onCustomScrollChanged.onScrollChanged();
             readdExtraControl();
+            mTimelineCode = TIMELINE_EXTRA;
             if (mSelectedExtraTimeLine.isPicture) {
                 setFloatImageVisible(mSelectedExtraTimeLine);
                 setFloatTextVisible(null);
@@ -1500,6 +1544,7 @@ public class MainActivity extends AppCompatActivity implements MainTimeLineContr
             mMainTimeLineControl.restoreTimeLineStatus(mSelectedMainTimeLine);
             mBtnExport.setVisibility(View.GONE);
             mBtnDelete.setVisibility(View.VISIBLE);
+            mTimelineCode = TIMELINE_VIDEO;
         }
     };
 

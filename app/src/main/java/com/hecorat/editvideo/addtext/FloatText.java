@@ -41,6 +41,7 @@ public class FloatText extends ImageView {
     public TextPaint textPaint;
     public Rect bound;
     public Typeface mTypeface;
+    public String fontPath;
 
     public int width, height;
     public int x, y, translateX, translateY;
@@ -54,20 +55,24 @@ public class FloatText extends ImageView {
     public int mStyle;
     public int mColor;
     public int mBackgroundColor;
+    public int size;
 
     public static final int ROTATE_CONSTANT = 30;
-    public static final int INIT_X = 300, INIT_Y = 300;
+    public static final int INIT_X = 300, INIT_Y = 300, INIT_SIZE = 60;
     public static final int PADDING = 30;
 
     public FloatText(Context context, String text) {
         super(context);
         x = INIT_X;
         y = INIT_Y;
+        size = INIT_SIZE;
         this.text = text;
         mActivity = (MainActivity) context;
+        fontPath = mActivity.mFontPath.get(0);
+        mTypeface = Typeface.createFromFile(fontPath);
         paint = new Paint();
         textPaint = new TextPaint();
-        textPaint.setTextSize(60);
+        textPaint.setTextSize(size);
         setText(text);
 
         rotatePoint = new float[2];
@@ -111,8 +116,9 @@ public class FloatText extends ImageView {
         resetLayout();
     }
 
-    public void setFont(Typeface typeface){
-        mTypeface = typeface;
+    public void setFont(String fontPath){
+        this.fontPath = fontPath;
+        mTypeface = Typeface.createFromFile(fontPath);
         resetLayout();
     }
 
@@ -193,7 +199,7 @@ public class FloatText extends ImageView {
             return y >= 0 ? 2 : 3;
         }
     }
-    public void scaleImage(float moveX, float moveY){
+    public void scaleText(float moveX, float moveY){
         if (Math.abs(scalePoint[0]-centerPoint[0])>100){
             if (scalePoint[0] >= centerPoint[0]) {
                 widthScale += moveX;
@@ -211,12 +217,11 @@ public class FloatText extends ImageView {
             scaleValue = heightScale/height;
             widthScale = scaleValue*width;
         }
-        maxDimensionLayout = (int) Math.sqrt(widthScale*widthScale+heightScale*heightScale);
-//        rectBorder = new Rect(0, 0, (int)widthScale, (int)heightScale);
+        size = (int)(size*scaleValue);
         invalidate();
     }
 
-    public void moveImage(int moveX, int moveY) {
+    public void moveText(int moveX, int moveY) {
         x += moveX;
         y += moveY;
         translateX = x;
@@ -315,10 +320,10 @@ public class FloatText extends ImageView {
                     }
 
                     if (touch == 1) {
-                        scaleImage(moveX, moveY);
+                        scaleText(moveX, moveY);
                     }
                     if (touch == 2) {
-                        moveImage((int)moveX, (int)moveY);
+                        moveText((int)moveX, (int)moveY);
                     }
                     if (touch == 3) {
                         currentAngle = getAngle(motionEvent.getX(), motionEvent.getY());

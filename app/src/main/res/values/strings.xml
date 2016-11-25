@@ -5,4 +5,7 @@
     <string name="audio_tab_title">Audio</string>
     <string name="txt_add_media">Media</string>
     <string name="txt_add_text">Text</string>
+    <string name="volume_editor_title">Volume</string>
+    <string name="ok_btn">OK</string>
+    <string name="cancel_btn">CANCEL</string>
 </resources>

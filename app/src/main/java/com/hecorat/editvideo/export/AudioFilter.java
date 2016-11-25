@@ -1,5 +1,7 @@
 package com.hecorat.editvideo.export;
 
+import com.hecorat.editvideo.timeline.AudioTimeLine;
+
 import java.util.ArrayList;
 
 /**
@@ -7,13 +9,13 @@ import java.util.ArrayList;
  */
 
 public class AudioFilter {
-    public static String getFilter(float videoVolume, String output, ArrayList<ExportTask.AudioHolder> listAudio, int order){
+    public static String getFilter(float videoVolume, String output, ArrayList<AudioTimeLine> listAudio, int order){
         String filter ="";
         String in = "[a0]";
         filter += setVolume(videoVolume, 0, false);
         for (int i=0; i<listAudio.size(); i++){
-            ExportTask.AudioHolder audio = listAudio.get(i);
-            filter += prepareAudio(audio.startTime, i+order);
+            AudioHolder audio = listAudio.get(i).audioHolder;
+            filter += prepareAudio(audio.startInTimeLine, i+order);
             filter += setVolume(audio.volume, i+order, true);
             in += "[auv"+(i+order)+"]";
         }
@@ -22,7 +24,7 @@ public class AudioFilter {
         return filter;
     }
 
-    private static String prepareAudio(int startTime, int index){
+    private static String prepareAudio(float startTime, int index){
         return "aevalsrc=0:d="+startTime+"[s1];[s1]["+index+":a]concat=n=2:v=0:a=1[au"+index+"];";
     }
 

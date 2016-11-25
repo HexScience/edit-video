@@ -12,6 +12,7 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.hecorat.editvideo.export.AudioHolder;
 import com.hecorat.editvideo.main.Constants;
 import com.hecorat.editvideo.R;
 
@@ -30,6 +31,7 @@ public class AudioTimeLine extends ImageView {
     public int duration;
     public int startInTimeline, endInTimeline;
     public int leftMargin;
+    public float volume;
 
     public String name, audioPath;
     public Rect bacgroundRect;
@@ -38,6 +40,7 @@ public class AudioTimeLine extends ImageView {
     public MediaMetadataRetriever retriever;
     public Bitmap defaultBitmap;
     public ArrayList<Bitmap> listBitmap;
+    public AudioHolder audioHolder;
 
     public AudioTimeLine(Context context, String audioPath, int height, int leftMargin) {
         super(context);
@@ -48,6 +51,7 @@ public class AudioTimeLine extends ImageView {
         name = new File(audioPath).getName();
         defaultBitmap = createDefaultBitmap();
         listBitmap = new ArrayList<>();
+        audioHolder = new AudioHolder();
 
         width = duration/ Constants.SCALE_VALUE;
         this.leftMargin = leftMargin;
@@ -56,11 +60,20 @@ public class AudioTimeLine extends ImageView {
         right = leftMargin + width;
         min = leftMargin;
         max = leftMargin + width;
+        volume = 1f;
 
         params = new RelativeLayout.LayoutParams(width, height);
         seekTimeLine(left, right);
         paint = new Paint();
         updateTimeLineStatus();
+    }
+
+    public void updateAudioHolder(){
+        audioHolder.audioPath = audioPath;
+        audioHolder.startTime = startTime/1000f;
+        audioHolder.startInTimeLine = startInTimeline/1000f;
+        audioHolder.duration = (endInTimeline-startInTimeline)/1000f;
+        audioHolder.volume = volume;
     }
 
     public void seekTimeLine(int left, int right){

@@ -71,6 +71,15 @@
             android:layout_marginBottom="@dimen/margin_bottom_toolbar"
             android:background="@drawable/btn_touch_feedback_oval"/>
         <ImageView
+            android:id="@+id/btn_volume"
+            android:layout_width="@dimen/toolbar_icon_dimension"
+            android:layout_height="@dimen/toolbar_icon_dimension"
+            android:padding="@dimen/toolbar_icon_padding"
+            android:src="@drawable/ic_btn_volume"
+            android:clickable="true"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"/>
+        <ImageView
             android:id="@+id/btn_play"
             android:layout_width="@dimen/toolbar_icon_dimension"
             android:layout_height="@dimen/toolbar_icon_dimension"

@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.export.VideoHolder;
 import com.hecorat.editvideo.main.Constants;
 import com.hecorat.editvideo.main.MainActivity;
 
@@ -22,26 +23,28 @@ import java.util.ArrayList;
  * Created by bkmsx on 31/10/2016.
  */
 public class MainTimeLine extends ImageView {
-    public int width, height;
     public Rect rectBackground, rectLeft, rectRight;
     public Paint paint;
     public MediaMetadataRetriever retriever;
-    public int durationVideo;
     public Bitmap defaultBitmap;
     public RelativeLayout.LayoutParams params;
+    public String videoPath;
+    public MainActivity mActivity;
+    public ArrayList<Bitmap> listBitmap;
+    public VideoHolder videoHolder;
+
+    public int width, height;
+    public int MARGIN_LEFT_TIME_LINE;
+    public int startInTimeLine, endInTimeLine;
     public int startTime, endTime;
     public int startPosition;
     public int left, right;
     public int min, max;
-    public String videoPath;
-    public int startInTimeLine, endInTimeLine;
-    public MainActivity mActivity;
-
-    public int MARGIN_LEFT_TIME_LINE;
+    public int durationVideo;
+    public float volume;
 
     public static final int PADDING = 4;
 
-    ArrayList<Bitmap> listBitmap;
     public MainTimeLine(Context context, String videoPath, int height) {
         super(context);
         mActivity = (MainActivity) context;
@@ -63,12 +66,13 @@ public class MainTimeLine extends ImageView {
         min = left;
         max = min + width;
         right = left + width;
-        log("init min: "+min);
 
         params = new RelativeLayout.LayoutParams(width, height);
         setLayoutParams(params);
         defaultBitmap = createDefaultBitmap();
         drawTimeLine(left, width);
+        videoHolder = new VideoHolder();
+        volume = 1f;
 
         new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -81,7 +85,6 @@ public class MainTimeLine extends ImageView {
         max += moveX;
         right = left+width;
         setLayoutParams(params);
-        log("margin min: ");
         updateTimeLineStatus();
     }
 
@@ -106,8 +109,13 @@ public class MainTimeLine extends ImageView {
         endTime = (right - min) * Constants.SCALE_VALUE;
         startInTimeLine = (left - MARGIN_LEFT_TIME_LINE)*Constants.SCALE_VALUE;
         endInTimeLine = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
-        log("startTime: "+startTime+" endTime: "+endTime);
-        log("startTimeLine: "+startInTimeLine+"endTimeLine: "+endInTimeLine);
+    }
+
+    public void updateVideoHolder(){
+        videoHolder.videoPath = videoPath;
+        videoHolder.startTime = startTime/1000f;
+        videoHolder.duration = (endTime-startTime)/1000f;
+        videoHolder.volume = volume;
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.hecorat.editvideo.export;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.speech.tts.Voice;
 import android.util.Log;
 
 import com.hecorat.editvideo.timeline.AudioTimeLine;
@@ -29,137 +28,72 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         mListImage = listImage;
         mListText = listText;
         mListAudio = listAudio;
+        updateAllList();
     }
 
-    public class ImageHolder {
-        String path;
-        int width, height, x, y;
-        float rotate;
-        int startTime, endTime;
-        ImageHolder (String path, int width, int height,
-                     int x, int y, float rotate, int startTime, int endTime){
-            this.path = path;
-            this.width = width;
-            this.height = height;
-            this.x = x;
-            this.y = y;
-            this.rotate = rotate;
-            this.startTime = startTime;
-            this.endTime = endTime;
+    private void updateAllList(){
+        for (int i=0; i<mListVideo.size(); i++){
+            mListVideo.get(i).updateVideoHolder();
         }
-    }
 
-    public class TextHolder {
-        String textFile, fontPath;
-        String fontColor, boxColor;
-        int size, x, y;
-        float rotate;
-        int startTime, endTime;
-        TextHolder (String textFile, String fontPath, int size, String fontColor,
-                    String boxColor, int x, int y, float rotate, int startTime, int endTime){
-            this.textFile = textFile;
-            this.fontPath = fontPath;
-            this.fontColor = fontColor;
-            this.boxColor = boxColor;
-            this.size = size;
-            this.x = x;
-            this.y = y;
-            this.rotate = rotate;
-            this.startTime = startTime;
-            this.endTime = endTime;
+        for (int i=0; i<mListAudio.size(); i++){
+            mListAudio.get(i).updateAudioHolder();
         }
-    }
 
-    public class AudioHolder {
-        String audioPath;
-        float volume;
-        int startTime, endTime;
-        int begin;
-        AudioHolder(String audioPath, float volume, int startTime, int endTime, int begin){
-            this.audioPath = audioPath;
-            this.volume = volume;
-            this.startTime = startTime;
-            this.endTime = endTime;
-            this.begin = begin;
+        for (int i=0; i<mListImage.size(); i++){
+            mListImage.get(i).updateImageHolder();
         }
-    }
 
-    public class VideoHolder {
-        String videoPath;
-        int begin, end;
-        VideoHolder(String videoPath, int begin, int end){
-            this.videoPath = videoPath;
-            this.begin = begin;
-            this.end = end;
+        for (int i=0; i<mListText.size(); i++){
+            mListText.get(i).updateTextHolder();
         }
     }
 
     private LinkedList<String> getCommand(){
         LinkedList<String> command = new LinkedList<>();
-        ArrayList<ImageHolder> listImage = new ArrayList<>();
-        ArrayList<TextHolder> listText = new ArrayList<>();
-        ArrayList<AudioHolder> listAudio = new ArrayList<>();
-        ArrayList<VideoHolder> listVideo = new ArrayList<>();
 
         String direct = Environment.getExternalStorageDirectory().toString();
         String inputBackground = direct + "/background.png";
-        String inputVideo1 = direct + "/in.mp4";
-        String inputVideo2 = direct + "/in1.mp4";
-        String inputImage1 = direct + "/img1.png";
-        String inputImage2 = direct + "/img2.png";
-        String inputText = direct + "/text.txt";
-        String fontText = direct + "/font.otf";
-        String inputAudio1 = direct + "/dhkb.mp3";
-        String inputAudio2 = direct + "/mm.mp3";
-        String output = direct + "/imageVideo.mp4";
+        String output = direct + "/outputFile.mp4";
 
-        ImageHolder image = new ImageHolder(inputImage1, 300, 400, 100, 100, 1.05f, 5, 10);
-        listImage.add(image);
-        image = new ImageHolder(inputImage2, 200, 300, 300, 300, 1.3f, 0, 5);
-        listImage.add(image);
-
-        TextHolder text = new TextHolder(inputText, fontText, 36, "red", "blue", 200, 200, 1.05f, 0, 5);
-        listText.add(text);
-        text = new TextHolder(inputText, fontText, 46, "red", "blue", 400, 200, 1.5f, 0, 10);
-        listText.add(text);
-
-        AudioHolder audio = new AudioHolder(inputAudio1, 1f, 5, 5, 30);
-        listAudio.add(audio);
-        audio = new AudioHolder(inputAudio2, 0.5f, 0, 5, 30);
-        listAudio.add(audio);
-
-        VideoHolder video = new VideoHolder(inputVideo1, 0, 9);
-        listVideo.add(video);
-        video = new VideoHolder(inputVideo2, 0, 9);
-        listVideo.add(video);
-
-        String filter = MergeFilter.getFilter(listVideo, 1);
+        String filter = MergeFilter.getFilter(mListVideo, 1);
         String inStream = "[v]";
         String auOutStream = "[aout]";
-        filter += AudioFilter.getFilter(0.5f, auOutStream+";", listAudio, 5);
+        int audioPosition = 1+mListVideo.size();
+        filter += AudioFilter.getFilter(1f, auOutStream+";", mListAudio, audioPosition);
         String outStream = "[outText];";
-        filter += ImageFilter.getFilter(inStream, outStream, listImage,3);
+        int imagePosition = audioPosition + mListAudio.size();
+        filter += ImageFilter.getFilter(inStream, outStream, mListImage, imagePosition);
         inStream = "[outText]";
         outStream = "[video]";
-        filter += TextFilter.getFilter(inStream, outStream, listText);
-        log(filter);
+        filter += TextFilter.getFilter(inStream, outStream, mListText);
 
         command.add("-loop");
         command.add("1");
         command.add("-i");
         command.add(inputBackground);
-        command.add("-i");
-        command.add(inputVideo1);
-        command.add("-i");
-        command.add(inputVideo2);
-        command.add("-i");
-        command.add(inputImage1);
-        command.add("-i");
-        command.add(inputImage2);
-        command.add("-i");
-        command.add(inputAudio1);
-        command.add("-i");
-        command.add(inputAudio2);
+        for (int i=0; i<mListVideo.size(); i++){
+            VideoHolder video = mListVideo.get(i).videoHolder;
+            command.add("-ss");
+            command.add(video.startTime+"");
+            command.add("-t");
+            command.add(video.duration+"");
+            command.add("-i");
+            command.add(video.videoPath);
+        }
+        for (int i=0; i<mListAudio.size(); i++){
+            AudioHolder audio = mListAudio.get(i).audioHolder;
+            command.add("-ss");
+            command.add(audio.startTime+"");
+            command.add("-t");
+            command.add(audio.duration+"");
+            command.add("-i");
+            command.add(audio.audioPath);
+        }
+        for (int i=0; i<mListImage.size(); i++){
+            command.add("-i");
+            command.add(mListImage.get(i).imagePath);
+        }
         command.add("-filter_complex");
         command.add(filter);
         command.add("-map");
@@ -191,8 +125,8 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
+        log(getCommand().toString());
         FFmpeg.executeFFmpegCommand(mContext, getCommand());
-//        getCommand();
         return null;
     }
 

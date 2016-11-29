@@ -28,7 +28,7 @@ public class VideoTL extends ImageView {
     public MediaMetadataRetriever retriever;
     public Bitmap defaultBitmap;
     public RelativeLayout.LayoutParams params;
-    public String videoPath;
+    public String videoPath, audioPath;
     public MainActivity mActivity;
     public ArrayList<Bitmap> listBitmap;
     public VideoHolder videoHolder;
@@ -42,15 +42,18 @@ public class VideoTL extends ImageView {
     public int min, max;
     public int durationVideo;
     public float volume;
+    public boolean hasAudio;
 
     public VideoTL(Context context, String videoPath, int height) {
         super(context);
         mActivity = (MainActivity) context;
         MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
         this.videoPath = videoPath;
+        this.audioPath = videoPath;
         retriever = new MediaMetadataRetriever();
         retriever.setDataSource(videoPath);
         listBitmap = new ArrayList<>();
+        hasAudio = true;
         durationVideo = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
 
         startTime = 0;

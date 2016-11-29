@@ -18,10 +18,14 @@ public class TimeText extends TextView {
     RelativeLayout.LayoutParams params;
     public TimeText(Context context, int second) {
         super(context);
-        Date date = new Date(second*1000);
-        String time = new SimpleDateFormat("mm:ss", Locale.getDefault()).format(date);
+        String pattern = "mm:ss";
+        Date date = new Date(second%3600*1000);
+        String time = new SimpleDateFormat(pattern, Locale.getDefault()).format(date);
+        if (second>=3600){
+            time = second/3600+":"+time;
+        }
         setText(time);
-        setTextSize(13);
+        setTextSize(11);
         params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         setLayoutParams(params);

@@ -91,8 +91,8 @@ public class VideoTLControl extends ImageView {
     }
 
     public interface OnControlTimeLineChanged {
-        void updateMainTimeLine(int leftPosition, int width);
-        void invisibleMainControl();
+        void updateVideoTimeLine(int leftPosition, int width);
+        void invisibleVideoControl();
         void seekTo(int value, boolean scroll);
     }
 
@@ -160,7 +160,7 @@ public class VideoTLControl extends ImageView {
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (touch == TOUCH_CENTER) {
-                        mOnControlTimeLineChanged.invisibleMainControl();
+                        mOnControlTimeLineChanged.invisibleVideoControl();
                         return true;
                     }
                     width = endPosition - startPosition;
@@ -175,7 +175,7 @@ public class VideoTLControl extends ImageView {
                         currentVideo = (right - min)* Constants.SCALE_VALUE;
                     }
                     mOnControlTimeLineChanged.seekTo(currentVideo, true);
-                    mOnControlTimeLineChanged.updateMainTimeLine(startPosition, width);
+                    mOnControlTimeLineChanged.updateVideoTimeLine(startPosition, width);
                     touch = 0;
                     return true;
                 default:

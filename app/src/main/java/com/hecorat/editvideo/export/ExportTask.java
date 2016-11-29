@@ -170,6 +170,7 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         mProgressDialog = new ProgressDialog(mActivity);
         mProgressDialog.setMessage("Exporting..");
         mProgressDialog.show();
+        mProgressDialog.setCanceledOnTouchOutside(false);
     }
 
     @Override
@@ -177,12 +178,14 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         super.onPostExecute(aVoid);
         log("End get info");
         mProgressDialog.dismiss();
+        mActivity.hideStatusBar();
     }
 
     @Override
     protected Void doInBackground(Void... params) {
         log(getCommand().toString());
-        FFmpeg.executeFFmpegCommand(mActivity, getCommand());
+        FFmpeg ffmpeg = FFmpeg.newInstance(mActivity);
+        ffmpeg.executeFFmpegCommand(getCommand());
         return null;
     }
 

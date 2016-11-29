@@ -11,4 +11,5 @@ public class TextHolder {
     public int width, height;
     public float rotate;
     public float startInTimeLine, endInTimeLine;
+    public float padding;
 }

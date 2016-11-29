@@ -382,13 +382,15 @@ public class FloatText extends ImageView {
         if (drawBorder) {
             drawBorder(false);
             mActivity.setExtraControlVisible(false);
-            mActivity.showBtnEditText(false);
+            mActivity.cancelEditText();
+            mActivity.setBtnDeleteVisible(false);
         } else {
             drawBorder(true);
             mActivity.setExtraControlVisible(true);
             mActivity.restoreExtraControl(timeline);
             mActivity.setFloatTextVisible(timeline);
-            mActivity.showBtnEditText(true);
+            mActivity.setBtnEditTextVisible(true);
+            mActivity.setBtnDeleteVisible(true);
         }
         invalidate();
         }

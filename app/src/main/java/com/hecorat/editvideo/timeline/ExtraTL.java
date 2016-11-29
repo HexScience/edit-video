@@ -96,10 +96,9 @@ public class ExtraTL extends ImageView {
         textHolder.startInTimeLine = startInTimeLine/1000f;
         textHolder.endInTimeLine = endInTimeLine/1000f;
         textHolder.rotate = (float) (-floatText.rotation* Math.PI/180);
-        textHolder.width = (int) floatText.widthScale;
-        textHolder.height = (int) floatText.heightScale;
-        log("Text: x="+textHolder.x+" y="+textHolder.y+" size="+textHolder.size);
-        log("layout scale="+layoutScale);
+        textHolder.width = (int) ((floatText.widthScale+FloatText.PADDING*2)*layoutScale);
+        textHolder.height = (int) ((floatText.heightScale+FloatText.PADDING*2)*layoutScale);
+        textHolder.padding = FloatText.PADDING * layoutScale;
     }
 
     public String convertToHexColor(int color) {

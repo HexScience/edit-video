@@ -2,11 +2,13 @@ package com.hecorat.editvideo.export;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,24 +25,59 @@ public class FFmpeg {
     private static final String CPU_ARMEABI_V7A_NEON = "armeabi-v7a-neon";
     private static final String FFMPEG = "ffmpeg";
     public static String mFfmpegPath;
-    private static final String RESULT = "result";
-    private static final int RESULT_OK = 1;
-    private static final int RESULT_ERROR = 0;
+    public static String mAllLog;
+    public static String mLineLog;
+    public static FFmpeg sFFmpeg;
 
-    public static boolean executeFFmpegCommand(Context context, LinkedList<String> command) {
-        initFFMPEG(context);
+    public static FFmpeg newInstance(Context context){
+        if (sFFmpeg == null){
+            sFFmpeg = new FFmpeg();
+            initFFMPEG(context);
+        }
+        return sFFmpeg;
+    }
+
+    public boolean performGetVideoInfo(String inputVideo, String outputFile){
+        Log.e("Az Plugin: ", "Get to Az plugin");
+        LinkedList<String> command = new LinkedList<String>();
+
+        command.add(mFfmpegPath);
+        command.add("-i");
+        command.add(inputVideo);
+
+        boolean value = executeFFmpegCommand(command);
+        writeToFile(new File(outputFile), mAllLog);
+        return value;
+    }
+
+    public static void writeToFile(File fileTxt, String data) {
+        try {
+            FileWriter out = new FileWriter(fileTxt);
+            out.write(data);
+            out.close();
+        } catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
+    public String performGetLineLog() {
+        return mLineLog;
+    }
+
+    public boolean executeFFmpegCommand(LinkedList<String> command) {
         command.add(0, mFfmpegPath);
         Process ffmpegProcess = null;
         ProcessBuilder procBuilder = new ProcessBuilder(command);
+        mAllLog="";
         try {
             ffmpegProcess = procBuilder.redirectErrorStream(true).start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(
                     ffmpegProcess.getInputStream()));
             System.out
                     .println("***Starting FFMPEG***" + procBuilder.toString());
-            String mLineLog;
             while ((mLineLog = reader.readLine()) != null) {
                 System.out.println("***" + mLineLog + "***");
+                mAllLog += mLineLog;
             }
             System.out.println("***Ending FFMPEG***");
 

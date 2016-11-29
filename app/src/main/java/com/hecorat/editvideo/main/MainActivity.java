@@ -44,12 +44,15 @@ import com.hecorat.editvideo.addtext.ColorPickerView;
 import com.hecorat.editvideo.addtext.FloatText;
 import com.hecorat.editvideo.addtext.FontAdapter;
 import com.hecorat.editvideo.addtext.FontManager;
+import com.hecorat.editvideo.audio.AddSilentAudoTask;
 import com.hecorat.editvideo.audio.VolumeEditor;
+import com.hecorat.editvideo.export.ConfirmExport;
 import com.hecorat.editvideo.export.ExportTask;
 import com.hecorat.editvideo.filemanager.FragmentAudioGallery;
 import com.hecorat.editvideo.filemanager.FragmentImagesGallery;
 import com.hecorat.editvideo.filemanager.FragmentVideosGallery;
 import com.hecorat.editvideo.helper.Utils;
+import com.hecorat.editvideo.helper.VideoMetaData;
 import com.hecorat.editvideo.preview.CustomVideoView;
 import com.hecorat.editvideo.timeline.AudioTL;
 import com.hecorat.editvideo.timeline.AudioTLControl;
@@ -66,7 +69,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements VideoTLControl.OnControlTimeLineChanged,
         ExtraTLControl.OnExtraTimeLineControlChanged, AudioTLControl.OnAudioControlTimeLineChanged,
-        ColorPickerView.OnColorChangedListener, VolumeEditor.OnVolumeChangedListener {
+        ColorPickerView.OnColorChangedListener {
     private RelativeLayout mVideoViewLayout;
     private RelativeLayout mLayoutVideo, mLayoutImage, mLayoutText, mLayoutAudio;
     private RelativeLayout mTimeLineVideo, mTimeLineImage, mTimeLineText, mTimeLineAudio;
@@ -300,9 +303,12 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mMediaPlayer = new MediaPlayer();
     }
 
-    @Override
+    private void setBtnVolumeVisible(boolean visible){
+        int visibility = visible? View.VISIBLE:View.GONE;
+        mBtnVolume.setVisibility(visibility);
+    }
+
     public void onVolumeChanged(int volume) {
-        log("Volume: " + volume);
         if (mTimelineCode == TIMELINE_VIDEO) {
             mSelectedVideoTL.volume = convertVolumeToFloat(volume);
         }
@@ -310,23 +316,16 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         if (mTimelineCode == TIMELINE_AUDIO) {
             mSelectedAudioTL.volume = convertVolumeToFloat(volume);
         }
+        hideStatusBar();
     }
 
     private float convertVolumeToFloat(int volume) {
-        int max = 100;
-        double numerator = max - volume > 0 ? Math.log(max - volume) : 0;
-        float value = (float) (1 - (numerator / Math.log(max)));
+        float value = (float)volume/100f;
         return value;
     }
 
     private int convertVolumeToInt(float volume) {
-        int max = 100;
-        double numerator = (1f - volume) * Math.log(max);
-        double value = max - Math.exp(numerator);
-        if (value > 98) {
-            value = 100;
-        }
-        return (int) Math.round(value);
+        return Math.round(volume*100);
     }
 
     View.OnClickListener onBtnVolumeClick = new View.OnClickListener() {
@@ -370,7 +369,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 mColorPicker.setColor(color);
                 setColorForViews(color);
                 mEdtColorHex.clearFocus();
-                hideStatusBar();
+
             }
             return false;
         }
@@ -556,7 +555,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 mSelectedExtraTL.setText(text);
                 mSelectedExtraTL.floatText.setText(text);
                 mEditText.clearFocus();
-                hideStatusBar();
             }
             return false;
         }
@@ -566,14 +564,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View v) {
             if (mOpenLayoutEditText) {
-                openEditText(false);
+                openLayoutEditText(false);
             } else {
-                openEditText(true);
+                openLayoutEditText(true);
             }
         }
     };
 
-    private void openEditText(boolean open) {
+    public void openLayoutEditText(boolean open) {
         int visible = open ? View.VISIBLE : View.GONE;
         mLayoutEditText.setVisibility(visible);
         slideEditText(open);
@@ -620,12 +618,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View v) {
             if (mTimelineCode == TIMELINE_VIDEO) {
-                deleteMainTimeLine();
+                deleteVideo();
             } else if (mTimelineCode == TIMELINE_EXTRA) {
                 deleteExtraTimeline();
             } else {
                 deleteAudioTimeLine();
             }
+            updateBtnExportVisible();
         }
     };
 
@@ -651,10 +650,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         invisibleExtraControl();
     }
 
-    private void deleteMainTimeLine() {
+    private void deleteVideo() {
         mVideoList.remove(mSelectedVideoTL);
         mLayoutVideo.removeView(mSelectedVideoTL);
-        invisibleMainControl();
+        invisibleVideoControl();
         mCountVideo--;
         mCurrentVideoId--;
         if (mCountVideo > 0) {
@@ -671,6 +670,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mActiveVideoView.stopPlayback();
             mActiveVideoView.setVisibility(View.GONE);
             mActiveVideoView.setVisibility(View.VISIBLE);
+            setBtnExportVisible(false);
+            setBtnPlayVisible(false);
         }
     }
 
@@ -692,7 +693,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     };
 
     private void setTimeMark(){
-        for (int i=0; i<=40 ; i++){
+        for (int i=0; i<=3600 ; i++){
             if (i%5 == 0){
                 BigTimeMark bigTimeMark = new BigTimeMark(this);
                 mLayoutTimeMark.addView(bigTimeMark);
@@ -720,11 +721,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     View.OnClickListener onBtnExportClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-
-            ExportTask exportTask = new ExportTask(mActivity, mVideoList, mImageList, mTextList, mAudioList);
-            exportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            ConfirmExport.newInstance(mActivity).show(getFragmentManager().beginTransaction(), "confirm export");
         }
     };
+
+    public void exportVideo(){
+        ExportTask exportTask = new ExportTask(mActivity, mVideoList, mImageList, mTextList, mAudioList);
+        exportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
 
     @Override
     protected void onDestroy() {
@@ -1008,7 +1012,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-
     private void playVideo() {
         if (mPreviewStatus == BEGIN || mPreviewStatus == END) {
             resetVideoView();
@@ -1020,7 +1023,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     public void addVideo(String videoPath) {
         VideoTL videoTL = new VideoTL(this, videoPath, mTimeLineVideoHeight);
-        videoTL.setOnClickListener(onMainTimeLineClick);
+        videoTL.setOnClickListener(onVideoTimeLineClick);
         videoTL.setOnLongClickListener(onVideoLongClick);
         mVideoList.add(videoTL);
         mLayoutVideo.addView(videoTL);
@@ -1031,9 +1034,25 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mActiveVideoView.setVideoPath(videoTL.videoPath);
         mCurrentVideoId = mCountVideo - 1;
         if (mCountVideo == 1) {
-            setToolbarVisible(mBtnPlay, true);
+            setBtnPlayVisible(true);
         }
+        fixIfVideoHasAudio(videoTL);
+        updateBtnExportVisible();
         mTimelineCode = TIMELINE_VIDEO;
+    }
+
+    private void fixIfVideoHasAudio(VideoTL videoTL){
+        new AddSilentAudoTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, videoTL);
+    }
+
+    private void setBtnPlayVisible(boolean visible){
+        int visibility = visible? View.VISIBLE:View.GONE;
+        mBtnPlay.setVisibility(visibility);
+    }
+
+    public void setBtnEditTextVisible(boolean visible){
+        int visibility = visible? View.VISIBLE:View.GONE;
+        mBtnEditText.setVisibility(visibility);
     }
 
     public void addImage(String imagePath) {
@@ -1053,6 +1072,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setFloatTextVisible(null);
         restoreExtraControl(extraTL);
         setExtraControlVisible(true);
+        updateBtnExportVisible();
+        setBtnDeleteVisible(true);
+        floatImage.drawBorder(true);
         mTimelineCode = TIMELINE_EXTRA;
     }
 
@@ -1172,7 +1194,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setFloatImageVisible(null);
         mSelectedExtraTL = extraTL;
         setFloatTextVisible(extraTL);
-        showBtnEditText(true);
+        setBtnEditTextVisible(true);
+        updateBtnExportVisible();
+        setBtnDeleteVisible(true);
         mTimelineCode = TIMELINE_EXTRA;
     }
 
@@ -1200,6 +1224,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         addAudioTLToTL(audioTL);
         audioTL.setOnClickListener(onAudioTimeLineClick);
         audioTL.setOnLongClickListener(onAudioLongClick);
+        updateBtnExportVisible();
         mSelectedAudioTL = audioTL;
         mTimelineCode = TIMELINE_AUDIO;
     }
@@ -1313,38 +1338,45 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View view) {
             if (mOpenLayoutEditText) {
-                openEditText(false);
+                openLayoutEditText(false);
+                return;
             }
 
-            switch (mFragmentCode) {
-                case VIDEO_TAB:
-                    if (mOpenVideoSubFolder) {
-                        mFragmentVideosGallery.backToMain();
-                        mOpenVideoSubFolder = false;
-                        return;
-                    }
-                    break;
-                case IMAGE_TAB:
-                    if (mOpenImageSubFolder) {
-                        mFragmentImagesGallery.backToMain();
-                        mOpenImageSubFolder = false;
-                        return;
-                    }
-                    break;
-                case AUDIO_TAB:
-                    if (mOpenAudioSubFolder) {
-                        mFragmentAudioGallery.backToMain();
-                        mOpenAudioSubFolder = false;
-                        return;
-                    }
-                    break;
-            }
-
-            if (mOpenFileManager) {
-                openFileManager(false);
-            }
+            upLevelFileManager();
         }
     };
+
+    private boolean upLevelFileManager(){
+        switch (mFragmentCode) {
+            case VIDEO_TAB:
+                if (mOpenVideoSubFolder) {
+                    mFragmentVideosGallery.backToMain();
+                    mOpenVideoSubFolder = false;
+                    return true;
+                }
+                break;
+            case IMAGE_TAB:
+                if (mOpenImageSubFolder) {
+                    mFragmentImagesGallery.backToMain();
+                    mOpenImageSubFolder = false;
+                    return true;
+                }
+                break;
+            case AUDIO_TAB:
+                if (mOpenAudioSubFolder) {
+                    mFragmentAudioGallery.backToMain();
+                    mOpenAudioSubFolder = false;
+                    return true;
+                }
+                break;
+        }
+
+        if (mOpenFileManager) {
+            openFileManager(false);
+            return true;
+        }
+        return false;
+    }
 
     ViewPager.OnPageChangeListener onViewPagerChanged = new ViewPager.OnPageChangeListener() {
         @Override
@@ -1571,7 +1603,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void invisibleAllController(){
         invisibleExtraControl();
-        invisibleMainControl();
+        invisibleVideoControl();
         invisibleAudioControl();
     }
 
@@ -1593,6 +1625,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mAudioTLControl.restoreTimeLineStatus(mSelectedAudioTL);
             mTimelineCode = TIMELINE_AUDIO;
             setBtnDeleteVisible(true);
+            setBtnVolumeVisible(true);
+            setBtnEditTextVisible(false);
+            setFloatImageVisible(null);
+            setFloatTextVisible(null);
         }
     };
 
@@ -1729,12 +1765,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     @Override
     public void onBackPressed() {
-
+        hideStatusBar();
         if (mOpenLayoutEditText) {
-            openEditText(false);
+            openLayoutEditText(false);
             return;
         }
-        super.onBackPressed();
+        if (!upLevelFileManager()){
+            super.onBackPressed();
+        }
     }
 
     View.OnClickListener onExtraTimeLineClick = new View.OnClickListener() {
@@ -1750,19 +1788,36 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             if (mSelectedExtraTL.isImage) {
                 setFloatImageVisible(mSelectedExtraTL);
                 setFloatTextVisible(null);
+                setBtnEditTextVisible(false);
             } else {
                 setFloatImageVisible(null);
                 setFloatTextVisible(mSelectedExtraTL);
-                showBtnEditText(true);
+                setBtnEditTextVisible(true);
             }
             setBtnDeleteVisible(true);
+            setBtnVolumeVisible(false);
         }
     };
 
-    public void showBtnEditText(boolean show) {
-        setToolbarVisible(mBtnEditText, show);
-        if (!show && mOpenLayoutEditText) {
-            openEditText(false);
+    public void cancelEditText() {
+        setBtnEditTextVisible(false);
+        if (mOpenLayoutEditText) {
+            openLayoutEditText(false);
+        }
+    }
+
+    private void updateBtnExportVisible(){
+        if (mCountVideo>1){
+            setBtnExportVisible(true);
+        } else if (mCountVideo==1){
+            if (mImageList.size()>0||mTextList.size()>0
+                    ||mAudioList.size()>0){
+                setBtnExportVisible(true);
+            } else {
+                setBtnExportVisible(false);
+            }
+        } else {
+            setBtnExportVisible(false);
         }
     }
 
@@ -1807,7 +1862,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    View.OnClickListener onMainTimeLineClick = new View.OnClickListener() {
+    View.OnClickListener onVideoTimeLineClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             mSelectedVideoTL = (VideoTL) view;
@@ -1815,10 +1870,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 mScrollView.scrollTo(mSelectedVideoTL.startInTimeLine / Constants.SCALE_VALUE, 0);
                 onCustomScrollChanged.onScrollChanged();
             }
-            setMainControlVisible(true);
+            setVideoControlVisible(true);
             mVideoTLControl.restoreTimeLineStatus(mSelectedVideoTL);
-            setBtnExportVisible(false);
             setBtnDeleteVisible(true);
+            setBtnVolumeVisible(true);
+            setBtnEditTextVisible(false);
+            setFloatTextVisible(null);
+            setFloatImageVisible(null);
             mTimelineCode = TIMELINE_VIDEO;
         }
     };
@@ -1828,13 +1886,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mBtnExport.setVisibility(visibility);
     }
 
-    private void setBtnDeleteVisible(boolean visible) {
+    public void setBtnDeleteVisible(boolean visible) {
         int visibility = visible ? View.VISIBLE : View.GONE;
         mBtnDelete.setVisibility(visibility);
     }
 
     @Override
-    public void updateMainTimeLine(int leftPosition, int width) {
+    public void updateVideoTimeLine(int leftPosition, int width) {
         mSelectedVideoTL.drawTimeLine(leftPosition, width);
         getLeftMargin(mCountVideo - 1);
         mMaxTimeLine = mVideoList.get(mCountVideo - 1).endInTimeLine;
@@ -1845,10 +1903,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     @Override
-    public void invisibleMainControl() {
-        setMainControlVisible(false);
-        mBtnDelete.setVisibility(View.GONE);
-        mBtnExport.setVisibility(View.VISIBLE);
+    public void invisibleVideoControl() {
+        setVideoControlVisible(false);
+        setBtnDeleteVisible(false);
+        setBtnExportVisible(true);
+        setBtnVolumeVisible(false);
     }
 
     private int getLeftMargin(int position) {
@@ -1900,11 +1959,12 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     @Override
     public void invisibleExtraControl() {
         setExtraControlVisible(false);
+        setBtnDeleteVisible(false);
         if (mSelectedExtraTL == null){
             return;
         }
         if (!mSelectedExtraTL.isImage) {
-            showBtnEditText(false);
+            cancelEditText();
         }
     }
 
@@ -1916,9 +1976,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     @Override
     public void invisibleAudioControl() {
         setAudioControlVisible(false);
+        setBtnDeleteVisible(false);
+        setBtnVolumeVisible(false);
     }
 
-    private void setMainControlVisible(boolean visible) {
+    private void setVideoControlVisible(boolean visible) {
         if (visible) {
             mVideoTLControl.setVisibility(View.VISIBLE);
             mScrollView.scroll = false;
@@ -1945,7 +2007,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private void addControler() {
         mVideoTLControl = new VideoTLControl(this, 500, mTimeLineVideoHeight, mLeftMarginTimeLine);
         mTimeLineVideo.addView(mVideoTLControl, mVideoTLControl.params);
-        setMainControlVisible(false);
+        setVideoControlVisible(false);
 
         mExtraTLControl = new ExtraTLControl(this, mLeftMarginTimeLine, 500, mTimeLineImageHeight);
         mTimeLineImage.addView(mExtraTLControl);

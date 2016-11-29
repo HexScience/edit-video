@@ -8,4 +8,6 @@
     <string name="volume_editor_title">Volume</string>
     <string name="ok_btn">OK</string>
     <string name="cancel_btn">CANCEL</string>
+    <string name="confirm_export_title">Confirm Export</string>
+    <string name="confirm_export_msg">Do you want to export video now?</string>
 </resources>

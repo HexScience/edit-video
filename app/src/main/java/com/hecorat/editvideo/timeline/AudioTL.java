@@ -12,9 +12,9 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.export.AudioHolder;
 import com.hecorat.editvideo.main.Constants;
-import com.hecorat.editvideo.R;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 /**
  * Created by bkmsx on 05/11/2016.
  */
-public class AudioTimeLine extends ImageView {
+public class AudioTL extends ImageView {
     public int min, max;
     public int left, right;
     public int width, height;
@@ -34,7 +34,7 @@ public class AudioTimeLine extends ImageView {
     public float volume;
 
     public String name, audioPath;
-    public Rect bacgroundRect;
+    public Rect bacgroundRect, rectTop,rectBottom, rectLeft, rectRight;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
     public MediaMetadataRetriever retriever;
@@ -42,7 +42,7 @@ public class AudioTimeLine extends ImageView {
     public ArrayList<Bitmap> listBitmap;
     public AudioHolder audioHolder;
 
-    public AudioTimeLine(Context context, String audioPath, int height, int leftMargin) {
+    public AudioTL(Context context, String audioPath, int height, int leftMargin) {
         super(context);
         this.audioPath = audioPath;
         retriever = new MediaMetadataRetriever();
@@ -83,6 +83,10 @@ public class AudioTimeLine extends ImageView {
         start = left - min; // it for visualation after
 
         bacgroundRect = new Rect(0, 0, width, height);
+        rectTop = new Rect(0, 0, width, Constants.BORDER_WIDTH);
+        rectBottom = new Rect(0, height- Constants.BORDER_WIDTH, width, height);
+        rectLeft = new Rect(0, 0, Constants.BORDER_WIDTH, height);
+        rectRight = new Rect(width- Constants.BORDER_WIDTH, 0, width, height);
         params.width = width;
         params.leftMargin = left;
         setLayoutParams(params);
@@ -102,10 +106,10 @@ public class AudioTimeLine extends ImageView {
     }
 
     public void updateTimeLineStatus(){
-        startTime = start*Constants.SCALE_VALUE;
-        endTime = (start + width)*Constants.SCALE_VALUE;
-        startInTimeline = (left-leftMargin)*Constants.SCALE_VALUE;
-        endInTimeline = (right-leftMargin)*Constants.SCALE_VALUE;
+        startTime = start* Constants.SCALE_VALUE;
+        endTime = (start + width)* Constants.SCALE_VALUE;
+        startInTimeline = (left-leftMargin)* Constants.SCALE_VALUE;
+        endInTimeline = (right-leftMargin)* Constants.SCALE_VALUE;
         log("start: "+startTime);
     }
 
@@ -120,6 +124,11 @@ public class AudioTimeLine extends ImageView {
             canvas.drawBitmap(listBitmap.get(i), i*150 - start, 0, paint);
         }
         canvas.drawText(name, 20, 50, paint);
+        paint.setColor(getResources().getColor(R.color.border_timeline_color));
+        canvas.drawRect(rectTop, paint);
+        canvas.drawRect(rectBottom, paint);
+        canvas.drawRect(rectLeft, paint);
+        canvas.drawRect(rectRight, paint);
     }
 
     private Bitmap createDefaultBitmap(){

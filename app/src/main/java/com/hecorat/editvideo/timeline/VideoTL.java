@@ -22,7 +22,7 @@ import java.util.ArrayList;
 /**
  * Created by bkmsx on 31/10/2016.
  */
-public class MainTimeLine extends ImageView {
+public class VideoTL extends ImageView {
     public Rect rectBackground, rectLeft, rectRight;
     public Paint paint;
     public MediaMetadataRetriever retriever;
@@ -43,9 +43,7 @@ public class MainTimeLine extends ImageView {
     public int durationVideo;
     public float volume;
 
-    public static final int PADDING = 4;
-
-    public MainTimeLine(Context context, String videoPath, int height) {
+    public VideoTL(Context context, String videoPath, int height) {
         super(context);
         mActivity = (MainActivity) context;
         MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
@@ -98,16 +96,16 @@ public class MainTimeLine extends ImageView {
         params.width = width;
         setLayoutParams(params);
         rectBackground = new Rect(0, 0, width, height);
-        rectLeft = new Rect(0, 0, PADDING, height);
-        rectRight = new Rect(width-PADDING, 0, width, height);
+        rectLeft = new Rect(0, 0, Constants.BORDER_WIDTH, height);
+        rectRight = new Rect(width- Constants.BORDER_WIDTH, 0, width, height);
         invalidate();
         updateTimeLineStatus();
     }
 
     public void updateTimeLineStatus() {
-        startTime = startPosition*Constants.SCALE_VALUE;
+        startTime = startPosition* Constants.SCALE_VALUE;
         endTime = (right - min) * Constants.SCALE_VALUE;
-        startInTimeLine = (left - MARGIN_LEFT_TIME_LINE)*Constants.SCALE_VALUE;
+        startInTimeLine = (left - MARGIN_LEFT_TIME_LINE)* Constants.SCALE_VALUE;
         endInTimeLine = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
     }
 
@@ -125,7 +123,7 @@ public class MainTimeLine extends ImageView {
         paint.setColor(getResources().getColor(R.color.background_timeline));
         canvas.drawRect(rectBackground, paint);
         for (int i=0; i<listBitmap.size(); i++){
-            canvas.drawBitmap(listBitmap.get(i), i*150 - startPosition, PADDING, paint);
+            canvas.drawBitmap(listBitmap.get(i), i*150 - startPosition, Constants.BORDER_WIDTH, paint);
         }
         canvas.drawRect(rectLeft, paint);
         canvas.drawRect(rectRight, paint);
@@ -156,7 +154,7 @@ public class MainTimeLine extends ImageView {
                 if (bitmap == null) {
                     bitmap = defaultBitmap;
                 }
-                Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, 150, height-PADDING*2, false);
+                Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, 150, height- Constants.BORDER_WIDTH*2, false);
                 listBitmap.add(scaleBitmap);
                 publishProgress();
                 timeStamp += 3000000;

@@ -1,6 +1,6 @@
 package com.hecorat.editvideo.export;
 
-import com.hecorat.editvideo.timeline.AudioTimeLine;
+import com.hecorat.editvideo.timeline.AudioTL;
 
 import java.util.ArrayList;
 
@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 
 public class AudioFilter {
-    public static String getFilter(float videoVolume, String output, ArrayList<AudioTimeLine> listAudio, int order){
+    public static String getFilter(float videoVolume, String output, ArrayList<AudioTL> listAudio, int order){
         String filter ="";
         String in = "[a0]";
         filter += setVolume(videoVolume, 0, false);

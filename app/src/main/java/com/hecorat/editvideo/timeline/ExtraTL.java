@@ -11,29 +11,29 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.addimage.FloatImage;
 import com.hecorat.editvideo.addtext.FloatText;
 import com.hecorat.editvideo.export.ImageHolder;
 import com.hecorat.editvideo.export.TextHolder;
 import com.hecorat.editvideo.main.Constants;
-import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.main.MainActivity;
 
 /**
  * Created by bkmsx on 31/10/2016.
  */
-public class ExtraTimeLine extends ImageView {
+public class ExtraTL extends ImageView {
     public int width, height;
     public int durationImage;
     public int startInTimeLine, endInTimeLine;
     public int left, right;
-    public boolean isPicture;
+    public boolean isImage;
     public boolean inLayoutImage;
     public int leftMarginTimeLine;
 
     public MainActivity mActivity;
     public RelativeLayout.LayoutParams params;
-    public Rect rectBackground;
+    public Rect rectBackground, rectTop,rectBottom, rectLeft, rectRight;
     public Paint paint;
     public Bitmap bitmap;
     public String text;
@@ -43,14 +43,17 @@ public class ExtraTimeLine extends ImageView {
     public ImageHolder imageHolder;
     public TextHolder textHolder;
 
-    public ExtraTimeLine(Context context, String pathOrText, int height, int leftMargin, boolean isPicture) {
+    public static final float SCALE_TEXT = 1.2f;
+
+
+    public ExtraTL(Context context, String pathOrText, int height, int leftMargin, boolean isImage) {
         super(context);
         mActivity = (MainActivity) context;
         durationImage = Constants.IMAGE_TEXT_DURATION;
         this.height = height;
 
         paint = new Paint();
-        if (isPicture) {
+        if (isImage) {
             bitmap = getBitmap(pathOrText);
             imagePath = pathOrText;
             inLayoutImage = true;
@@ -60,10 +63,10 @@ public class ExtraTimeLine extends ImageView {
             inLayoutImage = false;
             textHolder = new TextHolder();
         }
-        this.isPicture = isPicture;
+        this.isImage = isImage;
         left = leftMargin;
-        leftMarginTimeLine = leftMargin;
-        width = durationImage/Constants.SCALE_VALUE;
+        leftMarginTimeLine = mActivity.mLeftMarginTimeLine;
+        width = durationImage/ Constants.SCALE_VALUE;
         right = left + width;
         params = new RelativeLayout.LayoutParams(width, height);
         setLayoutParams(params);
@@ -71,28 +74,32 @@ public class ExtraTimeLine extends ImageView {
         updateTimeLineStatus();
     }
 
-    public void updateImageHolder(){
+    public void updateImageHolder(float layoutScale){
         imageHolder.imagePath = imagePath;
         imageHolder.width = (int)floatImage.widthScale;
         imageHolder.height = (int) floatImage.heightScale;
-        imageHolder.x = floatImage.x;
-        imageHolder.y = floatImage.y;
-        imageHolder.rotate = (float) (-floatImage.rotation*Math.PI/180);
+        imageHolder.x = floatImage.xExport*layoutScale;
+        imageHolder.y = floatImage.yExport*layoutScale;
+        imageHolder.rotate = (float) (-floatImage.rotation* Math.PI/180);
         imageHolder.startInTimeLine = startInTimeLine/1000f;
         imageHolder.endInTimeLine = endInTimeLine/1000f;
     }
 
-    public void updateTextHolder(){
+    public void updateTextHolder(float layoutScale){
         textHolder.text = text;
         textHolder.fontPath = floatText.fontPath;
-        textHolder.size = floatText.size;
+        textHolder.size = floatText.sizeScale*layoutScale;
         textHolder.fontColor = convertToHexColor(floatText.mColor);
         textHolder.boxColor = convertToHexColor(floatText.mBackgroundColor);
-        textHolder.x = floatText.x;
-        textHolder.y = floatText.y;
+        textHolder.x = floatText.xExport*layoutScale;
+        textHolder.y = floatText.yExport*layoutScale;
         textHolder.startInTimeLine = startInTimeLine/1000f;
         textHolder.endInTimeLine = endInTimeLine/1000f;
-        textHolder.rotate = (float) (-floatText.rotation*Math.PI/180);
+        textHolder.rotate = (float) (-floatText.rotation* Math.PI/180);
+        textHolder.width = (int) floatText.widthScale;
+        textHolder.height = (int) floatText.heightScale;
+        log("Text: x="+textHolder.x+" y="+textHolder.y+" size="+textHolder.size);
+        log("layout scale="+layoutScale);
     }
 
     public String convertToHexColor(int color) {
@@ -108,8 +115,8 @@ public class ExtraTimeLine extends ImageView {
     }
 
     public void updateTimeLineStatus(){
-        startInTimeLine = (left - leftMarginTimeLine)*Constants.SCALE_VALUE;
-        endInTimeLine = (right - leftMarginTimeLine)*Constants.SCALE_VALUE;
+        startInTimeLine = (left - leftMarginTimeLine)* Constants.SCALE_VALUE;
+        endInTimeLine = (right - leftMarginTimeLine)* Constants.SCALE_VALUE;
     }
 
     private Bitmap getBitmap(String imagePath) {
@@ -123,6 +130,10 @@ public class ExtraTimeLine extends ImageView {
         this.right = right;
         width = right - left;
         rectBackground = new Rect(0, 0, width, height);
+        rectTop = new Rect(0, 0, width, Constants.BORDER_WIDTH);
+        rectBottom = new Rect(0, height- Constants.BORDER_WIDTH, width, height);
+        rectLeft = new Rect(0, 0, Constants.BORDER_WIDTH, height);
+        rectRight = new Rect(width- Constants.BORDER_WIDTH, 0, width, height);
         params.leftMargin = left;
         params.width = width;
         setLayoutParams(params);
@@ -142,13 +153,18 @@ public class ExtraTimeLine extends ImageView {
         setLayoutParams(params);
         paint.setColor(getResources().getColor(R.color.background_timeline));
         canvas.drawRect(rectBackground, paint);
-        if (isPicture) {
+        if (isImage) {
             canvas.drawBitmap(bitmap, 20, 0, paint);
         } else {
             paint.setColor(Color.MAGENTA);
             paint.setTextSize(35);
             canvas.drawText(text, 20, 50, paint);
         }
+        paint.setColor(getResources().getColor(R.color.border_timeline_color));
+        canvas.drawRect(rectTop, paint);
+        canvas.drawRect(rectBottom, paint);
+        canvas.drawRect(rectLeft, paint);
+        canvas.drawRect(rectRight, paint);
     }
 
     private void log(String msg){

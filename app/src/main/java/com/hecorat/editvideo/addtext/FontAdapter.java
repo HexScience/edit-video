@@ -11,14 +11,13 @@ import android.widget.TextView;
 
 import com.hecorat.editvideo.R;
 
-import java.io.File;
 import java.util.List;
 
 /**
  * Created by TienDam on 11/17/2016.
  */
 
-public class FontAdapter extends ArrayAdapter<String>{
+public class FontAdapter extends ArrayAdapter<String> {
     int selected;
     public FontAdapter(Context context, int resource, List<String> objects) {
         super(context, resource, objects);

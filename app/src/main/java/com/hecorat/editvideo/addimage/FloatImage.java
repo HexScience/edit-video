@@ -19,7 +19,7 @@ import android.widget.RelativeLayout;
 
 import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.main.MainActivity;
-import com.hecorat.editvideo.timeline.ExtraTimeLine;
+import com.hecorat.editvideo.timeline.ExtraTL;
 
 /**
  * Created by TienDam on 11/14/2016.
@@ -31,13 +31,15 @@ public class FloatImage extends ImageView {
     public RelativeLayout.LayoutParams params;
     public Rect rectBorder;
     public MainActivity mActivity;
-    public ExtraTimeLine timeline;
-    public Point initScalePoint, initCenterPoint, initRotatePoint;
+    public ExtraTL timeline;
+    public Point initScalePoint, initCenterPoint, initRotatePoint,
+            initTopRightPoint, initBottomLeftPoint, initTopLeftPoint, initBottomRightPoint;
 
     public int width, height;
-    public int x, y, translateX, translateY;
+    public float x, y, translateX, translateY, xExport, yExport;
     public float rotation = 0;
-    public float[] scalePoint, centerPoint, rotatePoint;
+    public float[] scalePoint, centerPoint, rotatePoint,
+            topRightPoint, bottomLeftPoint, topLeftPoint, bottomRightPoint;
     public float scaleValue = 1f;
     public float widthScale, heightScale;
     public boolean isCompact;
@@ -61,15 +63,31 @@ public class FloatImage extends ImageView {
         initRotatePoint = new Point(0, 0);
         initCenterPoint = new Point(width/2, height/2);
         initScalePoint = new Point(width, height);
+        initBottomLeftPoint = new Point(0, height);
+        initTopRightPoint = new Point(width, 0);
+        initTopLeftPoint = new Point(0, 0);
+        initBottomRightPoint = new Point(width, height);
         rotatePoint = new float[2];
         scalePoint = new float[2];
         centerPoint = new float[2];
+        topRightPoint = new float[2];
+        bottomLeftPoint = new float[2];
+        topLeftPoint = new float[2];
+        bottomRightPoint = new float[2];
         rotatePoint[0] = initRotatePoint.x;
         rotatePoint[1] = initRotatePoint.y;
         scalePoint[0] = initScalePoint.x;
         scalePoint[1] = initScalePoint.y;
         centerPoint[0] = initCenterPoint.x;
         centerPoint[1] = initCenterPoint.y;
+        topRightPoint[0] = initTopRightPoint.x;
+        topRightPoint[1] = initTopRightPoint.y;
+        bottomLeftPoint[0] = initBottomLeftPoint.x;
+        bottomLeftPoint[1] = initBottomLeftPoint.y;
+        topLeftPoint[0] = initTopLeftPoint.x;
+        topLeftPoint[1] = initTopLeftPoint.y;
+        bottomRightPoint[0] = initBottomRightPoint.x;
+        bottomRightPoint[1] = initBottomRightPoint.y;
 
         rotateBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_rotate);
         scaleBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_scale);
@@ -100,8 +118,8 @@ public class FloatImage extends ImageView {
         params.width = maxDimensionLayout;
         params.height = maxDimensionLayout;
 
-        params.leftMargin = x - translateX;
-        params.topMargin = y - translateY;
+        params.leftMargin =(int) (x - translateX);
+        params.topMargin = (int) (y - translateY);
         setLayoutParams(params);
         invalidate();
         isCompact = true;
@@ -167,7 +185,7 @@ public class FloatImage extends ImageView {
         invalidate();
     }
 
-    public void moveImage(int moveX, int moveY) {
+    public void moveImage(float moveX, float moveY) {
         x += moveX;
         y += moveY;
         translateX = x;
@@ -188,19 +206,29 @@ public class FloatImage extends ImageView {
         scalePoint[1] = initScalePoint.y;
         centerPoint[0] = initCenterPoint.x;
         centerPoint[1] = initCenterPoint.y;
-        log("center init: "+centerPoint[0]+" : "+centerPoint[1]);
-        log("rotate init: "+rotatePoint[0]+" : "+rotatePoint[1]);
-        log("scale init: "+scalePoint[0]+" : "+scalePoint[1]);
-        matrix.mapPoints(centerPoint);
+        topRightPoint[0] = initTopRightPoint.x;
+        topRightPoint[1] = initTopRightPoint.y;
+        bottomLeftPoint[0] = initBottomLeftPoint.x;
+        bottomLeftPoint[1] = initBottomLeftPoint.y;
+        topLeftPoint[0] = initTopLeftPoint.x;
+        topLeftPoint[1] = initTopLeftPoint.y;
+        bottomRightPoint[0] = initBottomRightPoint.x;
+        bottomRightPoint[1] = initBottomRightPoint.y;
 
+        matrix.mapPoints(centerPoint);
         matrix.postScale(scaleValue, scaleValue, centerPoint[0], centerPoint[1]);
 
         matrix.postRotate(-rotation, centerPoint[0], centerPoint[1]);
         matrix.mapPoints(scalePoint);
         matrix.mapPoints(rotatePoint);
-        log("center: "+centerPoint[0]+" : "+centerPoint[1]);
-        log("rotate: "+rotatePoint[0]+" : "+rotatePoint[1]);
-        log("scale: "+scalePoint[0]+" : "+scalePoint[1]);
+        matrix.mapPoints(bottomLeftPoint);
+        matrix.mapPoints(topRightPoint);
+        matrix.mapPoints(topLeftPoint);
+        matrix.mapPoints(bottomRightPoint);
+
+        xExport = Math.min(Math.min(Math.min(topLeftPoint[0], bottomRightPoint[0]), bottomLeftPoint[0]), topRightPoint[0]);
+        yExport = Math.min(Math.min(Math.min(topLeftPoint[1], bottomRightPoint[1]), bottomLeftPoint[1]), topRightPoint[1]);
+
         canvas.drawBitmap(mainBitmap, matrix, paint);
         if(!drawBorder) {
             return;
@@ -248,7 +276,6 @@ public class FloatImage extends ImageView {
                 case MotionEvent.ACTION_MOVE:
                     moveX = motionEvent.getX() - oldX;
                     moveY = motionEvent.getY() - oldY;
-//                    log("move X= "+moveX+" moveY= "+moveY);
                     if (Math.abs(moveX) >= delta && Math.abs(moveY)>= delta) {
                         isTouch = true;
                     }
@@ -261,7 +288,7 @@ public class FloatImage extends ImageView {
                         scaleImage(moveX, moveY);
                     }
                     if (touch == 2) {
-                        moveImage((int)moveX, (int)moveY);
+                        moveImage(moveX, moveY);
                     }
                     if (touch == 3) {
                         currentAngle = getAngle(motionEvent.getX(), motionEvent.getY());

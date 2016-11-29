@@ -17,7 +17,7 @@ import com.hecorat.editvideo.main.MainActivity;
 /**
  * Created by bkmsx on 01/11/2016.
  */
-public class ExtraTimeLineControl extends ImageView {
+public class ExtraTLControl extends ImageView {
 
     public static final int THUMB_WIDTH = 30, LINE_HEIGHT=4, ROUND = 10;
     public int width, height;
@@ -33,7 +33,7 @@ public class ExtraTimeLineControl extends ImageView {
 
     public int MARGIN_LEFT_TIME_LINE;
 
-    public ExtraTimeLineControl(Context context, int leftMargin, int widthTimeLine, int heightTimeLine) {
+    public ExtraTLControl(Context context, int leftMargin, int widthTimeLine, int heightTimeLine) {
         super(context);
         mActivity = (MainActivity) context;
         MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
@@ -50,11 +50,11 @@ public class ExtraTimeLineControl extends ImageView {
         mOnControlTimeLineChanged = (OnExtraTimeLineControlChanged) context;
     }
 
-    public void restoreTimeLineStatus(ExtraTimeLine extraTimeLine) {
-        left = extraTimeLine.left;
-        right = extraTimeLine.right;
+    public void restoreTimeLineStatus(ExtraTL extraTL) {
+        left = extraTL.left;
+        right = extraTL.right;
         width = right - left;
-        inLayoutImage = extraTimeLine.inLayoutImage;
+        inLayoutImage = extraTL.inLayoutImage;
         updateLayoutWidth(left, right);
     }
 

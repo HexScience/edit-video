@@ -6,7 +6,8 @@ package com.hecorat.editvideo.export;
 
 public class ImageHolder {
     public String imagePath;
-    public int width, height, x, y;
+    public int width, height;
+    public float x, y;
     public float rotate;
     public float startInTimeLine, endInTimeLine;
 }

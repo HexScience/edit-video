@@ -17,7 +17,7 @@ import com.hecorat.editvideo.main.MainActivity;
 /**
  * Created by bkmsx on 01/11/2016.
  */
-public class AudioTimeLineControl extends ImageView {
+public class AudioTLControl extends ImageView {
     public RectF thumbLeft, thumbRight;
     public Rect lineAbove, lineBelow;
     public int min, max;
@@ -31,7 +31,7 @@ public class AudioTimeLineControl extends ImageView {
 
     public int MARGIN_LEFT_TIME_LINE;
 
-    public AudioTimeLineControl(Context context, int left, int right, int height) {
+    public AudioTLControl(Context context, int left, int right, int height) {
         super(context);
         mActivity = (MainActivity) context;
         MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
@@ -72,11 +72,11 @@ public class AudioTimeLineControl extends ImageView {
         invalidate();
     }
 
-    public void restoreTimeLineStatus(AudioTimeLine audioTimeLine) {
-        min = audioTimeLine.min;
-        max = audioTimeLine.max;
-        left = audioTimeLine.left;
-        right = audioTimeLine.right;
+    public void restoreTimeLineStatus(AudioTL audioTL) {
+        min = audioTL.min;
+        max = audioTL.max;
+        left = audioTL.left;
+        right = audioTL.right;
         updateLayoutWidth(left, right);
     }
 

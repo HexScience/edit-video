@@ -17,7 +17,7 @@ import com.hecorat.editvideo.main.Constants;
 /**
  * Created by bkmsx on 01/11/2016.
  */
-public class MainTimeLineControl extends ImageView {
+public class VideoTLControl extends ImageView {
     public int width, height;
     public static final int THUMB_WIDTH = 30;
     public static final int LINE_HEIGHT = 4;
@@ -30,7 +30,7 @@ public class MainTimeLineControl extends ImageView {
     public RelativeLayout.LayoutParams params;
     public OnControlTimeLineChanged mOnControlTimeLineChanged;
 
-    public MainTimeLineControl(Context context, int widthTimeLine, int heightTimeLine, int left) {
+    public VideoTLControl(Context context, int widthTimeLine, int heightTimeLine, int left) {
         super(context);
         mOnControlTimeLineChanged = (OnControlTimeLineChanged) context;
         width = widthTimeLine;
@@ -47,11 +47,11 @@ public class MainTimeLineControl extends ImageView {
         setOnTouchListener(onTouchListener);
     }
 
-    public void restoreTimeLineStatus(MainTimeLine mainTimeLine) {
-        min = mainTimeLine.min;
-        max = mainTimeLine.max;
-        left = mainTimeLine.left;
-        width = mainTimeLine.width;
+    public void restoreTimeLineStatus(VideoTL videoTL) {
+        min = videoTL.min;
+        max = videoTL.max;
+        left = videoTL.left;
+        width = videoTL.width;
         right = left + width;
         updateLayoutWidth(left, right);
     }
@@ -170,9 +170,9 @@ public class MainTimeLineControl extends ImageView {
                     updateLayoutWidth(left, right);
                     int currentVideo;
                     if (touch == TOUCH_LEFT) {
-                        currentVideo = (left - min)*Constants.SCALE_VALUE;
+                        currentVideo = (left - min)* Constants.SCALE_VALUE;
                     } else {
-                        currentVideo = (right - min)*Constants.SCALE_VALUE;
+                        currentVideo = (right - min)* Constants.SCALE_VALUE;
                     }
                     mOnControlTimeLineChanged.seekTo(currentVideo, true);
                     mOnControlTimeLineChanged.updateMainTimeLine(startPosition, width);

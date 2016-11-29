@@ -7,7 +7,8 @@ package com.hecorat.editvideo.export;
 public class TextHolder {
     public String text, fontPath;
     public String fontColor, boxColor;
-    public int size, x, y;
+    public float size, x, y;
+    public int width, height;
     public float rotate;
     public float startInTimeLine, endInTimeLine;
 }

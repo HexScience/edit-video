@@ -1,6 +1,6 @@
 package com.hecorat.editvideo.export;
 
-import com.hecorat.editvideo.timeline.ExtraTimeLine;
+import com.hecorat.editvideo.timeline.ExtraTL;
 
 import java.util.ArrayList;
 
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class ImageFilter {
 
-    public static String getFilter(String input, String output, ArrayList<ExtraTimeLine> listImage, int order){
+    public static String getFilter(String input, String output, ArrayList<ExtraTL> listImage, int order){
         String filter="";
         for (int i=0; i<listImage.size(); i++){
             ImageHolder image = listImage.get(i).imageHolder;

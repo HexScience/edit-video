@@ -1,9 +1,8 @@
 package com.hecorat.editvideo.export;
 
-import android.media.MediaMetadata;
 import android.media.MediaMetadataRetriever;
 
-import com.hecorat.editvideo.timeline.MainTimeLine;
+import com.hecorat.editvideo.timeline.VideoTL;
 
 import java.util.ArrayList;
 
@@ -12,7 +11,7 @@ import java.util.ArrayList;
  */
 
 public class MergeFilter {
-    public static String getFilter(ArrayList<MainTimeLine> listVideo, int order){
+    public static String getFilter(ArrayList<VideoTL> listVideo, int order){
         String filter="";
         String in = "";
         for (int i=0; i<listVideo.size(); i++){

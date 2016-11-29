@@ -17,7 +17,7 @@ import com.hecorat.editvideo.R;
  * Created by TienDam on 11/24/2016.
  */
 
-public class VolumeEditor extends DialogFragment{
+public class VolumeEditor extends DialogFragment {
     static Context mContext;
     SeekBar mSeekBar;
     TextView mTextView;

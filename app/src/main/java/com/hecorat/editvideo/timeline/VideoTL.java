@@ -28,7 +28,7 @@ public class VideoTL extends ImageView {
     public MediaMetadataRetriever retriever;
     public Bitmap defaultBitmap;
     public RelativeLayout.LayoutParams params;
-    public String videoPath, audioPath;
+    public String videoPath, audioPreview;
     public MainActivity mActivity;
     public ArrayList<Bitmap> listBitmap;
     public VideoHolder videoHolder;
@@ -41,7 +41,7 @@ public class VideoTL extends ImageView {
     public int left, right;
     public int min, max;
     public int durationVideo;
-    public float volume;
+    public float volume, volumePreview;
     public boolean hasAudio;
 
     public VideoTL(Context context, String videoPath, int height) {
@@ -49,7 +49,7 @@ public class VideoTL extends ImageView {
         mActivity = (MainActivity) context;
         MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
         this.videoPath = videoPath;
-        this.audioPath = videoPath;
+        this.audioPreview = videoPath;
         retriever = new MediaMetadataRetriever();
         retriever.setDataSource(videoPath);
         listBitmap = new ArrayList<>();
@@ -74,6 +74,7 @@ public class VideoTL extends ImageView {
         drawTimeLine(left, width);
         videoHolder = new VideoHolder();
         volume = 1f;
+        volumePreview = 1f;
 
         new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -112,11 +113,12 @@ public class VideoTL extends ImageView {
         endInTimeLine = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
     }
 
-    public void updateVideoHolder(){
+    public VideoHolder updateVideoHolder(){
         videoHolder.videoPath = videoPath;
         videoHolder.startTime = startTime/1000f;
         videoHolder.duration = (endTime-startTime)/1000f;
         videoHolder.volume = volume;
+        return videoHolder;
     }
 
     @Override

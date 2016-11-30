@@ -10,4 +10,5 @@
     <string name="cancel_btn">CANCEL</string>
     <string name="confirm_export_title">Confirm Export</string>
     <string name="confirm_export_msg">Do you want to export video now?</string>
+    <string name="export_progress_msg">Export video</string>
 </resources>

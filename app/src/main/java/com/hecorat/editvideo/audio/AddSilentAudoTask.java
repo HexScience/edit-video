@@ -3,7 +3,6 @@ package com.hecorat.editvideo.audio;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.hecorat.editvideo.export.ConfirmExport;
 import com.hecorat.editvideo.export.FFmpeg;
 import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.helper.VideoMetaData;
@@ -28,7 +27,7 @@ public class AddSilentAudoTask extends AsyncTask<VideoTL, Void, Void>{
             String outPath = Utils.getTempFolder()+"/"+System.currentTimeMillis()+".mp4";
             addSilentAudio(videoTL.videoPath, outPath);
             videoTL.videoPath = outPath;
-            videoTL.audioPath = outPath;
+            videoTL.audioPreview = outPath;
             videoTL.hasAudio = false;
         }
         return null;
@@ -51,6 +50,6 @@ public class AddSilentAudoTask extends AsyncTask<VideoTL, Void, Void>{
         command.add("-shortest");
         command.add("-y");
         command.add(outPath);
-        FFmpeg.newInstance(context).executeFFmpegCommand(command);
+        FFmpeg.getInstance(context).executeFFmpegCommand(command);
     }
 }

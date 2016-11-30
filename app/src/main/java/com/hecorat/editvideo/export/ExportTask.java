@@ -4,10 +4,10 @@ import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
 
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.main.MainActivity;
 import com.hecorat.editvideo.timeline.AudioTL;
 import com.hecorat.editvideo.timeline.ExtraTL;
@@ -28,7 +28,10 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
     ArrayList<ExtraTL> mListImage, mListText;
     ArrayList<AudioTL> mListAudio;
     MainActivity mActivity;
-    ProgressDialog mProgressDialog;
+
+    long startTime;
+    int mVideoDuration;
+
     public ExportTask(MainActivity context, ArrayList<VideoTL> listVideo, ArrayList<ExtraTL> listImage,
                       ArrayList<ExtraTL> listText, ArrayList<AudioTL> listAudio) {
         mActivity = context;
@@ -41,9 +44,10 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 
     private void updateAllList(){
         float layoutScale = mActivity.getLayoutVideoScale(1280f);
-
+        mVideoDuration = 0;
         for (int i=0; i<mListVideo.size(); i++){
-            mListVideo.get(i).updateVideoHolder();
+            VideoHolder videoHolder = mListVideo.get(i).updateVideoHolder();
+            mVideoDuration += videoHolder.duration;
         }
 
         for (int i=0; i<mListAudio.size(); i++){
@@ -79,17 +83,14 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
                 e.printStackTrace();
             }
         }
-
-
     }
 
     private LinkedList<String> getCommand(){
         LinkedList<String> command = new LinkedList<>();
 
-        String direct = Environment.getExternalStorageDirectory().toString();
-        String inputBackground = direct + "/background.png";
+        String inputBackground = Utils.getTempFolder() + "/background.png";
         copyToStorage(inputBackground);
-        String output = direct + "/outputFile.mp4";
+        String output = Utils.getOutputFolder() + "/outputFile.mp4";
 
         String inVideo = "[v]";
         String outVideo = "[outVideo]";
@@ -167,24 +168,22 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
     protected void onPreExecute() {
         super.onPreExecute();
         log("Start get info");
-        mProgressDialog = new ProgressDialog(mActivity);
-        mProgressDialog.setMessage("Exporting..");
-        mProgressDialog.show();
-        mProgressDialog.setCanceledOnTouchOutside(false);
+        startTime = System.currentTimeMillis();
+        new ExportProgress(mActivity, mVideoDuration).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         log("End get info");
-        mProgressDialog.dismiss();
-        mActivity.hideStatusBar();
+        log("Total Time= "+(System.currentTimeMillis()-startTime));
+        mActivity.mFinishExport = true;
     }
 
     @Override
     protected Void doInBackground(Void... params) {
         log(getCommand().toString());
-        FFmpeg ffmpeg = FFmpeg.newInstance(mActivity);
+        FFmpeg ffmpeg = FFmpeg.getInstance(mActivity);
         ffmpeg.executeFFmpegCommand(getCommand());
         return null;
     }

@@ -29,7 +29,7 @@ public class FFmpeg {
     public static String mLineLog;
     public static FFmpeg sFFmpeg;
 
-    public static FFmpeg newInstance(Context context){
+    public static FFmpeg getInstance(Context context){
         if (sFFmpeg == null){
             sFFmpeg = new FFmpeg();
             initFFMPEG(context);
@@ -60,7 +60,7 @@ public class FFmpeg {
         }
     }
 
-    public String performGetLineLog() {
+    public String getLineLog() {
         return mLineLog;
     }
 

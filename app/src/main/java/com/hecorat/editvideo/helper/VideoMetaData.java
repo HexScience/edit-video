@@ -29,7 +29,7 @@ public class VideoMetaData {
 
     public static VideoMetaData getMetaData(Context context, String videoPath){
         String fileLog = Utils.getTempFolder()+"/logFile.txt";
-        FFmpeg.newInstance(context).performGetVideoInfo(videoPath, fileLog);
+        FFmpeg.getInstance(context).performGetVideoInfo(videoPath, fileLog);
         try {
             fileString = getStringFromFile(fileLog);
         } catch (Exception e) {

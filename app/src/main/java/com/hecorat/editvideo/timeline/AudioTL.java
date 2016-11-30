@@ -15,6 +15,7 @@ import android.widget.RelativeLayout;
 import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.export.AudioHolder;
 import com.hecorat.editvideo.main.Constants;
+import com.hecorat.editvideo.main.MainActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,9 +32,9 @@ public class AudioTL extends ImageView {
     public int duration;
     public int startInTimeline, endInTimeline;
     public int leftMargin;
-    public float volume;
+    public float volume, volumePreview;
 
-    public String name, audioPath;
+    public String name, audioPath, audioPreview;
     public Rect bacgroundRect, rectTop,rectBottom, rectLeft, rectRight;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
@@ -41,10 +42,13 @@ public class AudioTL extends ImageView {
     public Bitmap defaultBitmap;
     public ArrayList<Bitmap> listBitmap;
     public AudioHolder audioHolder;
+    public MainActivity mActivity;
 
     public AudioTL(Context context, String audioPath, int height, int leftMargin) {
         super(context);
+        mActivity = (MainActivity) context;
         this.audioPath = audioPath;
+        audioPreview = audioPath;
         retriever = new MediaMetadataRetriever();
         retriever.setDataSource(audioPath);
         duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
@@ -54,13 +58,14 @@ public class AudioTL extends ImageView {
         audioHolder = new AudioHolder();
 
         width = duration/ Constants.SCALE_VALUE;
-        this.leftMargin = leftMargin;
+        this.leftMargin = mActivity.mLeftMarginTimeLine;
         this.height = height;
         left = leftMargin;
         right = leftMargin + width;
         min = leftMargin;
         max = leftMargin + width;
         volume = 1f;
+        volumePreview = 1f;
 
         params = new RelativeLayout.LayoutParams(width, height);
         seekTimeLine(left, right);

@@ -56,7 +56,7 @@ public class FragmentVideosGallery extends Fragment {
         new AsyncTaskScanFolder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         mIsSubFolder = false;
-        mFolderAdapter = new VideoGalleryAdapter(getContext(), R.layout.image_layout, mListFirstVideo);
+        mFolderAdapter = new VideoGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListFirstVideo);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
         mFolderName = getString(R.string.video_tab_title);
@@ -85,7 +85,7 @@ public class FragmentVideosGallery extends Fragment {
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             mIsSubFolder = true;
             mListVideo.clear();
-            mVideoAdapter = new VideoGalleryAdapter(getContext(), R.layout.image_layout, mListVideo);
+            mVideoAdapter = new VideoGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListVideo);
             mGridView.setAdapter(mVideoAdapter);
             mGridView.setOnItemClickListener(onVideoClickListener);
             mActivity.mOpenVideoSubFolder = true;
@@ -213,7 +213,7 @@ public class FragmentVideosGallery extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             String videoPath = getItem(position);
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.image_layout, null);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.folder_gallery_layout, null);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
             ImageView iconFolder = (ImageView) convertView.findViewById(R.id.icon_folder);

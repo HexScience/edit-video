@@ -101,6 +101,7 @@
         android:layout_toEndOf="@+id/main_toolbar"
         android:orientation="vertical">
         <RelativeLayout
+            android:id="@+id/top_layout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/video_view_height"
             android:background="#555555">

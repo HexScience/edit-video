@@ -1,6 +1,7 @@
 package com.hecorat.editvideo.filemanager;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.main.MainActivity;
 
 import java.io.File;
@@ -27,8 +29,7 @@ import java.util.ArrayList;
  * Created by bkmsx on 08/11/2016.
  */
 public class FragmentImagesGallery extends Fragment {
-    public ArrayList<String> mListFolder;
-    public ArrayList<String> mListFirstImage, mListImage;
+
     public GridView mGridView;
     public String mStoragePath;
     public ImageGalleryAdapter mFolderAdapter, mImageAdapter;
@@ -36,8 +37,15 @@ public class FragmentImagesGallery extends Fragment {
 
     public boolean mIsSubFolder;
     public int mCountSubFolder;
+    public boolean mChooseSticker;
+
+    public ArrayList<String> mListFolder, mListStiker;
+    public ArrayList<String> mListFirstImage, mListImage;
     public String mFolderName;
     public String[] pattern = {".png", "jpg"};
+    public static final String STICKER_FOLDER = "sticker";
+    public static final String STICKER_FOLDER_NAME = "Stickers";
+    public static final String ASSETS_PATH = "file:///android_asset/";
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -47,6 +55,7 @@ public class FragmentImagesGallery extends Fragment {
         mStoragePath = Environment.getExternalStorageDirectory().toString();
         File fileDirectory = new File(mStoragePath);
         mListFolder = new ArrayList<>();
+        mListFolder.add(STICKER_FOLDER_NAME);
         mListFolder.add(mStoragePath);
         listFolderFrom(fileDirectory);
         mListFirstImage = new ArrayList<>();
@@ -54,11 +63,13 @@ public class FragmentImagesGallery extends Fragment {
 
         new AsyncTaskScanFolder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+        mChooseSticker = false;
         mIsSubFolder = false;
-        mFolderAdapter = new ImageGalleryAdapter(getContext(), R.layout.image_layout, mListFirstImage);
+        mFolderAdapter = new ImageGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListFirstImage);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
         mFolderName = getString(R.string.image_tab_title);
+
         return view;
     }
 
@@ -83,11 +94,20 @@ public class FragmentImagesGallery extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             mIsSubFolder = true;
-            mListImage.clear();
-            mImageAdapter = new ImageGalleryAdapter(getContext(), R.layout.image_layout, mListImage);
-            mGridView.setAdapter(mImageAdapter);
             mGridView.setOnItemClickListener(onImageClickListener);
             mActivity.mOpenImageSubFolder = true;
+            if (i==0){
+                mChooseSticker = true;
+                mImageAdapter = new ImageGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListStiker);
+                mGridView.setAdapter(mImageAdapter);
+                mFolderName = STICKER_FOLDER_NAME;
+                mActivity.setFolderName(mFolderName);
+                return;
+            }
+            mChooseSticker = false;
+            mListImage.clear();
+            mImageAdapter = new ImageGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListImage);
+            mGridView.setAdapter(mImageAdapter);
             mFolderName = new File(mListFolder.get(i)).getName();
             mActivity.setFolderName(mFolderName);
             new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
@@ -145,11 +165,12 @@ public class FragmentImagesGallery extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-
-            for (int i=0; i<mListFolder.size(); i++) {
-                boolean scanSubFolder = mListFolder.get(i).equals(mStoragePath)? false:true;
+            mListStiker = Utils.listFilesFromAssets(mActivity, STICKER_FOLDER);
+            mListFirstImage.add(mListStiker.get(0));
+            for (int i=1; i<mListFolder.size(); i++) {
+                boolean scanSubFolder = !mListFolder.get(i).equals(mStoragePath);
                 mCountSubFolder = 0;
-                if (!isVideoFolder(new File(mListFolder.get(i)), scanSubFolder)){
+                if (!isImageFolder(new File(mListFolder.get(i)), scanSubFolder)){
                     mListFolder.remove(i);
                     i--;
                 }
@@ -176,7 +197,7 @@ public class FragmentImagesGallery extends Fragment {
         }
     }
 
-    private boolean isVideoFolder(File fileDirectory, boolean includeSubDir) {
+    private boolean isImageFolder(File fileDirectory, boolean includeSubDir) {
         if (mCountSubFolder>7) {
             return false;
         }
@@ -185,7 +206,7 @@ public class FragmentImagesGallery extends Fragment {
         for (int i=0; i<fileList.length; i++){
             if (fileList[i].isDirectory()) {
                 if (includeSubDir) {
-                    result = isVideoFolder(fileList[i], true);
+                    result = isImageFolder(fileList[i], true);
                 }
             } else {
                 if (matchFile(fileList[i])) {
@@ -210,7 +231,7 @@ public class FragmentImagesGallery extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             String imagePath = getItem(position);
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.image_layout, null);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.folder_gallery_layout, null);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
             ImageView iconFolder = (ImageView) convertView.findViewById(R.id.icon_folder);
@@ -220,12 +241,25 @@ public class FragmentImagesGallery extends Fragment {
                 name = new File(mListImage.get(position)).getName();
                 iconId = R.drawable.ic_picture;
             } else {
-                name = new File(mListFolder.get(position)).getName();
+                if (position==0){
+                    name = mListFolder.get(0);
+                } else {
+                    name = new File(mListFolder.get(position)).getName();
+                }
                 iconId = R.drawable.ic_folder;
             }
             iconFolder.setImageResource(iconId);
-            textView.setText(name);
-            Glide.with(getContext()).load(imagePath).centerCrop().into(imageView);
+            if (mChooseSticker){
+
+            } else {
+                textView.setText(name);
+            }
+
+            if (!mIsSubFolder && position == 0){
+                Glide.with(getContext()).load(Uri.parse(ASSETS_PATH+mListFirstImage.get(0))).centerCrop().into(imageView);
+            } else {
+                Glide.with(getContext()).load(imagePath).centerCrop().into(imageView);
+            }
             return convertView;
         }
 

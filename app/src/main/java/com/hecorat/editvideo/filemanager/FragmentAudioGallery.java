@@ -54,7 +54,7 @@ public class FragmentAudioGallery extends Fragment {
         new AsyncTaskScanFolder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         mIsSubFolder = false;
-        mFolderAdapter = new AudioGalleryAdapter(getContext(), R.layout.image_layout, mListFirstAudio);
+        mFolderAdapter = new AudioGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListFirstAudio);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
         mFolderName = getString(R.string.audio_tab_title);
@@ -83,7 +83,7 @@ public class FragmentAudioGallery extends Fragment {
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         mIsSubFolder = true;
         mListAudio.clear();
-        mAudioAdapter = new AudioGalleryAdapter(getContext(), R.layout.image_layout, mListAudio);
+        mAudioAdapter = new AudioGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListAudio);
         mGridView.setAdapter(mAudioAdapter);
         mGridView.setOnItemClickListener(onAudioClickListener);
         mActivity.mOpenAudioSubFolder = true;
@@ -208,7 +208,7 @@ public class FragmentAudioGallery extends Fragment {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.image_layout, null);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.folder_gallery_layout, null);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
             ImageView iconFolder = (ImageView) convertView.findViewById(R.id.icon_folder);

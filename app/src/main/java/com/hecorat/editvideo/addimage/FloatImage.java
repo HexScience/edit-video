@@ -10,6 +10,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.main.MainActivity;
 import com.hecorat.editvideo.timeline.ExtraTL;
 
@@ -237,10 +239,16 @@ public class FloatImage extends ImageView {
         paint.setStrokeWidth(3);
         paint.setColor(Color.CYAN);
         paint.setPathEffect(new DashPathEffect(new float[] {8,6}, 0));
+
         canvas.save();
+        // befor N canvas apply matrix from leftside of screen
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
+            matrix.postTranslate(mActivity.mVideoViewLeft, 0);
+        }
         canvas.setMatrix(matrix);
         canvas.drawRect(rectBorder, paint);
         canvas.restore();
+
         canvas.drawBitmap(rotateBitmap, (int)rotatePoint[0]-ROTATE_CONSTANT, (int)rotatePoint[1]-ROTATE_CONSTANT, paint);
         canvas.drawBitmap(scaleBitmap, (int) scalePoint[0] - ROTATE_CONSTANT, (int) scalePoint[1]-ROTATE_CONSTANT, paint);
     }

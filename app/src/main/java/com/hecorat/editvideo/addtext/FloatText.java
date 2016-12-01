@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -285,6 +286,11 @@ public class FloatText extends ImageView {
         xExport = Math.min(Math.min(Math.min(topLeftPoint[0], bottomRightPoint[0]), bottomLeftPoint[0]), topRightPoint[0]);
         yExport = Math.min(Math.min(Math.min(topLeftPoint[1], bottomRightPoint[1]), bottomLeftPoint[1]), topRightPoint[1]);
 
+        // befor N canvas apply matrix from leftside of screen
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
+            matrix.postTranslate(mActivity.mVideoViewLeft, 0);
+        }
+
         canvas.setMatrix(matrix);
         textPaint.setColor(mColor);
 
@@ -384,6 +390,7 @@ public class FloatText extends ImageView {
             mActivity.setExtraControlVisible(false);
             mActivity.cancelEditText();
             mActivity.setBtnDeleteVisible(false);
+            mActivity.hideStatusBar();
         } else {
             drawBorder(true);
             mActivity.setExtraControlVisible(true);

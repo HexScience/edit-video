@@ -65,6 +65,7 @@ import com.hecorat.editvideo.timeline.TimeText;
 import com.hecorat.editvideo.timeline.VideoTL;
 import com.hecorat.editvideo.timeline.VideoTLControl;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements VideoTLControl.OnControlTimeLineChanged,
@@ -101,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private Button mBtnCloseColorPicker;
     private ImageView mIndicatorTextColor, mIndicatorTextBgr;
     private RelativeLayout mLayoutTimeMark;
+    private RelativeLayout mTopLayout;
 
     private Thread mThreadPreviewVideo;
     private ArrayList<VideoTL> mVideoList;
@@ -144,10 +146,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private boolean mStyleBold, mStyleItalic;
     private boolean mShowColorPicker, mChooseTextColor;
     private int mSelectedTL;
-    private int mSelectedPosition;
     private int mSeekTimeAudio;
     private int mSystemVolume;
     public boolean mFinishExport;
+    public float mVideoViewLeft;
 
     public static final int TIMELINE_VIDEO = 0;
     public static final int TIMELINE_EXTRA = 1;
@@ -230,6 +232,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mIndicatorTextBgr = (ImageView) findViewById(R.id.indicator_textbackground);
         mBtnVolume = (ImageView) findViewById(R.id.btn_volume);
         mLayoutTimeMark = (RelativeLayout) findViewById(R.id.layout_timemark);
+        mTopLayout = (RelativeLayout) findViewById(R.id.top_layout);
 
         mColorPicker.setAlphaSliderVisible(true);
         mColorPicker.setOnColorChangedListener(this);
@@ -294,9 +297,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mThreadPreviewVideo.start();
         mActiveVideoView = mVideoView1;
         mInActiveVideoView = mVideoView2;
+        mScroll = true;
+
         mScrollView.setOnCustomScrollChanged(onCustomScrollChanged);
         mLayoutTimeLine.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutTimeLineCreated);
-        mScroll = true;
+        mVideoViewLayout.getViewTreeObserver().addOnGlobalLayoutListener(onVideoViewLayoutCreated);
 
         mFontPath = FontManager.getFontPaths();
         mFontName = FontManager.getFontName();
@@ -308,6 +313,17 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         saveSystemVolume();
     }
+
+    ViewTreeObserver.OnGlobalLayoutListener onVideoViewLayoutCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
+        @Override
+        public void onGlobalLayout() {
+            int[] point = new int[2];
+            mVideoViewLayout.getLocationOnScreen(point);
+            mVideoViewLeft = point[0];
+            log("Video view: "+mVideoViewLeft);
+            mVideoViewLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+        }
+    };
 
     private void saveSystemVolume() {
         mSystemVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -1701,13 +1717,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mDragCode = DRAG_AUDIO;
             addShadowToLayoutAudio();
             mLayoutScrollView.setOnDragListener(onAudioDragListener);
-
-            for (int i = 0; i < mAudioList.size(); i++) {
-                if (mAudioList.get(i).equals(mSelectedAudioTL)) {
-                    mSelectedPosition = i;
-                    break;
-                }
-            }
             invisibleAllController();
             return false;
         }

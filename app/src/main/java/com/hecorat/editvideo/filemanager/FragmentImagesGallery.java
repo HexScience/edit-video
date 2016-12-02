@@ -65,7 +65,7 @@ public class FragmentImagesGallery extends Fragment {
 
         mChooseSticker = false;
         mIsSubFolder = false;
-        mFolderAdapter = new ImageGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListFirstImage);
+        mFolderAdapter = new ImageGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstImage);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
         mFolderName = getString(R.string.image_tab_title);
@@ -84,6 +84,9 @@ public class FragmentImagesGallery extends Fragment {
 
     public void backToMain() {
         mIsSubFolder = false;
+        if (mFolderAdapter==null){
+            mFolderAdapter = new ImageGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstImage);
+        }
         mGridView.setAdapter(mFolderAdapter);
         mFolderName = getString(R.string.image_tab_title);
         mActivity.setFolderName(mFolderName);
@@ -98,7 +101,7 @@ public class FragmentImagesGallery extends Fragment {
             mActivity.mOpenImageSubFolder = true;
             if (i==0){
                 mChooseSticker = true;
-                mImageAdapter = new ImageGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListStiker);
+                mImageAdapter = new ImageGalleryAdapter(mActivity, R.layout.image_gallery_layout, mListStiker);
                 mGridView.setAdapter(mImageAdapter);
                 mFolderName = STICKER_FOLDER_NAME;
                 mActivity.setFolderName(mFolderName);
@@ -106,7 +109,7 @@ public class FragmentImagesGallery extends Fragment {
             }
             mChooseSticker = false;
             mListImage.clear();
-            mImageAdapter = new ImageGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListImage);
+            mImageAdapter = new ImageGalleryAdapter(getContext(), R.layout.image_gallery_layout, mListImage);
             mGridView.setAdapter(mImageAdapter);
             mFolderName = new File(mListFolder.get(i)).getName();
             mActivity.setFolderName(mFolderName);
@@ -117,7 +120,15 @@ public class FragmentImagesGallery extends Fragment {
     AdapterView.OnItemClickListener onImageClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        mActivity.addImage(mListImage.get(i));
+            if (mChooseSticker){
+                String assetsPath = mListStiker.get(i);
+                String nameSticker = assetsPath.replace("/","_");
+                String stickerPath = Utils.getTempFolder()+"/"+nameSticker;
+                Utils.copyFileFromAssets(mActivity, assetsPath, stickerPath);
+                mActivity.addImage(stickerPath);
+            } else {
+                mActivity.addImage(mListImage.get(i));
+            }
         }
     };
 
@@ -224,42 +235,59 @@ public class FragmentImagesGallery extends Fragment {
 
     private class ImageGalleryAdapter extends ArrayAdapter<String> {
 
-        public ImageGalleryAdapter(Context context, int resource, ArrayList<String> objects) {
-            super(context, resource, objects);
+        public ImageGalleryAdapter(Context context, int resource, ArrayList<String> list) {
+            super(context, resource, list);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            String imagePath = getItem(position);
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.folder_gallery_layout, null);
+            if (!mIsSubFolder){
+                return getFolderLayout(position);
+            } else if (mChooseSticker){
+                return getStickerLayout(position);
+            } else {
+                return getImageLayout(position);
+            }
+        }
+
+        private View getFolderLayout(int position){
+            View convertView = LayoutInflater.from(getContext()).inflate(R.layout.folder_gallery_layout, null);
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
+            TextView textView = (TextView) convertView.findViewById(R.id.text_view);
+
+            if (position == 0) {
+                textView.setText(STICKER_FOLDER_NAME);
+                Uri uri = Uri.parse(ASSETS_PATH + mListFirstImage.get(0));
+                Glide.with(getContext()).load(uri).centerCrop().into(imageView);
+            } else {
+                String name = new File(mListFolder.get(position)).getName();
+                textView.setText(name);
+                Glide.with(getContext()).load(mListFirstImage.get(position)).centerCrop().into(imageView);
+            }
+            return convertView;
+        }
+
+        private View getStickerLayout(int position){
+            View convertView = LayoutInflater.from(getContext()).inflate(R.layout.image_gallery_layout, null);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
             ImageView iconFolder = (ImageView) convertView.findViewById(R.id.icon_folder);
-            String name;
-            int iconId;
-            if (mIsSubFolder) {
-                name = new File(mListImage.get(position)).getName();
-                iconId = R.drawable.ic_picture;
-            } else {
-                if (position==0){
-                    name = mListFolder.get(0);
-                } else {
-                    name = new File(mListFolder.get(position)).getName();
-                }
-                iconId = R.drawable.ic_folder;
-            }
-            iconFolder.setImageResource(iconId);
-            if (mChooseSticker){
+            iconFolder.setVisibility(View.GONE);
+            textView.setVisibility(View.GONE);
+            Uri uri = Uri.parse(ASSETS_PATH + mListStiker.get(position));
+            Glide.with(getContext()).load(uri).centerCrop().into(imageView);
 
-            } else {
-                textView.setText(name);
-            }
+            return convertView;
+        }
 
-            if (!mIsSubFolder && position == 0){
-                Glide.with(getContext()).load(Uri.parse(ASSETS_PATH+mListFirstImage.get(0))).centerCrop().into(imageView);
-            } else {
-                Glide.with(getContext()).load(imagePath).centerCrop().into(imageView);
-            }
+        private View getImageLayout(int position){
+            View convertView = LayoutInflater.from(getContext()).inflate(R.layout.image_gallery_layout, null);
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
+            TextView textView = (TextView) convertView.findViewById(R.id.text_view);
+            String imagePath = mListImage.get(position);
+            String name = new File(imagePath).getName();
+            textView.setText(name);
+            Glide.with(getContext()).load(imagePath).centerCrop().into(imageView);
             return convertView;
         }
 

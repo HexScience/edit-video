@@ -76,8 +76,8 @@ public class ExtraTL extends ImageView {
 
     public void updateImageHolder(float layoutScale){
         imageHolder.imagePath = imagePath;
-        imageHolder.width = (int)floatImage.widthScale;
-        imageHolder.height = (int) floatImage.heightScale;
+        imageHolder.width = (int)(floatImage.widthScale*layoutScale);
+        imageHolder.height = (int) (floatImage.heightScale*layoutScale);
         imageHolder.x = floatImage.xExport*layoutScale;
         imageHolder.y = floatImage.yExport*layoutScale;
         imageHolder.rotate = (float) (-floatImage.rotation* Math.PI/180);

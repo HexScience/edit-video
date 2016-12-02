@@ -36,7 +36,6 @@ public class CustomVideoView extends VideoView implements MediaPlayer.OnPrepared
             if (mediaPlayer != null)
                 this.mediaPlayer.setVolume(volume, volume);
         } catch (IllegalStateException e) {
-            e.printStackTrace();
         }
     }
 }

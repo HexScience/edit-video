@@ -65,7 +65,6 @@ import com.hecorat.editvideo.timeline.TimeText;
 import com.hecorat.editvideo.timeline.VideoTL;
 import com.hecorat.editvideo.timeline.VideoTLControl;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements VideoTLControl.OnControlTimeLineChanged,
@@ -281,6 +280,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutBtnTextBgrColor.setOnClickListener(onLayoutBtnTextBgrColorClick);
         mBtnCloseColorPicker.setOnClickListener(onBtnCloseColorPickerClick);
         mBtnVolume.setOnClickListener(onBtnVolumeClick);
+        mLayoutAdd.setOnClickListener(onLayoutAddClick);
 
         mEditText.setOnEditorActionListener(onEditTextActionListener);
         mEdtColorHex.setOnEditorActionListener(onEditColorActionListener);
@@ -313,6 +313,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         saveSystemVolume();
     }
+
+    View.OnClickListener onLayoutAddClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            openLayoutAdd(false);
+        }
+    };
 
     ViewTreeObserver.OnGlobalLayoutListener onVideoViewLayoutCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override
@@ -548,7 +555,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     };
 
     private void setBoldStyle(boolean bold) {
-        int color = bold ? Color.CYAN : Color.TRANSPARENT;
+        int color = bold ? Color.DKGRAY : Color.TRANSPARENT;
         mBtnBold.setBackgroundColor(color);
         mStyleBold = bold;
         updateTextStyle();
@@ -572,7 +579,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void setItalicStyle(boolean italic) {
-        int color = italic ? Color.CYAN : Color.TRANSPARENT;
+        int color = italic ? Color.DKGRAY : Color.TRANSPARENT;
         mBtnItalic.setBackgroundColor(color);
         mStyleItalic = italic;
         updateTextStyle();
@@ -659,7 +666,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View v) {
             openFileManager(true);
-            openAddLayout(false);
+            openLayoutAdd(false);
 
         }
     };
@@ -668,7 +675,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View v) {
             addText();
-            openAddLayout(false);
+            openLayoutAdd(false);
         }
     };
 
@@ -783,8 +790,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     };
 
-    public void exportVideo() {
-        ExportTask exportTask = new ExportTask(mActivity, mVideoList, mImageList, mTextList, mAudioList);
+    public void exportVideo(String name, float quality) {
+        ExportTask exportTask = new ExportTask(mActivity, mVideoList, mImageList, mTextList, mAudioList, name, quality);
         exportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -1429,7 +1436,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mFolderName.setText(name);
     }
 
-    private void openAddLayout(boolean open) {
+    private void openLayoutAdd(boolean open) {
         int visible = open ? View.VISIBLE : View.GONE;
         mLayoutAdd.setVisibility(visible);
         mOpenLayoutAdd = open;
@@ -1444,9 +1451,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 return;
             }
             if (mOpenLayoutAdd) {
-                openAddLayout(false);
+                openLayoutAdd(false);
             } else {
-                openAddLayout(true);
+                openLayoutAdd(true);
             }
         }
     };
@@ -1466,6 +1473,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     View.OnClickListener onBtnBackClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            if (mOpenLayoutAdd) {
+                openLayoutAdd(false);
+                return;
+            }
+
             if (mOpenLayoutEditText) {
                 openLayoutEditText(false);
                 return;
@@ -1887,6 +1899,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     @Override
     public void onBackPressed() {
         hideStatusBar();
+        if (mOpenLayoutAdd){
+            openLayoutAdd(false);
+            return;
+        }
+
         if (mOpenLayoutEditText) {
             openLayoutEditText(false);
             return;
@@ -2050,8 +2067,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mVideoViewLayout.setLayoutParams(params);
     }
 
-    public float getLayoutVideoScale(float realWidth) {
-        return realWidth / (float) mVideoViewLayout.getWidth();
+    public float getLayoutVideoScale(float realHeight) {
+        return realHeight / (float) mVideoViewLayout.getHeight();
     }
 
     @Override

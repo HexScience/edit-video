@@ -126,32 +126,29 @@
             </RelativeLayout>
             <LinearLayout
                 android:id="@+id/layout_add"
-                android:layout_width="60dp"
-                android:layout_height="80dp"
-                android:layout_marginTop="40dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:visibility="gone"
-                android:background="#252121">
+                android:visibility="gone">
                 <TextView
                     android:id="@+id/btn_add_media"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="60dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="40dp"
                     android:gravity="center"
-                    android:background="@drawable/btn_touch_feedback_rec"
+                    android:background="#252121"
                     android:text="@string/txt_add_media"/>
                 <FrameLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="60dp"
                     android:layout_height="1dp"
                     android:background="#2a2929"/>
                 <TextView
                     android:id="@+id/btn_add_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="60dp"
+                    android:layout_height="40dp"
                     android:gravity="center"
                     android:text="@string/txt_add_text"
-                    android:background="@drawable/btn_touch_feedback_rec"/>
+                    android:background="#252121"/>
             </LinearLayout>
             <LinearLayout
                 android:id="@+id/layout_file_manager"
@@ -422,6 +419,7 @@
                         android:layout_height="match_parent"
                         android:gravity="top"
                         android:background="@drawable/edittext_border"
+                        android:inputType="textNoSuggestions|textMultiLine"
                         android:layout_margin="20dp"
                         android:padding="5dp"/>
                     <LinearLayout
@@ -429,6 +427,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:visibility="gone"
+                        android:clickable="true"
                         android:background="#444444">
 
                         <LinearLayout
@@ -492,7 +491,6 @@
                             android:visibility="invisible"
                             android:layout_marginStart="5dp"
                             android:src="@drawable/ic_left_arrow"/>
-
 
                         <RelativeLayout
                             android:id="@+id/layout_btn_text_color"
@@ -564,12 +562,12 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:gravity="center_horizontal"
-                            android:background="@drawable/btn_touch_feedback_oval_nobackground"
+                            android:background="@drawable/btn_touch_feedback_rec_nobackground"
                             android:layout_height="wrap_content">
                             <ImageView
                                 android:id="@+id/btn_bold"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:layout_height="25dp"
                                 android:src="@drawable/ic_bold"/>
                         </LinearLayout>
                         <LinearLayout
@@ -577,12 +575,12 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:gravity="center_horizontal"
-                            android:background="@drawable/btn_touch_feedback_oval_nobackground"
+                            android:background="@drawable/btn_touch_feedback_rec_nobackground"
                             android:layout_height="wrap_content">
                             <ImageView
                                 android:id="@+id/btn_italic"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:layout_height="25dp"
                                 android:src="@drawable/ic_italic"/>
                         </LinearLayout>
                     </LinearLayout>
@@ -594,7 +592,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Font"/>
+                            android:text="Font : "/>
                         <Spinner
                             android:id="@+id/font_spinner"
                             android:layout_width="wrap_content"

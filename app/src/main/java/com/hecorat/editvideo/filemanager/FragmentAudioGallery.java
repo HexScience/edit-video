@@ -54,7 +54,7 @@ public class FragmentAudioGallery extends Fragment {
         new AsyncTaskScanFolder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         mIsSubFolder = false;
-        mFolderAdapter = new AudioGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListFirstAudio);
+        mFolderAdapter = new AudioGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstAudio);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
         mFolderName = getString(R.string.audio_tab_title);
@@ -72,6 +72,9 @@ public class FragmentAudioGallery extends Fragment {
 
     public void backToMain() {
         mIsSubFolder = false;
+        if (mFolderAdapter == null){
+            mFolderAdapter = new AudioGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstAudio);
+        }
         mGridView.setAdapter(mFolderAdapter);
         mFolderName = getString(R.string.audio_tab_title);
         mActivity.setFolderName(mFolderName);
@@ -83,7 +86,7 @@ public class FragmentAudioGallery extends Fragment {
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         mIsSubFolder = true;
         mListAudio.clear();
-        mAudioAdapter = new AudioGalleryAdapter(getContext(), R.layout.folder_gallery_layout, mListAudio);
+        mAudioAdapter = new AudioGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListAudio);
         mGridView.setAdapter(mAudioAdapter);
         mGridView.setOnItemClickListener(onAudioClickListener);
         mActivity.mOpenAudioSubFolder = true;
@@ -146,7 +149,7 @@ public class FragmentAudioGallery extends Fragment {
         protected Void doInBackground(Void... voids) {
 
             for (int i=0; i<mListFolder.size(); i++) {
-                boolean scanSubFolder = mListFolder.get(i).equals(mStoragePath)? false:true;
+                boolean scanSubFolder = !mListFolder.get(i).equals(mStoragePath);
                 mCountSubFolder = 0;
                 if (!isAudioFolder(new File(mListFolder.get(i)), scanSubFolder)){
                     mListFolder.remove(i);

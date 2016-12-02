@@ -1,6 +1,5 @@
 package com.hecorat.editvideo.export;
 
-import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -28,22 +27,26 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
     ArrayList<ExtraTL> mListImage, mListText;
     ArrayList<AudioTL> mListAudio;
     MainActivity mActivity;
+    String mName;
 
     long startTime;
     int mVideoDuration;
+    float mQuality;
 
     public ExportTask(MainActivity context, ArrayList<VideoTL> listVideo, ArrayList<ExtraTL> listImage,
-                      ArrayList<ExtraTL> listText, ArrayList<AudioTL> listAudio) {
+                      ArrayList<ExtraTL> listText, ArrayList<AudioTL> listAudio, String name, float quality) {
         mActivity = context;
         mListVideo = listVideo;
         mListImage = listImage;
         mListText = listText;
         mListAudio = listAudio;
+        mQuality = quality;
+        mName = name;
         updateAllList();
     }
 
     private void updateAllList(){
-        float layoutScale = mActivity.getLayoutVideoScale(1280f);
+        float layoutScale = mActivity.getLayoutVideoScale(mQuality);
         mVideoDuration = 0;
         for (int i=0; i<mListVideo.size(); i++){
             VideoHolder videoHolder = mListVideo.get(i).updateVideoHolder();
@@ -63,9 +66,15 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         }
     }
 
-    private void copyToStorage(String path){
+    private void copyImageToStorage(String path){
         Bitmap bitmap = BitmapFactory.decodeResource(mActivity.getResources(), R.raw.background);
-        Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, 1280, 720, false);
+        int height = (int) mQuality;
+        int width = (int) (mQuality*16/9);
+        if (width%2 !=0 ){
+            width++;
+
+        }
+        Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
         File file = new File(path);
 
         FileOutputStream out = null;
@@ -89,14 +98,14 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         LinkedList<String> command = new LinkedList<>();
 
         String inputBackground = Utils.getTempFolder() + "/background.png";
-        copyToStorage(inputBackground);
-        String output = Utils.getOutputFolder() + "/outputFile.mp4";
+        copyImageToStorage(inputBackground);
+        String output = Utils.getOutputFolder() + "/"+mName+".mp4";
 
         String inVideo = "[v]";
         String outVideo = "[outVideo]";
         String outAudio = "[outAudio];";
         int order = 1;
-        String filter = MergeFilter.getFilter(mListVideo, order);
+        String filter = MergeFilter.getFilter(mListVideo,(int)mQuality, order);
         if (mListImage.size()==0&&mListText.size()==0){
             outVideo = "[v]";
             outAudio = "[outAudio]";

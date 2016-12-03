@@ -302,6 +302,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mScrollView.setOnCustomScrollChanged(onCustomScrollChanged);
         mLayoutTimeLine.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutTimeLineCreated);
         mVideoViewLayout.getViewTreeObserver().addOnGlobalLayoutListener(onVideoViewLayoutCreated);
+        mLayoutVideo.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutVideoCreated);
+        mLayoutImage.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutImageCreated);
 
         mFontPath = FontManager.getFontPaths();
         mFontName = FontManager.getFontName();
@@ -318,6 +320,26 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View v) {
             openLayoutAdd(false);
+        }
+    };
+
+    ViewTreeObserver.OnGlobalLayoutListener onLayoutVideoCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
+        @Override
+        public void onGlobalLayout() {
+            mTimeLineVideoHeight = mLayoutVideo.getHeight()-10;
+            log("Video height: "+mTimeLineVideoHeight);
+            addVideoControler();
+            mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+        }
+    };
+
+    ViewTreeObserver.OnGlobalLayoutListener onLayoutImageCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
+        @Override
+        public void onGlobalLayout() {
+            mTimeLineImageHeight = mLayoutImage.getHeight()-10;
+            log("Image height: "+mTimeLineImageHeight);
+            addExtraNAudioController();
+            mLayoutImage.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
 
@@ -751,7 +773,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         public void onGlobalLayout() {
             mLeftMarginTimeLine = mLayoutTimeLine.getWidth() / 2 - Utils.dpToPixel(mActivity, 45);
             updateLayoutTimeLine();
-            addControler();
             setTimeMark();
             mLayoutTimeLine.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
@@ -787,6 +808,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View view) {
             ConfirmExport.newInstance(mActivity).show(getFragmentManager().beginTransaction(), "confirm export");
+            pausePreview();
         }
     };
 
@@ -2063,8 +2085,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void setVideoRatio() {
         ViewGroup.LayoutParams params = mVideoViewLayout.getLayoutParams();
+        int height = (int) (Utils.getScreenWidth()*0.6);
+        params.height = height;
+        log("height screen"+height);
         params.width = (int) (params.height * 1.77);
         mVideoViewLayout.setLayoutParams(params);
+        params = mTopLayout.getLayoutParams();
+        params.height = height;
+        mTopLayout.setLayoutParams(params);
     }
 
     public float getLayoutVideoScale(float realHeight) {
@@ -2142,11 +2170,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    private void addControler() {
+    private void addVideoControler() {
         mVideoTLControl = new VideoTLControl(this, 500, mTimeLineVideoHeight, mLeftMarginTimeLine);
         mTimeLineVideo.addView(mVideoTLControl, mVideoTLControl.params);
         setVideoControlVisible(false);
+    }
 
+    private void addExtraNAudioController(){
         mExtraTLControl = new ExtraTLControl(this, mLeftMarginTimeLine, 500, mTimeLineImageHeight);
         mTimeLineImage.addView(mExtraTLControl);
         mExtraTLControl.inLayoutImage = true;

@@ -5,6 +5,7 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Environment;
 import android.provider.SyncStateContract;
+import android.util.DisplayMetrics;
 
 import com.hecorat.editvideo.main.Constants;
 
@@ -19,6 +20,9 @@ import java.util.ArrayList;
  * Created by bkmsx on 11/11/2016.
  */
 public class Utils {
+    public static int getScreenWidth(){
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
+    }
 
     public static final int dpToPixel(Context context, int dp) {
         float density = context.getResources().getDisplayMetrics().density;

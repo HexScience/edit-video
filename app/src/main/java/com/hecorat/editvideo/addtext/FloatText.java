@@ -293,13 +293,18 @@ public class FloatText extends ImageView {
 
         canvas.setMatrix(matrix);
         textPaint.setColor(mColor);
+        int canvasWidth = canvas.getWidth();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
+            canvasWidth = canvas.getWidth()+ (int)mActivity.mVideoViewLeft;
+        }
 
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(mBackgroundColor);
         canvas.drawRect(rectBackground, paint);
 
-        StaticLayout textLayout = new StaticLayout(text, textPaint,canvas.getWidth(),
+        StaticLayout textLayout = new StaticLayout(text, textPaint,canvasWidth,
                 Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
+        log("canvas width: "+canvas.getWidth());
         textLayout.draw(canvas);
 
         if (!drawBorder) {

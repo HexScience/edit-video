@@ -919,8 +919,8 @@ public class ColorPickerView extends View {
 	}
 
 	/**
-	 * Set the text that should be shown in the
-	 * alpha slider. Set to null to disable text.
+	 * Set the textPath that should be shown in the
+	 * alpha slider. Set to null to disable textPath.
 	 * @param res string resource id.
 	 */
 	public void setAlphaSliderText(int res){
@@ -929,8 +929,8 @@ public class ColorPickerView extends View {
 	}
 
 	/**
-	 * Set the text that should be shown in the
-	 * alpha slider. Set to null to disable text.
+	 * Set the textPath that should be shown in the
+	 * alpha slider. Set to null to disable textPath.
 	 * @param text Text that should be shown.
 	 */
 	public void setAlphaSliderText(String text){
@@ -939,7 +939,7 @@ public class ColorPickerView extends View {
 	}
 
 	/**
-	 * Get the current value of the text
+	 * Get the current value of the textPath
 	 * that will be shown in the alpha
 	 * slider.
 	 * @return

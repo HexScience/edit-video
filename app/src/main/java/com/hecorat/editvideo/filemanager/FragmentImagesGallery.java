@@ -120,14 +120,16 @@ public class FragmentImagesGallery extends Fragment {
     AdapterView.OnItemClickListener onImageClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            int viewCoord[] = new int[2];
+            view.getLocationOnScreen(viewCoord);
             if (mChooseSticker){
                 String assetsPath = mListStiker.get(i);
                 String nameSticker = assetsPath.replace("/","_");
                 String stickerPath = Utils.getTempFolder()+"/"+nameSticker;
                 Utils.copyFileFromAssets(mActivity, assetsPath, stickerPath);
-                mActivity.addImage(stickerPath);
+                mActivity.addImage(stickerPath, viewCoord);
             } else {
-                mActivity.addImage(mListImage.get(i));
+                mActivity.addImage(mListImage.get(i), viewCoord);
             }
         }
     };

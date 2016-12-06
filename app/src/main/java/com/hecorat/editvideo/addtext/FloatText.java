@@ -10,6 +10,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.text.Layout;
@@ -139,13 +140,31 @@ public class FloatText extends ImageView {
         resetLayout();
     }
 
-    public void resetLayout(){
-        textPaint.setTypeface(Typeface.create(mTypeface, mStyle));
+    private void updateTextDimesions(){
+        String[] lines = text.split("\n");
+        int lineCount = lines.length;
+
+        float maxWidth = 0;
+        for (String line: lines) {
+            float lineWidth = textPaint.measureText(line);
+            if (maxWidth < lineWidth) {
+                maxWidth = lineWidth;
+            }
+        }
+        width = (int) maxWidth;
+
+        int lineSpace = 3;
         bound = new Rect();
         textPaint.getTextBounds(text, 0, text.length(), bound);
-        width = (int) textPaint.measureText(text);
-        height = bound.height();
+        height = bound.height()*lineCount + lineSpace*(lineCount-1);
+    }
+
+    public void resetLayout(){
+        textPaint.setTypeface(Typeface.create(mTypeface, mStyle));
+        updateTextDimesions();
+
         rectBorder = new Rect(-PADDING, -PADDING, width+PADDING, height+PADDING);
+
         rectBackground = new Rect(-PADDING, -PADDING, width+PADDING, height+PADDING);
         widthScale = width*scaleValue;
         heightScale = height*scaleValue;
@@ -254,6 +273,7 @@ public class FloatText extends ImageView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.save();
+
         Matrix matrix = new Matrix();
         matrix.postTranslate(translateX, translateY);
         rotatePoint[0] = initRotatePoint.x;
@@ -289,22 +309,20 @@ public class FloatText extends ImageView {
         // befor N canvas apply matrix from leftside of screen
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
             matrix.postTranslate(mActivity.mVideoViewLeft, 0);
+            Rect rectBound = canvas.getClipBounds();
+            canvas.clipRect(rectBound.left, rectBound.top,
+                    rectBound.right + mActivity.mVideoViewLeft, rectBound.bottom, Region.Op.REPLACE);
         }
 
         canvas.setMatrix(matrix);
         textPaint.setColor(mColor);
-        int canvasWidth = canvas.getWidth();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
-            canvasWidth = canvas.getWidth()+ (int)mActivity.mVideoViewLeft;
-        }
 
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(mBackgroundColor);
         canvas.drawRect(rectBackground, paint);
-
-        StaticLayout textLayout = new StaticLayout(text, textPaint,canvasWidth,
+        StaticLayout textLayout = new StaticLayout(text, textPaint,canvas.getWidth(),
                 Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
-        log("canvas width: "+canvas.getWidth());
+
         textLayout.draw(canvas);
 
         if (!drawBorder) {

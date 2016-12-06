@@ -72,7 +72,6 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         int width = (int) (mQuality*16/9);
         if (width%2 !=0 ){
             width++;
-
         }
         Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
         File file = new File(path);

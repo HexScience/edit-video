@@ -99,7 +99,9 @@ public class FragmentAudioGallery extends Fragment {
     AdapterView.OnItemClickListener onAudioClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        mActivity.addAudio(mListAudio.get(i));
+            int[] audioCoord = new int[2];
+            view.getLocationOnScreen(audioCoord);
+            mActivity.addAudio(mListAudio.get(i), audioCoord);
         }
     };
 

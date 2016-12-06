@@ -102,8 +102,11 @@ public class FragmentVideosGallery extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             String videoPath = mListVideo.get(i);
-            log("this video audioPreview: "+mListVideo.get(i));
-            mActivity.addVideo(videoPath);
+            int point[] = new int[2];
+            view.getLocationOnScreen(point);
+            mActivity.addVideo(videoPath, point);
+
+            log("view x= "+point[0]+" y= "+point[1]);
         }
     };
 

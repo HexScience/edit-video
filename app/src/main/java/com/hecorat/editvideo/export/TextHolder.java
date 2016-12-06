@@ -5,7 +5,7 @@ package com.hecorat.editvideo.export;
  */
 
 public class TextHolder {
-    public String text, fontPath;
+    public String textPath, fontPath;
     public String fontColor, boxColor;
     public float size, x, y;
     public int width, height;

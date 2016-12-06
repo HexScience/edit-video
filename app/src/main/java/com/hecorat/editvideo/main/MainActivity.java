@@ -1,5 +1,6 @@
 package com.hecorat.editvideo.main;
 
+import android.animation.ValueAnimator;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -38,6 +39,7 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.addimage.FloatImage;
 import com.hecorat.editvideo.addtext.AlphaColorDrawable;
@@ -101,7 +103,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private Button mBtnCloseColorPicker;
     private ImageView mIndicatorTextColor, mIndicatorTextBgr;
     private RelativeLayout mLayoutTimeMark;
-    private RelativeLayout mTopLayout;
+    private RelativeLayout mTopLayout, mMainLayout;
+    private LinearLayout mSeekbarIndicator;
+    private RelativeLayout mLayoutAnimationAddFile;
+    private ImageView mImageShadowAnimation;
 
     private Thread mThreadPreviewVideo;
     private ArrayList<VideoTL> mVideoList;
@@ -149,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private int mSystemVolume;
     public boolean mFinishExport;
     public float mVideoViewLeft;
+    public String mVideoPath, mImagePath, mAudioPath;
 
     public static final int TIMELINE_VIDEO = 0;
     public static final int TIMELINE_EXTRA = 1;
@@ -165,6 +171,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public static final int PAUSE = 2;
     public static final int END = 3;
     public static final int UPDATE_STATUS_PERIOD = 200;
+    public static final int ADD_VIDEO = 0;
+    public static final int ADD_AUDIO = 1;
+    public static final int ADD_IMAGE = 2;
+    public static final int ADD_TEXT = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -232,6 +242,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mBtnVolume = (ImageView) findViewById(R.id.btn_volume);
         mLayoutTimeMark = (RelativeLayout) findViewById(R.id.layout_timemark);
         mTopLayout = (RelativeLayout) findViewById(R.id.top_layout);
+        mMainLayout = (RelativeLayout) findViewById(R.id.main_layout);
+        mSeekbarIndicator = (LinearLayout) findViewById(R.id.seekbar_indicator);
 
         mColorPicker.setAlphaSliderVisible(true);
         mColorPicker.setOnColorChangedListener(this);
@@ -314,6 +326,75 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mMediaPlayer = new MediaPlayer();
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         saveSystemVolume();
+        prepareLayoutAnimationAddFile();
+    }
+
+    private void prepareLayoutAnimationAddFile(){
+        mLayoutAnimationAddFile = new RelativeLayout(this);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        mLayoutAnimationAddFile.setLayoutParams(params);
+        mImageShadowAnimation = new ImageView(this);
+        params = new RelativeLayout.LayoutParams(200, 200);
+        mImageShadowAnimation.setLayoutParams(params);
+        mLayoutAnimationAddFile.addView(mImageShadowAnimation);
+    }
+
+    private void startAnimationAddFile(final int fileType,
+                                       int duration, final float xDes, float yDes){
+        mMainLayout.addView(mLayoutAnimationAddFile);
+
+        float x0 = xDes/3;
+        final float a = yDes/(xDes*xDes-2*x0*xDes);
+        final float b = -2*x0*a;
+
+        ValueAnimator animator = ValueAnimator.ofFloat(0, xDes);
+        animator.setDuration(duration);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener()
+        {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float value = ((Float) (animation.getAnimatedValue()))
+                        .floatValue();
+                // Set translation of your view here. Position can be calculated
+                // out of value. This code should move the view in a half circle.
+                float x = value;
+                float y = a*x*x+b*x;
+                mImageShadowAnimation.setTranslationX(x);
+                mImageShadowAnimation.setTranslationY(y);
+                if (value == xDes) {
+                    onAnimationAddFileCompleted(fileType);
+                }
+            }
+        });
+        animator.start();
+    }
+
+    private void onAnimationAddFileCompleted(int fileType){
+        removeLayoutAnimationAddFile();
+        if (fileType == ADD_VIDEO){
+            addVideoTL();
+            return;
+        }
+
+        if (fileType == ADD_IMAGE) {
+            addImageTL();
+            return;
+        }
+
+        if (fileType == ADD_TEXT) {
+            addTextTL();
+            return;
+        }
+
+        if (fileType == ADD_AUDIO) {
+            addAudioTL();
+        }
+
+    }
+
+    private void removeLayoutAnimationAddFile(){
+        mMainLayout.removeView(mLayoutAnimationAddFile);
     }
 
     View.OnClickListener onLayoutAddClick = new View.OnClickListener() {
@@ -731,8 +812,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
         if (mSelectedExtraTL.inLayoutImage) {
             mLayoutImage.removeView(mSelectedExtraTL);
+            mListInLayoutImage.remove(mSelectedExtraTL);
         } else {
             mLayoutText.removeView(mSelectedExtraTL);
+            mListInLayoutText.remove(mSelectedExtraTL);
         }
         invisibleExtraControl();
     }
@@ -1177,8 +1260,28 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    public void addVideo(String videoPath) {
-        VideoTL videoTL = new VideoTL(this, videoPath, mTimeLineVideoHeight);
+    public void addVideo(String videoPath, int videoCoord[]) {
+        startAnimationAddVideo(videoPath, videoCoord);
+    }
+
+    private void startAnimationAddVideo(String videoPath, int videoCoord[]){
+        mVideoPath = videoPath;
+
+        int[] indicatorCoord = new int[2];
+        mSeekbarIndicator.getLocationOnScreen(indicatorCoord);
+        int xDes = indicatorCoord[0] - videoCoord[0];
+        int yDes = indicatorCoord[1] - videoCoord[1];
+
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mImageShadowAnimation.getLayoutParams();
+        params.leftMargin = videoCoord[0];
+        params.topMargin = videoCoord[1];
+        Glide.with(this).load(videoPath).into(mImageShadowAnimation);
+
+        startAnimationAddFile(ADD_VIDEO, 500, xDes, yDes);
+    }
+
+    private void addVideoTL(){
+        VideoTL videoTL = new VideoTL(this, mVideoPath, mTimeLineVideoHeight);
         videoTL.setOnClickListener(onVideoTimeLineClick);
         videoTL.setOnLongClickListener(onVideoLongClick);
         mVideoList.add(videoTL);
@@ -1192,12 +1295,12 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         if (mCountVideo == 1) {
             setBtnPlayVisible(true);
         }
-        fixIfVideoHasAudio(videoTL);
+        fixIfVideoHasNoAudio(videoTL);
         updateBtnExportVisible();
         mSelectedTL = TIMELINE_VIDEO;
     }
 
-    private void fixIfVideoHasAudio(VideoTL videoTL) {
+    private void fixIfVideoHasNoAudio(VideoTL videoTL) {
         new AddSilentAudoTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, videoTL);
     }
 
@@ -1211,27 +1314,51 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mBtnEditText.setVisibility(visibility);
     }
 
-    public void addImage(String imagePath) {
-        int leftMargin = mLeftMarginTimeLine + mScrollView.getScrollX();
-        ExtraTL extraTL = new ExtraTL(this, imagePath, mTimeLineImageHeight, leftMargin, true);
+    public void addImage(String imagePath, int imageCoord[]) {
+        startAnimationAddImage(imagePath, imageCoord);
+    }
 
+    private void addImageTL(){
+        int leftMargin = mLeftMarginTimeLine + mScrollView.getScrollX();
+        ExtraTL extraTL = new ExtraTL(this, mImagePath, mTimeLineImageHeight, leftMargin, true);
         extraTL.setOnClickListener(onExtraTimeLineClick);
         extraTL.setOnLongClickListener(onExtraTimelineLongClick);
         addExtraTLToTL(extraTL, leftMargin);
         mImageList.add(extraTL);
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+
+        Bitmap bitmap = BitmapFactory.decodeFile(mImagePath);
         FloatImage floatImage = new FloatImage(this, bitmap);
         extraTL.floatImage = floatImage;
         floatImage.timeline = extraTL;
         mVideoViewLayout.addView(floatImage);
         setFloatImageVisible(mSelectedExtraTL);
         setFloatTextVisible(null);
+        floatImage.drawBorder(true);
+
         restoreExtraControl(extraTL);
         setExtraControlVisible(true);
         updateBtnExportVisible();
         setBtnDeleteVisible(true);
-        floatImage.drawBorder(true);
         mSelectedTL = TIMELINE_EXTRA;
+    }
+
+    private void startAnimationAddImage(String imagePath, int imageCoord[]){
+        mImagePath = imagePath;
+
+        int[] indicatorCoord = new int[2];
+        int[] layoutImageCoord = new int[2];
+        mSeekbarIndicator.getLocationOnScreen(indicatorCoord);
+        mLayoutImage.getLocationOnScreen(layoutImageCoord);
+
+        int xDes = indicatorCoord[0] - imageCoord[0];
+        int yDes = layoutImageCoord[1] - imageCoord[1];
+
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mImageShadowAnimation.getLayoutParams();
+        params.leftMargin = imageCoord[0];
+        params.topMargin = imageCoord[1];
+        Glide.with(this).load(imagePath).into(mImageShadowAnimation);
+
+        startAnimationAddFile(ADD_IMAGE, 500, xDes, yDes);
     }
 
     private void addExtraTLToTL(ExtraTL extraTL, int position) {
@@ -1334,6 +1461,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void addText() {
+        startAnimationAddText();
+    }
+
+    private void addTextTL(){
         String text = "Lai Trung Tien";
         int leftMargin = mLeftMarginTimeLine + mScrollView.getScrollX();
         ExtraTL extraTL = new ExtraTL(this, text, mTimeLineImageHeight, leftMargin, false);
@@ -1341,19 +1472,40 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         extraTL.setOnLongClickListener(onExtraTimelineLongClick);
         addExtraTLToTL(extraTL, leftMargin);
         mTextList.add(extraTL);
+        mSelectedExtraTL = extraTL;
+
         FloatText floatText = new FloatText(this, text);
         mVideoViewLayout.addView(floatText);
         extraTL.floatText = floatText;
         floatText.timeline = extraTL;
+        setFloatImageVisible(null);
+        setFloatTextVisible(extraTL);
+
         restoreExtraControl(extraTL);
         setExtraControlVisible(true);
-        setFloatImageVisible(null);
-        mSelectedExtraTL = extraTL;
-        setFloatTextVisible(extraTL);
         setBtnEditTextVisible(true);
         updateBtnExportVisible();
         setBtnDeleteVisible(true);
         mSelectedTL = TIMELINE_EXTRA;
+    }
+
+    private void startAnimationAddText(){
+        int[] indicatorCoord = new int[2];
+        int[] layoutImageCoord = new int[2];
+        int[] textCoord = new int[2];
+        mSeekbarIndicator.getLocationOnScreen(indicatorCoord);
+        mLayoutImage.getLocationOnScreen(layoutImageCoord);
+        mBtnAddText.getLocationOnScreen(textCoord);
+
+        int xDes = indicatorCoord[0] - textCoord[0];
+        int yDes = layoutImageCoord[1] - textCoord[1];
+
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mImageShadowAnimation.getLayoutParams();
+        params.leftMargin = textCoord[0];
+        params.topMargin = textCoord[1];
+        Glide.with(this).load(R.drawable.ic_text).into(mImageShadowAnimation);
+
+        startAnimationAddFile(ADD_TEXT, 500, xDes, yDes);
     }
 
     public void restoreExtraControl(ExtraTL extraTL) {
@@ -1374,15 +1526,38 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    public void addAudio(String audioPath) {
+    public void addAudio(String audioPath, int[] audioCoord) {
+        mAudioPath = audioPath;
+        startAnimationAddAudio(audioCoord);
+    }
+
+    public void addAudioTL(){
         int leftMargin = mLeftMarginTimeLine + mScrollView.getScrollX();
-        AudioTL audioTL = new AudioTL(this, audioPath, mTimeLineImageHeight, leftMargin);
+        AudioTL audioTL = new AudioTL(this, mAudioPath, mTimeLineImageHeight, leftMargin);
         addAudioTLToTL(audioTL);
         audioTL.setOnClickListener(onAudioTimeLineClick);
         audioTL.setOnLongClickListener(onAudioLongClick);
-        updateBtnExportVisible();
         mSelectedAudioTL = audioTL;
+
+        updateBtnExportVisible();
         mSelectedTL = TIMELINE_AUDIO;
+    }
+
+    private void startAnimationAddAudio(int[] audioCoord){
+        int[] indicatorCoord = new int[2];
+        int[] layoutImageCoord = new int[2];
+        mSeekbarIndicator.getLocationOnScreen(indicatorCoord);
+        mLayoutAudio.getLocationOnScreen(layoutImageCoord);
+
+        int xDes = indicatorCoord[0] - audioCoord[0];
+        int yDes = layoutImageCoord[1] - audioCoord[1];
+
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mImageShadowAnimation.getLayoutParams();
+        params.leftMargin = audioCoord[0];
+        params.topMargin = audioCoord[1];
+        Glide.with(this).load(R.drawable.ic_music).into(mImageShadowAnimation);
+
+        startAnimationAddFile(ADD_AUDIO, 500, xDes, yDes);
     }
 
     private void addAudioTLToTL(AudioTL audioTL) {

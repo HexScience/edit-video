@@ -36,7 +36,7 @@ public class VideoMetaData {
             e.printStackTrace();
         }
         VideoMetaData videoMetaData = getTrack();
-        logData(videoMetaData);
+//        logData(videoMetaData);
         return videoMetaData;
     }
 

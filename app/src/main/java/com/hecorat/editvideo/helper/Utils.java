@@ -6,11 +6,13 @@ import android.content.res.Resources;
 import android.os.Environment;
 import android.provider.SyncStateContract;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.hecorat.editvideo.main.Constants;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,6 +22,16 @@ import java.util.ArrayList;
  * Created by bkmsx on 11/11/2016.
  */
 public class Utils {
+    public static void writeToFile(File fileTxt, String data) {
+        try {
+            FileWriter out = new FileWriter(fileTxt);
+            out.write(data);
+            out.close();
+        } catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
     public static int getScreenWidth(){
         return Resources.getSystem().getDisplayMetrics().heightPixels;
     }

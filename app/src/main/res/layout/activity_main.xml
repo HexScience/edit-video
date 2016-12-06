@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/main_layout"
     tools:context=".main.MainActivity">
 
     <LinearLayout
@@ -94,7 +95,7 @@
             android:background="@drawable/btn_touch_feedback_oval"/>
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/main_layout"
+
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#222222"
@@ -124,6 +125,11 @@
                     android:layout_centerHorizontal="true"
                     android:visibility="gone"/>
             </RelativeLayout>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_toEndOf="@+id/video_view_layout"
+                android:background="#555555"/>
             <LinearLayout
                 android:id="@+id/layout_add"
                 android:layout_width="match_parent"

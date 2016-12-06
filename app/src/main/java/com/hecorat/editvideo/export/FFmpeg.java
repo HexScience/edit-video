@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
+import com.hecorat.editvideo.helper.Utils;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,18 +48,8 @@ public class FFmpeg {
         command.add(inputVideo);
 
         boolean value = executeFFmpegCommand(command);
-        writeToFile(new File(outputFile), mAllLog);
+        Utils.writeToFile(new File(outputFile), mAllLog);
         return value;
-    }
-
-    public static void writeToFile(File fileTxt, String data) {
-        try {
-            FileWriter out = new FileWriter(fileTxt);
-            out.write(data);
-            out.close();
-        } catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
     }
 
     public String getLineLog() {

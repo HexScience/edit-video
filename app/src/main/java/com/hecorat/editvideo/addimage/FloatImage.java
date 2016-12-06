@@ -10,6 +10,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -244,6 +245,9 @@ public class FloatImage extends ImageView {
         // befor N canvas apply matrix from leftside of screen
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
             matrix.postTranslate(mActivity.mVideoViewLeft, 0);
+            Rect rectBound = canvas.getClipBounds();
+            canvas.clipRect(rectBound.left, rectBound.top,
+                    rectBound.right + mActivity.mVideoViewLeft, rectBound.bottom, Region.Op.REPLACE);
         }
         canvas.setMatrix(matrix);
         canvas.drawRect(rectBorder, paint);

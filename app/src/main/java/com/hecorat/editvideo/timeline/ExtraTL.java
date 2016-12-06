@@ -16,8 +16,11 @@ import com.hecorat.editvideo.addimage.FloatImage;
 import com.hecorat.editvideo.addtext.FloatText;
 import com.hecorat.editvideo.export.ImageHolder;
 import com.hecorat.editvideo.export.TextHolder;
+import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.main.Constants;
 import com.hecorat.editvideo.main.MainActivity;
+
+import java.io.File;
 
 /**
  * Created by bkmsx on 31/10/2016.
@@ -86,13 +89,16 @@ public class ExtraTL extends ImageView {
     }
 
     public void updateTextHolder(float layoutScale){
-        textHolder.text = text;
+        float textCorrection = 20;
+        String textFile = Utils.getTempFolder()+"/"+System.currentTimeMillis()+".txt";
+        Utils.writeToFile(new File(textFile), text);
+        textHolder.textPath = textFile;
         textHolder.fontPath = floatText.fontPath;
         textHolder.size = floatText.sizeScale*layoutScale;
         textHolder.fontColor = convertToHexColor(floatText.mColor);
         textHolder.boxColor = convertToHexColor(floatText.mBackgroundColor);
-        textHolder.x = floatText.xExport*layoutScale;
-        textHolder.y = floatText.yExport*layoutScale;
+        textHolder.x = floatText.xExport*layoutScale - textCorrection;
+        textHolder.y = floatText.yExport*layoutScale - textCorrection;
         textHolder.startInTimeLine = startInTimeLine/1000f;
         textHolder.endInTimeLine = endInTimeLine/1000f;
         textHolder.rotate = (float) (-floatText.rotation* Math.PI/180);

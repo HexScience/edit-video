@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private ArrayList<AudioTL> mAudioList;
     private ArrayList<ExtraTL> mListInLayoutImage, mListInLayoutText;
     public ArrayList<String> mFontPath, mFontName;
+    public String mVideoPath, mImagePath, mAudioPath;
 
     private MainActivity mActivity;
     private FontAdapter mFontAdapter;
@@ -154,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private int mSystemVolume;
     public boolean mFinishExport;
     public float mVideoViewLeft;
-    public String mVideoPath, mImagePath, mAudioPath;
+    public boolean mFoundImage, mFoundText;
 
     public static final int TIMELINE_VIDEO = 0;
     public static final int TIMELINE_EXTRA = 1;
@@ -985,7 +986,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         float audioVolume = mCurrentAudioTL!=null? mCurrentAudioTL.volume:1;
         float videoVolume = mCurrentVideoTL!=null? mCurrentVideoTL.volume:1;
         float maxVolume = Math.max(audioVolume, videoVolume);
-        log("Max volume= "+maxVolume);
         float value;
         if (maxVolume > 1) {
             value = maxVolume - 1;
@@ -1296,6 +1296,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             setBtnPlayVisible(true);
         }
         fixIfVideoHasNoAudio(videoTL);
+
         updateBtnExportVisible();
         mSelectedTL = TIMELINE_VIDEO;
     }
@@ -1337,8 +1338,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         restoreExtraControl(extraTL);
         setExtraControlVisible(true);
+
         updateBtnExportVisible();
         setBtnDeleteVisible(true);
+        setBtnEditTextVisible(false);
+        setBtnVolumeVisible(false);
         mSelectedTL = TIMELINE_EXTRA;
     }
 
@@ -1483,9 +1487,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         restoreExtraControl(extraTL);
         setExtraControlVisible(true);
+
         setBtnEditTextVisible(true);
         updateBtnExportVisible();
         setBtnDeleteVisible(true);
+        setBtnVolumeVisible(false);
         mSelectedTL = TIMELINE_EXTRA;
     }
 
@@ -2167,6 +2173,35 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
+    public void setFloatTextVisible(float x, float y) {
+        mFoundText = false;
+        for (int i=0; i<mTextList.size(); i++){
+            FloatText floatText = mTextList.get(i).floatText;
+            if (floatText.getVisibility() == View.VISIBLE) {
+                if (x>=floatText.xMin && x<=floatText.xMax
+                        && y>=floatText.yMin && y<=floatText.yMax) {
+                    floatText.drawBorder(true);
+                    mSelectedExtraTL = mTextList.get(i);
+                    mFoundText = true;
+                } else {
+                    floatText.drawBorder(false);
+                }
+            }
+        }
+        if (!mFoundText) {
+            if (!mFoundImage){
+                setExtraControlVisible(false);
+                cancelEditText();
+                setBtnDeleteVisible(false);
+            }
+        } else {
+            setExtraControlVisible(true);
+            restoreExtraControl(mSelectedExtraTL);
+            setBtnDeleteVisible(true);
+            setBtnEditTextVisible(true);
+        }
+    }
+
     public void setFloatImageVisible(ExtraTL extraTL) {
         for (int i = 0; i < mImageList.size(); i++) {
             FloatImage floatImage = mImageList.get(i).floatImage;
@@ -2175,6 +2210,33 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             } else {
                 floatImage.drawBorder(false);
             }
+        }
+    }
+
+    public void setFloatImageVisible(float x, float y) {
+        mFoundImage = false;
+        for (int i=0; i<mImageList.size(); i++){
+            FloatImage floatImage = mImageList.get(i).floatImage;
+            if (floatImage.getVisibility() == View.VISIBLE) {
+                if (x>=floatImage.xMin && x<=floatImage.xMax
+                        && y>=floatImage.yMin && y<=floatImage.yMax) {
+                    floatImage.drawBorder(true);
+                    mSelectedExtraTL = mImageList.get(i);
+                    mFoundImage = true;
+                } else {
+                    floatImage.drawBorder(false);
+                }
+            }
+        }
+        if (!mFoundImage) {
+            if (!mFoundText){
+                setExtraControlVisible(false);
+                setBtnDeleteVisible(false);
+            }
+        } else {
+            setExtraControlVisible(true);
+            restoreExtraControl(mSelectedExtraTL);
+            setBtnDeleteVisible(true);
         }
     }
 

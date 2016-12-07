@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.editvideo.R;
-import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.main.MainActivity;
 import com.hecorat.editvideo.timeline.ExtraTL;
 
@@ -39,7 +38,8 @@ public class FloatImage extends ImageView {
             initTopRightPoint, initBottomLeftPoint, initTopLeftPoint, initBottomRightPoint;
 
     public int width, height;
-    public float x, y, translateX, translateY, xExport, yExport;
+    public float x, y, translateX, translateY, xExport, yExport,
+                    xMin, yMin, xMax, yMax;
     public float rotation = 0;
     public float[] scalePoint, centerPoint, rotatePoint,
             topRightPoint, bottomLeftPoint, topLeftPoint, bottomRightPoint;
@@ -63,6 +63,7 @@ public class FloatImage extends ImageView {
         heightScale = height;
         x = INIT_X;
         y = INIT_Y;
+
         initRotatePoint = new Point(0, 0);
         initCenterPoint = new Point(width/2, height/2);
         initScalePoint = new Point(width, height);
@@ -70,6 +71,7 @@ public class FloatImage extends ImageView {
         initTopRightPoint = new Point(width, 0);
         initTopLeftPoint = new Point(0, 0);
         initBottomRightPoint = new Point(width, height);
+
         rotatePoint = new float[2];
         scalePoint = new float[2];
         centerPoint = new float[2];
@@ -77,20 +79,6 @@ public class FloatImage extends ImageView {
         bottomLeftPoint = new float[2];
         topLeftPoint = new float[2];
         bottomRightPoint = new float[2];
-        rotatePoint[0] = initRotatePoint.x;
-        rotatePoint[1] = initRotatePoint.y;
-        scalePoint[0] = initScalePoint.x;
-        scalePoint[1] = initScalePoint.y;
-        centerPoint[0] = initCenterPoint.x;
-        centerPoint[1] = initCenterPoint.y;
-        topRightPoint[0] = initTopRightPoint.x;
-        topRightPoint[1] = initTopRightPoint.y;
-        bottomLeftPoint[0] = initBottomLeftPoint.x;
-        bottomLeftPoint[1] = initBottomLeftPoint.y;
-        topLeftPoint[0] = initTopLeftPoint.x;
-        topLeftPoint[1] = initTopLeftPoint.y;
-        bottomRightPoint[0] = initBottomRightPoint.x;
-        bottomRightPoint[1] = initBottomRightPoint.y;
 
         rotateBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_rotate);
         scaleBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_scale);
@@ -99,11 +87,29 @@ public class FloatImage extends ImageView {
         maxDimensionLayout = (int) Math.sqrt(width*width + height*height);
         params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         setFullLayout();
-//        setBackgroundColor(Color.DKGRAY);
         setOnTouchListener(onTouchListener);
         setOnClickListener(onClickListener);
         rectBorder = new Rect(0, 0, (int)widthScale, (int)heightScale);
         drawBorder = true;
+    }
+
+    private void initBorderPoints(){
+        rotatePoint[0] = initRotatePoint.x;
+        rotatePoint[1] = initRotatePoint.y;
+        scalePoint[0] = initScalePoint.x;
+        scalePoint[1] = initScalePoint.y;
+
+        centerPoint[0] = initCenterPoint.x;
+        centerPoint[1] = initCenterPoint.y;
+
+        topRightPoint[0] = initTopRightPoint.x;
+        topRightPoint[1] = initTopRightPoint.y;
+        bottomLeftPoint[0] = initBottomLeftPoint.x;
+        bottomLeftPoint[1] = initBottomLeftPoint.y;
+        topLeftPoint[0] = initTopLeftPoint.x;
+        topLeftPoint[1] = initTopLeftPoint.y;
+        bottomRightPoint[0] = initBottomRightPoint.x;
+        bottomRightPoint[1] = initBottomRightPoint.y;
     }
 
     public void drawBorder(boolean draw){
@@ -196,6 +202,24 @@ public class FloatImage extends ImageView {
         invalidate();
     }
 
+    private void getBorderPointsCoord(Matrix matrix){
+        matrix.mapPoints(scalePoint);
+        matrix.mapPoints(rotatePoint);
+        matrix.mapPoints(bottomLeftPoint);
+        matrix.mapPoints(topRightPoint);
+        matrix.mapPoints(topLeftPoint);
+        matrix.mapPoints(bottomRightPoint);
+    }
+
+    private void getLayoutLimit(){
+        xExport = Math.min(Math.min(Math.min(topLeftPoint[0], bottomRightPoint[0]), bottomLeftPoint[0]), topRightPoint[0]);
+        yExport = Math.min(Math.min(Math.min(topLeftPoint[1], bottomRightPoint[1]), bottomLeftPoint[1]), topRightPoint[1]);
+        xMin = xExport;
+        yMin = yExport;
+        xMax = Math.max(Math.max(Math.max(topLeftPoint[0], bottomRightPoint[0]), bottomLeftPoint[0]), topRightPoint[0]);
+        yMax = Math.max(Math.max(Math.max(topLeftPoint[1], bottomRightPoint[1]), bottomLeftPoint[1]), topRightPoint[1]);
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -203,36 +227,18 @@ public class FloatImage extends ImageView {
 
         matrix.postTranslate(translateX, translateY);
 
-        rotatePoint[0] = initRotatePoint.x;
-        rotatePoint[1] = initRotatePoint.y;
-        scalePoint[0] = initScalePoint.x;
-        scalePoint[1] = initScalePoint.y;
-        centerPoint[0] = initCenterPoint.x;
-        centerPoint[1] = initCenterPoint.y;
-        topRightPoint[0] = initTopRightPoint.x;
-        topRightPoint[1] = initTopRightPoint.y;
-        bottomLeftPoint[0] = initBottomLeftPoint.x;
-        bottomLeftPoint[1] = initBottomLeftPoint.y;
-        topLeftPoint[0] = initTopLeftPoint.x;
-        topLeftPoint[1] = initTopLeftPoint.y;
-        bottomRightPoint[0] = initBottomRightPoint.x;
-        bottomRightPoint[1] = initBottomRightPoint.y;
+        initBorderPoints();
 
         matrix.mapPoints(centerPoint);
+
         matrix.postScale(scaleValue, scaleValue, centerPoint[0], centerPoint[1]);
-
         matrix.postRotate(-rotation, centerPoint[0], centerPoint[1]);
-        matrix.mapPoints(scalePoint);
-        matrix.mapPoints(rotatePoint);
-        matrix.mapPoints(bottomLeftPoint);
-        matrix.mapPoints(topRightPoint);
-        matrix.mapPoints(topLeftPoint);
-        matrix.mapPoints(bottomRightPoint);
 
-        xExport = Math.min(Math.min(Math.min(topLeftPoint[0], bottomRightPoint[0]), bottomLeftPoint[0]), topRightPoint[0]);
-        yExport = Math.min(Math.min(Math.min(topLeftPoint[1], bottomRightPoint[1]), bottomLeftPoint[1]), topRightPoint[1]);
+        getBorderPointsCoord(matrix);
+        getLayoutLimit();
 
         canvas.drawBitmap(mainBitmap, matrix, paint);
+
         if(!drawBorder) {
             return;
         }
@@ -249,11 +255,12 @@ public class FloatImage extends ImageView {
             canvas.clipRect(rectBound.left, rectBound.top,
                     rectBound.right + mActivity.mVideoViewLeft, rectBound.bottom, Region.Op.REPLACE);
         }
+
         canvas.setMatrix(matrix);
         canvas.drawRect(rectBorder, paint);
         canvas.restore();
 
-        canvas.drawBitmap(rotateBitmap, (int)rotatePoint[0]-ROTATE_CONSTANT, (int)rotatePoint[1]-ROTATE_CONSTANT, paint);
+        canvas.drawBitmap(rotateBitmap, (int) rotatePoint[0]-ROTATE_CONSTANT, (int) rotatePoint[1]-ROTATE_CONSTANT, paint);
         canvas.drawBitmap(scaleBitmap, (int) scalePoint[0] - ROTATE_CONSTANT, (int) scalePoint[1]-ROTATE_CONSTANT, paint);
     }
 
@@ -313,8 +320,12 @@ public class FloatImage extends ImageView {
                     break;
                 case MotionEvent.ACTION_UP:
                     if (!isTouch){
-                        performClick();
-                        log("click");
+                        if (touch != 0) {
+                            performClick();
+                        } else {
+                            mActivity.setFloatImageVisible(oldX, oldY);
+                            mActivity.setFloatTextVisible(oldX, oldY);
+                        }
                     }
                     break;
             }

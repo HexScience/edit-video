@@ -33,13 +33,13 @@ import com.hecorat.editvideo.timeline.ExtraTL;
  */
 
 public class FloatText extends ImageView {
-    public Bitmap bitmap, mainBitmap, rotateBitmap, scaleBitmap;
+    public Bitmap rotateBitmap, scaleBitmap;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
     public Rect rectBorder, rectBackground;
     public MainActivity mActivity;
     public ExtraTL timeline;
-    public Point initScalePoint, initCenterPoint, initRotatePoint,
+    public Point initBorderBottomRight, initCenterPoint, initBorderTopLeft, initBorderTopRight, initBorderBottomLeft,
             initTopRightPoint, initBottomLeftPoint, initTopLeftPoint, initBottomRightPoint;
     public String text;
     public TextPaint textPaint;
@@ -48,15 +48,16 @@ public class FloatText extends ImageView {
     public String fontPath;
 
     public int width, height;
-    public float x, y, translateX, translateY, xExport, yExport;
+    public float x, y, translateX, translateY,
+            xExport, yExport, xMax, yMax, xMin, yMin;
     public float rotation = 0;
-    public float[] scalePoint, centerPoint, rotatePoint,
+    public float[] borderBottomRight, centerPoint, borderTopLeft, borderBottomLeft, borderTopRight,
             topRightPoint, bottomLeftPoint, topLeftPoint, bottomRightPoint;
     public float scaleValue = 1f;
     public float widthScale, heightScale;
     public boolean isCompact;
     public boolean drawBorder;
-    public int maxDimensionLayout;
+    public int widthMax, heightMax;
     public int mStyle;
     public int mColor;
     public int mBackgroundColor;
@@ -66,14 +67,14 @@ public class FloatText extends ImageView {
     public static final int INIT_X = 300, INIT_Y = 300, INIT_SIZE = 60;
     public static final int PADDING = 30;
 
-    public FloatText(Context context, String text) {
-        super(context);
+    public FloatText(MainActivity activity, String text) {
+        super(activity);
         x = INIT_X;
         y = INIT_Y;
         size = INIT_SIZE;
         sizeScale = size;
         this.text = text;
-        mActivity = (MainActivity) context;
+        mActivity = activity;
         fontPath = mActivity.mFontPath.get(0);
         mTypeface = Typeface.createFromFile(fontPath);
         paint = new Paint();
@@ -81,27 +82,15 @@ public class FloatText extends ImageView {
         textPaint.setTextSize(size);
         setText(text);
 
-        rotatePoint = new float[2];
-        scalePoint = new float[2];
+        borderTopLeft = new float[2];
+        borderBottomRight = new float[2];
+        borderBottomLeft = new float[2];
+        borderTopRight = new float[2];
         centerPoint = new float[2];
         topRightPoint = new float[2];
         bottomLeftPoint = new float[2];
         topLeftPoint = new float[2];
         bottomRightPoint = new float[2];
-        rotatePoint[0] = initRotatePoint.x;
-        rotatePoint[1] = initRotatePoint.y;
-        scalePoint[0] = initScalePoint.x;
-        scalePoint[1] = initScalePoint.y;
-        centerPoint[0] = initCenterPoint.x;
-        centerPoint[1] = initCenterPoint.y;
-        topRightPoint[0] = initTopRightPoint.x;
-        topRightPoint[1] = initTopRightPoint.y;
-        bottomLeftPoint[0] = initBottomLeftPoint.x;
-        bottomLeftPoint[1] = initBottomLeftPoint.y;
-        topLeftPoint[0] = initTopLeftPoint.x;
-        topLeftPoint[1] = initTopLeftPoint.y;
-        bottomRightPoint[0] = initBottomRightPoint.x;
-        bottomRightPoint[1] = initBottomRightPoint.y;
 
         rotateBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_rotate);
         scaleBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_scale);
@@ -169,9 +158,11 @@ public class FloatText extends ImageView {
         widthScale = width*scaleValue;
         heightScale = height*scaleValue;
 
-        initRotatePoint = new Point(-PADDING, -PADDING);
+        initBorderTopLeft = new Point(-PADDING, -PADDING);
         initCenterPoint = new Point(width/2, height/2);
-        initScalePoint = new Point(width+PADDING, height+PADDING);
+        initBorderBottomRight = new Point(width+PADDING, height+PADDING);
+        initBorderBottomLeft = new Point(-PADDING, height+PADDING);
+        initBorderTopRight = new Point(width+PADDING, -PADDING);
         initBottomLeftPoint = new Point(0, height);
         initTopRightPoint = new Point(width, 0);
         initTopLeftPoint = new Point(0, 0);
@@ -188,14 +179,14 @@ public class FloatText extends ImageView {
     }
 
     private void setCompactLayout(){
-        translateX = (int) (maxDimensionLayout-widthScale)/2;
-        translateY = (int) (maxDimensionLayout-heightScale)/2;
+        translateX = PADDING;
+        translateY = PADDING;
         log("translateX = "+translateX+" translateY = "+translateY);
-        params.width = maxDimensionLayout;
-        params.height = maxDimensionLayout;
+        params.width = widthMax;
+        params.height = heightMax;
 
-        params.leftMargin = (int) (x - translateX);
-        params.topMargin = (int) (y - translateY);
+        params.leftMargin = (int) (xMin);
+        params.topMargin = (int) (yMin);
         setLayoutParams(params);
         invalidate();
         isCompact = true;
@@ -240,8 +231,8 @@ public class FloatText extends ImageView {
         }
     }
     public void scaleText(float moveX, float moveY){
-        if (Math.abs(scalePoint[0]-centerPoint[0])>100){
-            if (scalePoint[0] >= centerPoint[0]) {
+        if (Math.abs(borderBottomRight[0]-centerPoint[0])>100){
+            if (borderBottomRight[0] >= centerPoint[0]) {
                 widthScale += moveX;
             } else {
                 widthScale -= moveX;
@@ -249,7 +240,7 @@ public class FloatText extends ImageView {
             scaleValue = widthScale/width;
             heightScale = scaleValue*height;
         } else {
-            if (scalePoint[1] >= centerPoint[1]){
+            if (borderBottomRight[1] >= centerPoint[1]){
                 heightScale += moveY;
             } else {
                 heightScale -= moveY;
@@ -274,37 +265,18 @@ public class FloatText extends ImageView {
         super.onDraw(canvas);
         canvas.save();
 
+        initBorderPoints();
+
         Matrix matrix = new Matrix();
         matrix.postTranslate(translateX, translateY);
-        rotatePoint[0] = initRotatePoint.x;
-        rotatePoint[1] = initRotatePoint.y;
-        scalePoint[0] = initScalePoint.x;
-        scalePoint[1] = initScalePoint.y;
-        centerPoint[0] = initCenterPoint.x;
-        centerPoint[1] = initCenterPoint.y;
-        topRightPoint[0] = initTopRightPoint.x;
-        topRightPoint[1] = initTopRightPoint.y;
-        bottomLeftPoint[0] = initBottomLeftPoint.x;
-        bottomLeftPoint[1] = initBottomLeftPoint.y;
-        topLeftPoint[0] = initTopLeftPoint.x;
-        topLeftPoint[1] = initTopLeftPoint.y;
-        bottomRightPoint[0] = initBottomRightPoint.x;
-        bottomRightPoint[1] = initBottomRightPoint.y;
 
         matrix.mapPoints(centerPoint);
 
         matrix.postScale(scaleValue, scaleValue, centerPoint[0], centerPoint[1]);
         matrix.postRotate(-rotation, centerPoint[0], centerPoint[1]);
 
-        matrix.mapPoints(scalePoint);
-        matrix.mapPoints(rotatePoint);
-        matrix.mapPoints(bottomLeftPoint);
-        matrix.mapPoints(topRightPoint);
-        matrix.mapPoints(topLeftPoint);
-        matrix.mapPoints(bottomRightPoint);
-
-        xExport = Math.min(Math.min(Math.min(topLeftPoint[0], bottomRightPoint[0]), bottomLeftPoint[0]), topRightPoint[0]);
-        yExport = Math.min(Math.min(Math.min(topLeftPoint[1], bottomRightPoint[1]), bottomLeftPoint[1]), topRightPoint[1]);
+        getBorderPointsCoord(matrix);
+        getLayoutLimit();
 
         // befor N canvas apply matrix from leftside of screen
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
@@ -315,19 +287,19 @@ public class FloatText extends ImageView {
         }
 
         canvas.setMatrix(matrix);
-        textPaint.setColor(mColor);
 
+        textPaint.setColor(mColor);
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(mBackgroundColor);
         canvas.drawRect(rectBackground, paint);
         StaticLayout textLayout = new StaticLayout(text, textPaint,canvas.getWidth(),
                 Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
-
         textLayout.draw(canvas);
 
         if (!drawBorder) {
             return;
         }
+
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.MAGENTA);
         paint.setStrokeWidth(3);
@@ -335,8 +307,56 @@ public class FloatText extends ImageView {
         canvas.drawRect(rectBorder, paint);
         canvas.restore();
 
-        canvas.drawBitmap(rotateBitmap, rotatePoint[0]-ROTATE_CONSTANT, rotatePoint[1]-ROTATE_CONSTANT, paint);
-        canvas.drawBitmap(scaleBitmap, scalePoint[0]-ROTATE_CONSTANT, scalePoint[1]-ROTATE_CONSTANT, paint);
+        canvas.drawBitmap(rotateBitmap, borderTopLeft[0]-ROTATE_CONSTANT, borderTopLeft[1]-ROTATE_CONSTANT, paint);
+        canvas.drawBitmap(scaleBitmap, borderBottomRight[0]-ROTATE_CONSTANT, borderBottomRight[1]-ROTATE_CONSTANT, paint);
+    }
+
+    private void getLayoutLimit(){
+        // text x, y
+        xExport = Math.min(Math.min(Math.min(topLeftPoint[0], bottomRightPoint[0]), bottomLeftPoint[0]), topRightPoint[0]);
+        yExport = Math.min(Math.min(Math.min(topLeftPoint[1], bottomRightPoint[1]), bottomLeftPoint[1]), topRightPoint[1]);
+        // border x, y
+        xMax = Math.max(Math.max(Math.max(borderTopRight[0], borderTopLeft[0]), borderBottomLeft[0]), borderBottomRight[0]);
+        yMax = Math.max(Math.max(Math.max(borderTopRight[1], borderTopLeft[1]), borderBottomLeft[1]), borderBottomRight[1]);
+        xMin = Math.min(Math.min(Math.min(borderTopRight[0], borderTopLeft[0]), borderBottomLeft[0]), borderBottomRight[0]);
+        yMin = Math.min(Math.min(Math.min(borderTopRight[1], borderTopLeft[1]), borderBottomLeft[1]), borderBottomRight[1]);
+        widthMax = (int)(xMax - xMin);
+        heightMax = (int) (yMax - yMin);
+    }
+
+    private void getBorderPointsCoord(Matrix matrix){
+        matrix.mapPoints(borderBottomRight);
+        matrix.mapPoints(borderTopLeft);
+        matrix.mapPoints(borderBottomLeft);
+        matrix.mapPoints(borderTopRight);
+
+        matrix.mapPoints(bottomLeftPoint);
+        matrix.mapPoints(topRightPoint);
+        matrix.mapPoints(topLeftPoint);
+        matrix.mapPoints(bottomRightPoint);
+    }
+
+    private void initBorderPoints(){
+        borderTopLeft[0] = initBorderTopLeft.x;
+        borderTopLeft[1] = initBorderTopLeft.y;
+        borderBottomRight[0] = initBorderBottomRight.x;
+        borderBottomRight[1] = initBorderBottomRight.y;
+        borderTopRight[0] = initBorderTopRight.x;
+        borderTopRight[1] = initBorderTopRight.y;
+        borderBottomLeft[0] = initBorderBottomLeft.x;
+        borderBottomLeft[1] = initBorderBottomLeft.y;
+
+        centerPoint[0] = initCenterPoint.x;
+        centerPoint[1] = initCenterPoint.y;
+
+        topRightPoint[0] = initTopRightPoint.x;
+        topRightPoint[1] = initTopRightPoint.y;
+        bottomLeftPoint[0] = initBottomLeftPoint.x;
+        bottomLeftPoint[1] = initBottomLeftPoint.y;
+        topLeftPoint[0] = initTopLeftPoint.x;
+        topLeftPoint[1] = initTopLeftPoint.y;
+        bottomRightPoint[0] = initBottomRightPoint.x;
+        bottomRightPoint[1] = initBottomRightPoint.y;
     }
 
     OnTouchListener onTouchListener = new OnTouchListener() {
@@ -356,9 +376,9 @@ public class FloatText extends ImageView {
                     startAngle = getAngle(oldX, oldY);
                     int eps = 75;
                     float epsMove = Math.max(widthScale/2, heightScale/2);
-                    if (oldX < scalePoint[0]+eps && oldX > scalePoint[0]-eps && oldY < scalePoint[1]+eps && oldY > scalePoint[1]-eps){
+                    if (oldX < borderBottomRight[0]+eps && oldX > borderBottomRight[0]-eps && oldY < borderBottomRight[1]+eps && oldY > borderBottomRight[1]-eps){
                         touch = 1;
-                    } else if (oldX < rotatePoint[0]+eps && oldX > rotatePoint[0]-eps && oldY < rotatePoint[1]+eps && oldY > rotatePoint[1]-eps){
+                    } else if (oldX < borderTopLeft[0]+eps && oldX > borderTopLeft[0]-eps && oldY < borderTopLeft[1]+eps && oldY > borderTopLeft[1]-eps){
                         touch = 3;
                     } else if (oldX < centerPoint[0]+epsMove && oldX > centerPoint[0]-epsMove && oldY < centerPoint[1]+epsMove && oldY > centerPoint[1]-epsMove) {
                         touch = 2;
@@ -396,7 +416,12 @@ public class FloatText extends ImageView {
                     break;
                 case MotionEvent.ACTION_UP:
                     if (!isTouch){
-                        performClick();
+                        if (touch != 0) {
+                            performClick();
+                        } else {
+                            mActivity.setFloatTextVisible(oldX, oldY);
+                            mActivity.setFloatImageVisible(oldX, oldY);
+                        }
                     }
                     break;
             }

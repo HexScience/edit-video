@@ -47,13 +47,13 @@ public class ColorPickerView extends View {
 	private final static int	PANEL_ALPHA = 2;
 
 	/**
-	 * The width in pixels of the border
+	 * The widthSeekbar in pixels of the border
 	 * surrounding all color panels.
 	 */
 	private final static float	BORDER_WIDTH_PX = 1;
 
 	/**
-	 * The width in dp of the hue panel.
+	 * The widthSeekbar in dp of the hue panel.
 	 */
 	private float 		HUE_PANEL_WIDTH = 30f;
 	/**
@@ -662,7 +662,7 @@ public class ColorPickerView extends View {
 		if(!mShowAlphaPanel){
 			
 			height = (int) (widthAllowed - PANEL_SPACING - HUE_PANEL_WIDTH);
-			//If calculated height (based on the width) is more than the allowed height.
+			//If calculated height (based on the widthSeekbar) is more than the allowed height.
 			if(height > heightAllowed || getTag().equals("landscape")) {
 				height = heightAllowed / 2;
 				width = (int) (height + PANEL_SPACING + HUE_PANEL_WIDTH);

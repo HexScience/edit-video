@@ -51,7 +51,7 @@ public class ConfirmExport extends DialogFragment{
                 RadioButton radioButton = (RadioButton) view.findViewById(id);
                 int quality = Integer.parseInt(radioButton.getTag().toString());
                 String name = editText.getText().toString();
-                mActivity.exportVideo(name, quality);
+//                mActivity.exportVideo(name, quality);
                 mActivity.hideStatusBar();
             }
         });

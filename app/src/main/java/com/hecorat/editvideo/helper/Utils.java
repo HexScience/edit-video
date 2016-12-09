@@ -3,6 +3,10 @@ package com.hecorat.editvideo.helper;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Environment;
 import android.provider.SyncStateContract;
 import android.util.DisplayMetrics;
@@ -30,6 +34,15 @@ public class Utils {
         } catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
         }
+    }
+
+    public static Bitmap createDefaultBitmap(){
+        Paint paint = new Paint();
+        Bitmap bitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        paint.setColor(Color.BLACK);
+        canvas.drawRect(0, 0, bitmap.getWidth(), bitmap.getHeight(), paint);
+        return bitmap;
     }
 
     public static int getScreenWidth(){

@@ -7,4 +7,13 @@
     <color name="seperate_line_layer_icon_color">#414040</color>
     <color name="background_timeline">#81b476</color>
     <color name="border_timeline_color">#236432</color>
+    <color name="circle_progress_bar_color">#fdfd03</color>
+    <color name="circle_progress_rim_color">#7c7e9a</color>
+    <color name="circle_progress_text_color">#050505</color>
+    <color name="circle_progress_fill_color">#efeff1</color>
+    <color name="rect_grey_edit_icon">#98424242</color>
+    <color name="thumb_seekbar_color">#75FDD2</color>
+    <color name="orange">#FF7043</color>
+    <color name="video_timeline_highline">#fd9003</color>
+    <color name="range_seekbar_bgr">#b44444</color>
 </resources>

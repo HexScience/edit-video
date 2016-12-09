@@ -8,28 +8,20 @@ import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.main.MainActivity;
 
 public class ExportProgress extends AsyncTask<Void, Integer, Void> {
-	private ProgressDialog progressDialog;
 	private MainActivity mActivity;
+	private ExportFragment mExportFragment;
+
 	private int mVideoDuration; //seconds
 
 	public ExportProgress(MainActivity activity, int durationSecond) {
 		mActivity = activity;
-		progressDialog = new ProgressDialog(activity);
-		setTitleDialog(mActivity.getResources().getString(R.string.export_progress_msg));
+		mExportFragment = mActivity.mExportFragment;
 		mVideoDuration = durationSecond;
-	}
-
-	public void setTitleDialog(String title){
-		progressDialog.setTitle(title);
 	}
 
 	@Override
 	protected void onPreExecute() {
 		mActivity.mFinishExport = false;
-		progressDialog.setMax(100);
-		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		progressDialog.setCanceledOnTouchOutside(false);
-		progressDialog.show();
 		super.onPreExecute();
 	}
 
@@ -49,7 +41,6 @@ public class ExportProgress extends AsyncTask<Void, Integer, Void> {
 					total = Integer.parseInt(hours) * 3600 + Integer.parseInt(minutes) * 60
 							+ Integer.parseInt(seconds);
 					publishProgress(total * 100 / duration);
-					Log.d("Log Convert AAC", total + "");
 				}
 			}
 			if (mActivity.mFinishExport){
@@ -67,14 +58,14 @@ public class ExportProgress extends AsyncTask<Void, Integer, Void> {
 
 	@Override
 	protected void onProgressUpdate(Integer... values) {
-		progressDialog.setProgress(values[0]);
+		mExportFragment.setExportProgress(values[0]);
 		super.onProgressUpdate(values);
 	}
 
 	@Override
 	protected void onPostExecute(Void result) {
-		progressDialog.dismiss();
 		mActivity.hideStatusBar();
+		mExportFragment.onExportCompleted();
 		super.onPostExecute(result);
 	}
 }

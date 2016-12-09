@@ -1,6 +1,5 @@
 package com.hecorat.editvideo.addtext;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -444,7 +443,7 @@ public class FloatText extends ImageView {
             mActivity.setExtraControlVisible(true);
             mActivity.restoreExtraControl(timeline);
             mActivity.setFloatTextVisible(timeline);
-            mActivity.setBtnEditTextVisible(true);
+            mActivity.setBtnEditVisible(true);
             mActivity.setBtnDeleteVisible(true);
         }
         invalidate();

@@ -8,12 +8,14 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.export.VideoHolder;
+import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.main.Constants;
 import com.hecorat.editvideo.main.MainActivity;
 
@@ -43,6 +45,8 @@ public class VideoTL extends ImageView {
     public int durationVideo;
     public float volume, volumePreview;
     public boolean hasAudio;
+    public int mBackgroundColor;
+    public boolean isHighLight;
 
     public VideoTL(Context context, String videoPath, int height) {
         super(context);
@@ -70,13 +74,23 @@ public class VideoTL extends ImageView {
 
         params = new RelativeLayout.LayoutParams(width, height);
         setLayoutParams(params);
-        defaultBitmap = createDefaultBitmap();
-        drawTimeLine(left, width);
+        defaultBitmap = Utils.createDefaultBitmap();
+        drawTimeLineWith(startTime, endTime);
         videoHolder = new VideoHolder();
         volume = 1f;
         volumePreview = 1f;
-
+        setNormalTL();
         new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    public void highlightTL() {
+        isHighLight = true;
+        mBackgroundColor = ContextCompat.getColor(mActivity, R.color.video_timeline_highline);
+    }
+
+    public void setNormalTL(){
+        isHighLight = false;
+        mBackgroundColor = ContextCompat.getColor(mActivity, R.color.background_timeline);
     }
 
     public void setLeftMargin(int value) {
@@ -106,6 +120,24 @@ public class VideoTL extends ImageView {
         updateTimeLineStatus();
     }
 
+    public void drawTimeLineWith(int startTime, int endTime){
+        startPosition = startTime/Constants.SCALE_VALUE;
+        width = (endTime-startTime)/Constants.SCALE_VALUE;
+        right = left + width;
+        min = left - startPosition;
+        params.width = width;
+        setLayoutParams(params);
+        rectBackground = new Rect(0, 0, width, height);
+        rectLeft = new Rect(0, 0, Constants.BORDER_WIDTH, height);
+        rectRight = new Rect(width- Constants.BORDER_WIDTH, 0, width, height);
+
+        this.startTime = startTime;
+        this.endTime = endTime;
+        startInTimeLine = (left - MARGIN_LEFT_TIME_LINE)* Constants.SCALE_VALUE;
+        endInTimeLine = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
+        invalidate();
+    }
+
     public void updateTimeLineStatus() {
         startTime = startPosition* Constants.SCALE_VALUE;
         endTime = (right - min) * Constants.SCALE_VALUE;
@@ -125,7 +157,7 @@ public class VideoTL extends ImageView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         setLayoutParams(params);
-        paint.setColor(getResources().getColor(R.color.background_timeline));
+        paint.setColor(mBackgroundColor);
         canvas.drawRect(rectBackground, paint);
         for (int i=0; i<listBitmap.size(); i++){
             canvas.drawBitmap(listBitmap.get(i), i*150 - startPosition, Constants.BORDER_WIDTH, paint);
@@ -134,14 +166,7 @@ public class VideoTL extends ImageView {
         canvas.drawRect(rectRight, paint);
     }
 
-    private Bitmap createDefaultBitmap(){
-        Paint paint = new Paint();
-        Bitmap bitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        paint.setColor(Color.BLACK);
-        canvas.drawRect(0, 0, bitmap.getWidth(), bitmap.getHeight(), paint);
-        return bitmap;
-    }
+
 
     private class AsyncTaskExtractFrame extends AsyncTask<Void, Void, Void> {
 

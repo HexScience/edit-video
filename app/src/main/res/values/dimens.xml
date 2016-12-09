@@ -17,4 +17,5 @@
     <dimen name="margin_end_text_background">30dp</dimen>
     <dimen name="margin_start_text_background">15dp</dimen>
     <dimen name="indicator_text_color">20dp</dimen>
+    <dimen name="text_size_export">17sp</dimen>
 </resources>

@@ -67,7 +67,7 @@ public class VideoTLControl extends ImageView {
         invalidate();
     }
 
-    // layout with exact width
+    // layout with exact widthSeekbar
     public void updateLayoutWidth(int left, int right) {
         int widthTimeLine = right - left;
         thumbLeft = new RectF(0, 0, THUMB_WIDTH, height);

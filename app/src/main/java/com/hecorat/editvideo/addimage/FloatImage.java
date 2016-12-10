@@ -346,6 +346,7 @@ public class FloatImage extends ImageView {
                 mActivity.restoreExtraControl(timeline);
                 mActivity.setFloatImageVisible(timeline);
                 mActivity.setBtnDeleteVisible(true);
+                mActivity.pausePreview();
             }
             invalidate();
         }

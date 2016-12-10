@@ -445,6 +445,7 @@ public class FloatText extends ImageView {
             mActivity.setFloatTextVisible(timeline);
             mActivity.setBtnEditVisible(true);
             mActivity.setBtnDeleteVisible(true);
+            mActivity.pausePreview();
         }
         invalidate();
         }

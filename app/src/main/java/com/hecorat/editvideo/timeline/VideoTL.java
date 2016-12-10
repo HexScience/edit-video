@@ -25,7 +25,7 @@ import java.util.ArrayList;
  * Created by bkmsx on 31/10/2016.
  */
 public class VideoTL extends ImageView {
-    public Rect rectBackground, rectLeft, rectRight;
+    public Rect rectBackground, rectLeft, rectRight, rectTop, rectBottom;
     public Paint paint;
     public MediaMetadataRetriever retriever;
     public Bitmap defaultBitmap;
@@ -46,6 +46,7 @@ public class VideoTL extends ImageView {
     public float volume, volumePreview;
     public boolean hasAudio;
     public int mBackgroundColor;
+    public int mBorderColor;
     public boolean isHighLight;
 
     public VideoTL(Context context, String videoPath, int height) {
@@ -58,7 +59,8 @@ public class VideoTL extends ImageView {
         retriever.setDataSource(videoPath);
         listBitmap = new ArrayList<>();
         hasAudio = true;
-        durationVideo = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+        durationVideo = Integer.parseInt(retriever.extractMetadata
+                (MediaMetadataRetriever.METADATA_KEY_DURATION));
 
         startTime = 0;
         endTime = durationVideo;
@@ -79,18 +81,20 @@ public class VideoTL extends ImageView {
         videoHolder = new VideoHolder();
         volume = 1f;
         volumePreview = 1f;
-        setNormalTL();
+        mBackgroundColor = ContextCompat.getColor(mActivity, R.color.background_timeline);
         new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public void highlightTL() {
         isHighLight = true;
-        mBackgroundColor = ContextCompat.getColor(mActivity, R.color.video_timeline_highline);
+        mBorderColor = ContextCompat.getColor(mActivity, R.color.video_timeline_highline);
+        invalidate();
     }
 
     public void setNormalTL(){
         isHighLight = false;
-        mBackgroundColor = ContextCompat.getColor(mActivity, R.color.background_timeline);
+        mBorderColor = ContextCompat.getColor(mActivity, R.color.background_timeline);
+        invalidate();
     }
 
     public void setLeftMargin(int value) {
@@ -130,6 +134,8 @@ public class VideoTL extends ImageView {
         rectBackground = new Rect(0, 0, width, height);
         rectLeft = new Rect(0, 0, Constants.BORDER_WIDTH, height);
         rectRight = new Rect(width- Constants.BORDER_WIDTH, 0, width, height);
+        rectTop = new Rect(0, 0 , width, Constants.BORDER_WIDTH);
+        rectBottom = new Rect(0, height-Constants.BORDER_WIDTH, width, height);
 
         this.startTime = startTime;
         this.endTime = endTime;
@@ -162,6 +168,9 @@ public class VideoTL extends ImageView {
         for (int i=0; i<listBitmap.size(); i++){
             canvas.drawBitmap(listBitmap.get(i), i*150 - startPosition, Constants.BORDER_WIDTH, paint);
         }
+        paint.setColor(mBorderColor);
+        canvas.drawRect(rectTop, paint);
+        canvas.drawRect(rectBottom, paint);
         canvas.drawRect(rectLeft, paint);
         canvas.drawRect(rectRight, paint);
     }

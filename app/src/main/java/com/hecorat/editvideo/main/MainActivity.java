@@ -340,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         log(" Start");
     }
 
-    private void stopThreadPreview() {
+    public void stopThreadPreview() {
         mRunThread = false;
         log(" Stop");
     }
@@ -771,6 +771,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mSelectedVideoTL.drawTimeLineWith(startTime, endTime);
         getLeftMargin(mCountVideo - 1);
         mMaxTimeLine = mVideoList.get(mCountVideo - 1).endInTimeLine;
+        scrollTo(mSelectedVideoTL.startInTimeLine);
+        mActiveVideoView.seekTo(mSelectedVideoTL.startTime);
     }
 
     public void setLayoutFragmentVisible(boolean visible) {
@@ -1089,7 +1091,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 @Override
                 public void onStartScroll() {
                     pausePreview();
-                    stopThreadPreview();
                 }
 
                 @Override
@@ -1130,12 +1131,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
                     mActiveVideoView.seekTo(positionInVideo);
 
-
-                    if (mMediaPlayer != null && mCurrentAudioTL != null) {
-                        int seekTime = mTLPositionInMs - mCurrentAudioTL.startInTimeline + mCurrentAudioTL.startTime;
-                        mMediaPlayer.seekTo(seekTime);
-                    }
-
+                    updateMediaPlayer();
+                    updateTextVisibility();
+                    updateImageVisibility();
                     updateSystemVolume();
                 }
             };
@@ -1160,12 +1158,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 mTLPositionInMs += mVideoList.get(i).width * Constants.SCALE_VALUE;
             }
             VideoTL currentTimeLine = mVideoList.get(mCurrentVideoId);
-            int currentVideoView = mActiveVideoView.getCurrentPosition();
-            if (currentVideoView < currentTimeLine.startTime) {
-                currentVideoView = currentTimeLine.startTime;
+            int currentTime = mActiveVideoView.getCurrentPosition();
+            if (currentTime < currentTimeLine.startTime) {
+                currentTime = currentTimeLine.startTime;
             }
-            mTLPositionInMs += currentVideoView - currentTimeLine.startTime + 50;
+            mTLPositionInMs += currentTime - currentTimeLine.startTime + 50;
         }
+
         if (!mScroll) {
             return;
         }
@@ -1190,8 +1189,17 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void updateVideoView() {
+        if (mCountVideo < 1){
+            return;
+        }
         if (mTLPositionInMs >= mMaxTimeLine) {
-            pauseVideo();
+            pausePreview();
+            return;
+        }
+
+        VideoTL lastVideo = mVideoList.get(mCountVideo-1);
+        int halfTimeLastVideo = (lastVideo.startInTimeLine+lastVideo.endInTimeLine)/2;
+        if (mTLPositionInMs > halfTimeLastVideo  && !mActiveVideoView.isPlaying()){
             stopThreadPreview();
             return;
         }
@@ -1208,6 +1216,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 timelineId = i;
                 break;
             }
+        }
+
+        int halfTimeVideo = (videoTL.startInTimeLine+videoTL.endInTimeLine)/2;
+
+        if (mRunThread && timelineId<mCountVideo-1 && !mActiveVideoView.isPlaying()
+                && mTLPositionInMs > halfTimeVideo){
+            timelineId++;
+            videoTL = mVideoList.get(timelineId);
+            log("increase");
         }
 
         if (mCurrentVideoId != timelineId && videoTL != null) {
@@ -1269,19 +1286,31 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             if (mActiveVideoView.isPlaying()) {
                 mBtnPlay.setImageResource(R.drawable.ic_play);
                 pausePreview();
-                stopThreadPreview();
             } else {
                 mBtnPlay.setImageResource(R.drawable.ic_pause);
                 openFileManager(false);
                 startThreadPreview();
                 startPreview();
+                hideAllFloatNControlers();
             }
         }
     };
 
-    private void pausePreview() {
+    private void hideAllFloatNControlers(){
+        setFloatImageVisible(null);
+        setFloatTextVisible(null);
+        setAudioControlVisible(false);
+        setExtraControlVisible(false);
+        setBtnDeleteVisible(false);
+        setBtnEditVisible(false);
+        setBtnVolumeVisible(false);
+        unSelectVideoTL();
+    }
+
+    public void pausePreview() {
         pauseVideo();
         pauseAudio();
+        stopThreadPreview();
     }
 
     private void startPreview() {
@@ -1342,21 +1371,31 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         VideoTL videoTL = new VideoTL(this, mVideoPath, mTimeLineVideoHeight);
         videoTL.setOnClickListener(onVideoTimeLineClick);
         videoTL.setOnLongClickListener(onVideoLongClick);
+
         mVideoList.add(videoTL);
         mLayoutVideo.addView(videoTL);
         mCountVideo++;
         getLeftMargin(mCountVideo - 1);
+
         mMaxTimeLine = videoTL.endInTimeLine;
         mTLPositionInMs = videoTL.startInTimeLine;
+        scrollTo(mTLPositionInMs);
         mActiveVideoView.setVideoPath(videoTL.videoPath);
         mCurrentVideoId = mCountVideo - 1;
-        if (mCountVideo == 1) {
-            setBtnPlayVisible(true);
-        }
         fixIfVideoHasNoAudio(videoTL);
 
+        mSelectedVideoTL = videoTL;
         updateBtnExportVisible();
+        setBtnDeleteVisible(true);
+        setBtnEditVisible(true);
+        setBtnPlayVisible(true);
+        setBtnVolumeVisible(true);
+        highlightSelectedVideoTL();
         mSelectedTL = TIMELINE_VIDEO;
+    }
+
+    private void scrollTo(int time){
+        mScrollView.scrollTo(time/Constants.SCALE_VALUE, 0);
     }
 
     private void fixIfVideoHasNoAudio(VideoTL videoTL) {
@@ -1716,6 +1755,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 openLayoutAdd(false);
             } else {
                 openLayoutAdd(true);
+                pausePreview();
             }
         }
     };
@@ -1783,7 +1823,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             setHightLighTab(position);
             switch (position) {
                 case VIDEO_TAB:
-
                     setFolderName(mFragmentVideosGallery.mFolderName);
                     break;
                 case IMAGE_TAB:
@@ -2015,6 +2054,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             setBtnEditVisible(false);
             setFloatImageVisible(null);
             setFloatTextVisible(null);
+
+            pausePreview();
         }
     };
 
@@ -2182,13 +2223,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     View.OnClickListener onExtraTimeLineClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            pausePreview();
             mSelectedExtraTL = (ExtraTL) view;
             setExtraControlVisible(true);
             unSelectVideoTL();
             mExtraTLControl.restoreTimeLineStatus(mSelectedExtraTL);
-            mScrollView.scrollTo(mSelectedExtraTL.startInTimeLine / Constants.SCALE_VALUE, 0);
-            onCustomScrollChanged.onScrollChanged();
             readdExtraControl();
+            scrollTo(mSelectedExtraTL.startInTimeLine);
+            onCustomScrollChanged.onScrollChanged();
+
             mSelectedTL = TIMELINE_EXTRA;
             if (mSelectedExtraTL.isImage) {
                 setFloatImageVisible(mSelectedExtraTL);
@@ -2201,6 +2244,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             }
             setBtnDeleteVisible(true);
             setBtnVolumeVisible(false);
+
         }
     };
 
@@ -2329,10 +2373,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mSelectedVideoTL = (VideoTL) view;
             if (mSelectedVideoTL.isHighLight) {
                 unSelectVideoTL();
+                log("unselected");
             } else {
+                log("selected");
                 selectVideoTL();
                 setExtraControlVisible(false);
                 setAudioControlVisible(false);
+                pausePreview();
             }
         }
     };
@@ -2340,10 +2387,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private void selectVideoTL() {
         mSelectedTL = TIMELINE_VIDEO;
         highlightSelectedVideoTL();
-        if (!mSelectedVideoTL.equals(mCurrentVideoTL)) {
-            mScrollView.scrollTo(mSelectedVideoTL.startInTimeLine / Constants.SCALE_VALUE, 0);
-            onCustomScrollChanged.onScrollChanged();
-        }
+//        if (!mSelectedVideoTL.equals(mCurrentVideoTL)) {
+//            mScrollView.scrollTo(mSelectedVideoTL.startInTimeLine / Constants.SCALE_VALUE, 0);
+//            onCustomScrollChanged.onScrollChanged();
+//        }
         setBtnDeleteVisible(true);
         setBtnVolumeVisible(true);
         setBtnEditVisible(true);

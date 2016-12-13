@@ -3,17 +3,18 @@ package com.hecorat.editvideo.timeline;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.database.VideoObject;
 import com.hecorat.editvideo.export.VideoHolder;
 import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.main.Constants;
@@ -30,7 +31,7 @@ public class VideoTL extends ImageView {
     public MediaMetadataRetriever retriever;
     public Bitmap defaultBitmap;
     public RelativeLayout.LayoutParams params;
-    public String videoPath, audioPreview;
+    public String videoPath, audioPreview, originVideoPath;
     public MainActivity mActivity;
     public ArrayList<Bitmap> listBitmap;
     public VideoHolder videoHolder;
@@ -48,41 +49,65 @@ public class VideoTL extends ImageView {
     public int mBackgroundColor;
     public int mBorderColor;
     public boolean isHighLight;
+    public int orderInList;
+    public int projectId;
 
     public VideoTL(Context context, String videoPath, int height) {
         super(context);
         mActivity = (MainActivity) context;
         MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
         this.videoPath = videoPath;
-        this.audioPreview = videoPath;
+        originVideoPath = videoPath;
+        this.height = height;
+        paint = new Paint();
         retriever = new MediaMetadataRetriever();
         retriever.setDataSource(videoPath);
         listBitmap = new ArrayList<>();
         hasAudio = true;
         durationVideo = Integer.parseInt(retriever.extractMetadata
                 (MediaMetadataRetriever.METADATA_KEY_DURATION));
+        defaultBitmap = Utils.createDefaultBitmap();
+        videoHolder = new VideoHolder();
+        mBackgroundColor = ContextCompat.getColor(mActivity, R.color.background_timeline);
+        mBorderColor = mBackgroundColor;
 
         startTime = 0;
         endTime = durationVideo;
-
-        this.height = height;
-
-        paint = new Paint();
         left = 0;
         width = durationVideo/ Constants.SCALE_VALUE;
         min = left;
         max = min + width;
         right = left + width;
+        volume = 1f;
+        volumePreview = 1f;
 
         params = new RelativeLayout.LayoutParams(width, height);
         setLayoutParams(params);
-        defaultBitmap = Utils.createDefaultBitmap();
         drawTimeLineWith(startTime, endTime);
-        videoHolder = new VideoHolder();
-        volume = 1f;
-        volumePreview = 1f;
-        mBackgroundColor = ContextCompat.getColor(mActivity, R.color.background_timeline);
+
         new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        // spare
+        this.audioPreview = videoPath;
+    }
+
+    public void restoreVideoObject(VideoObject video) {
+        projectId = video.projectId;
+        startTime = Integer.parseInt(video.startTime);
+        endTime = Integer.parseInt(video.endTime);
+        left = Integer.parseInt(video.left);
+        drawTimeLineWith(startTime, endTime);
+    }
+
+    public VideoObject getVideoObject() {
+        VideoObject videoObject = new VideoObject();
+        videoObject.projectId = 1;
+        videoObject.path = originVideoPath;
+        videoObject.startTime = startTime + "";
+        videoObject.endTime = endTime + "";
+        videoObject.left = left + "";
+        videoObject.orderInList = orderInList + "";
+        return videoObject;
     }
 
     public void highlightTL() {
@@ -108,6 +133,7 @@ public class VideoTL extends ImageView {
         updateTimeLineStatus();
     }
 
+    //spare
     public void drawTimeLine(int leftPosition, int width) {
         int moveX = left - leftPosition;
         min += moveX;
@@ -130,12 +156,15 @@ public class VideoTL extends ImageView {
         right = left + width;
         min = left - startPosition;
         params.width = width;
+        params.leftMargin = left;
         setLayoutParams(params);
         rectBackground = new Rect(0, 0, width, height);
         rectLeft = new Rect(0, 0, Constants.BORDER_WIDTH, height);
         rectRight = new Rect(width- Constants.BORDER_WIDTH, 0, width, height);
         rectTop = new Rect(0, 0 , width, Constants.BORDER_WIDTH);
         rectBottom = new Rect(0, height-Constants.BORDER_WIDTH, width, height);
+        log("width = " + rectLeft.width());
+        log("height = " + rectLeft.height());
 
         this.startTime = startTime;
         this.endTime = endTime;
@@ -143,6 +172,7 @@ public class VideoTL extends ImageView {
         endInTimeLine = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
         invalidate();
     }
+
 
     public void updateTimeLineStatus() {
         startTime = startPosition* Constants.SCALE_VALUE;
@@ -166,7 +196,7 @@ public class VideoTL extends ImageView {
         paint.setColor(mBackgroundColor);
         canvas.drawRect(rectBackground, paint);
         for (int i=0; i<listBitmap.size(); i++){
-            canvas.drawBitmap(listBitmap.get(i), i*150 - startPosition, Constants.BORDER_WIDTH, paint);
+            canvas.drawBitmap(listBitmap.get(i), i*150 - startPosition, 0, paint);
         }
         paint.setColor(mBorderColor);
         canvas.drawRect(rectTop, paint);
@@ -174,8 +204,6 @@ public class VideoTL extends ImageView {
         canvas.drawRect(rectLeft, paint);
         canvas.drawRect(rectRight, paint);
     }
-
-
 
     private class AsyncTaskExtractFrame extends AsyncTask<Void, Void, Void> {
 
@@ -193,7 +221,7 @@ public class VideoTL extends ImageView {
                 if (bitmap == null) {
                     bitmap = defaultBitmap;
                 }
-                Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, 150, height- Constants.BORDER_WIDTH*2, false);
+                Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, 150, height, false);
                 listBitmap.add(scaleBitmap);
                 publishProgress();
                 timeStamp += 3000000;

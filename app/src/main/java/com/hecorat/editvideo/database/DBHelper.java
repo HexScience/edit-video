@@ -28,14 +28,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public SQLiteDatabase getWritableSqLiteDB(){
-        return this.getWritableDatabase();
-    }
-
-    public SQLiteDatabase getReadableSqLiteDB(){
-        return this.getReadableDatabase();
-    }
-
     private void log(String msg) {
         Log.e("DbHelper",msg);
     }

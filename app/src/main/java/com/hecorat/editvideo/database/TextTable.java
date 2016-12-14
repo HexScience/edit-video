@@ -12,10 +12,10 @@ import java.util.ArrayList;
  */
 
 public class TextTable {
-    String TABLE_NAME = "Text";
+    String TABLE_NAME = "Texts";
     String ID = "Id";
     String PROJECT_ID = "ProjectId";
-    String PATH = "Path";
+    String TEXT = "Text";
     String LEFT = "Left";
     String RIGHT = "Right";
     String IN_LAYOUT_IMAGE = "InLayoutImage";
@@ -37,10 +37,10 @@ public class TextTable {
 
     public void createTable() {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
-        String sql = "create table " + TABLE_NAME + " ("+
+        String sql = "create table if not exists " + TABLE_NAME + " ("+
                 ID + " integer primary key, " +
                 PROJECT_ID + " integer, " +
-                PATH + " text, " +
+                TEXT + " text, " +
                 LEFT + " text, " +
                 RIGHT + " text, " +
                 IN_LAYOUT_IMAGE + " text, " +
@@ -67,7 +67,7 @@ public class TextTable {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(PROJECT_ID, text.projectId);
-        contentValues.put(PATH, text.path);
+        contentValues.put(TEXT, text.text);
         contentValues.put(LEFT, text.left);
         contentValues.put(RIGHT, text.right);
         contentValues.put(IN_LAYOUT_IMAGE, text.inLayoutImage);
@@ -94,7 +94,7 @@ public class TextTable {
                 TextObject text = new TextObject();
                 text.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(ID)));
                 text.projectId = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
-                text.path = cursor.getString(cursor.getColumnIndex(PATH));
+                text.text = cursor.getString(cursor.getColumnIndex(TEXT));
                 text.left = cursor.getString(cursor.getColumnIndex(LEFT));
                 text.right = cursor.getString(cursor.getColumnIndex(RIGHT));
                 text.inLayoutImage = cursor.getString(cursor.getColumnIndex(IN_LAYOUT_IMAGE));

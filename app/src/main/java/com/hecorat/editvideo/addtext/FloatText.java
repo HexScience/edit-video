@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.database.TextObject;
 import com.hecorat.editvideo.main.MainActivity;
 import com.hecorat.editvideo.timeline.ExtraTL;
 
@@ -47,8 +48,8 @@ public class FloatText extends ImageView {
     public String fontPath;
 
     public int width, height;
-    public float x, y, translateX, translateY,
-            xExport, yExport, xMax, yMax, xMin, yMin;
+    public float x, y, xExport, yExport,
+            xMax, yMax, xMin, yMin;
     public float rotation = 0;
     public float[] borderBottomRight, centerPoint, borderTopLeft, borderBottomLeft, borderTopRight,
             topRightPoint, bottomLeftPoint, topLeftPoint, bottomRightPoint;
@@ -93,13 +94,29 @@ public class FloatText extends ImageView {
 
         rotateBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_rotate);
         scaleBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_scale);
-        params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
         setFullLayout();
         setOnTouchListener(onTouchListener);
         setOnClickListener(onClickListener);
         drawBorder(true);
         mColor = Color.RED;
         mBackgroundColor = Color.TRANSPARENT;
+    }
+
+    public void restoreState(TextObject textObject) {
+        x = Float.parseFloat(textObject.x);
+        y = Float.parseFloat(textObject.y);
+        scaleValue = Float.parseFloat(textObject.scale);
+        rotation = Float.parseFloat(textObject.rotation);
+
+        size = Float.parseFloat(textObject.size);
+        fontPath = textObject.fontPath;
+        mColor = Integer.parseInt(textObject.fontColor);
+        mBackgroundColor = Integer.parseInt(textObject.boxColor);
+        sizeScale = size * scaleValue;
+        mTypeface = Typeface.createFromFile(fontPath);
+        resetLayout();
     }
 
     public void setTextBgrColor(int color){
@@ -145,6 +162,9 @@ public class FloatText extends ImageView {
         bound = new Rect();
         textPaint.getTextBounds(text, 0, text.length(), bound);
         height = bound.height()*lineCount + lineSpace*(lineCount-1);
+
+        widthScale = width * scaleValue;
+        heightScale = height * scaleValue;
     }
 
     public void resetLayout(){
@@ -177,23 +197,7 @@ public class FloatText extends ImageView {
         invalidate();
     }
 
-    private void setCompactLayout(){
-        translateX = PADDING;
-        translateY = PADDING;
-        log("translateX = "+translateX+" translateY = "+translateY);
-        params.width = widthMax;
-        params.height = heightMax;
-
-        params.leftMargin = (int) (xMin);
-        params.topMargin = (int) (yMin);
-        setLayoutParams(params);
-        invalidate();
-        isCompact = true;
-    }
-
     private void setFullLayout(){
-        translateX = x;
-        translateY = y;
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
         params.topMargin = 0;
@@ -254,8 +258,6 @@ public class FloatText extends ImageView {
     public void moveText(float moveX, float moveY) {
         x += moveX;
         y += moveY;
-        translateX = x;
-        translateY = y;
         invalidate();
     }
 
@@ -267,7 +269,7 @@ public class FloatText extends ImageView {
         initBorderPoints();
 
         Matrix matrix = new Matrix();
-        matrix.postTranslate(translateX, translateY);
+        matrix.postTranslate(x, y);
 
         matrix.mapPoints(centerPoint);
 

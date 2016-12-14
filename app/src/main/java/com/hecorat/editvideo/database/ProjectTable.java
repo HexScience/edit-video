@@ -25,10 +25,16 @@ public class ProjectTable {
 
     public void createTable() {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
-        String sql = "create table " + TABLE_NAME + "(" +
+        String sql = "create table if not exists " + TABLE_NAME + "(" +
                 ID + " integer primary key, " +
                 NAME + " text, " +
                 DATA + " text)";
+        sqLiteDatabase.execSQL(sql);
+    }
+
+    public void dropTable() {
+        SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
+        String sql = "drop table if exists " + TABLE_NAME;
         sqLiteDatabase.execSQL(sql);
     }
 
@@ -53,11 +59,6 @@ public class ProjectTable {
         return list;
     }
 
-    public void dropTable() {
-        SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
-        String sql = "drop table if exists " + TABLE_NAME;
-        sqLiteDatabase.execSQL(sql);
-    }
     private void log(String msg) {
         Log.e("Project Table", msg);
     }

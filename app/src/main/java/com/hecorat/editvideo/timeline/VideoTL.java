@@ -96,6 +96,8 @@ public class VideoTL extends ImageView {
         startTime = Integer.parseInt(video.startTime);
         endTime = Integer.parseInt(video.endTime);
         left = Integer.parseInt(video.left);
+        volume = Float.parseFloat(video.volume);
+        volumePreview = Float.parseFloat(video.volumePreview);
         drawTimeLineWith(startTime, endTime);
     }
 
@@ -107,6 +109,8 @@ public class VideoTL extends ImageView {
         videoObject.endTime = endTime + "";
         videoObject.left = left + "";
         videoObject.orderInList = orderInList + "";
+        videoObject.volume = volume + "";
+        videoObject.volumePreview = volumePreview + "";
         return videoObject;
     }
 
@@ -163,8 +167,6 @@ public class VideoTL extends ImageView {
         rectRight = new Rect(width- Constants.BORDER_WIDTH, 0, width, height);
         rectTop = new Rect(0, 0 , width, Constants.BORDER_WIDTH);
         rectBottom = new Rect(0, height-Constants.BORDER_WIDTH, width, height);
-        log("width = " + rectLeft.width());
-        log("height = " + rectLeft.height());
 
         this.startTime = startTime;
         this.endTime = endTime;

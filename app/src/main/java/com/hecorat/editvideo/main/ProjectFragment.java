@@ -11,7 +11,6 @@ import android.widget.Button;
 
 import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.database.AudioTable;
-import com.hecorat.editvideo.database.ImageObject;
 import com.hecorat.editvideo.database.ImageTable;
 import com.hecorat.editvideo.database.ProjectTable;
 import com.hecorat.editvideo.database.TextObject;
@@ -73,7 +72,7 @@ public class ProjectFragment extends Fragment{
         public void onClick(View view) {
             ArrayList<TextObject> list = textTable.getData(1);
             for (TextObject text : list) {
-                String msg = text.id +", "+text.projectId+", "+text.path+", "+text.left
+                String msg = text.id +", "+text.projectId+", "+text.text+", "+text.left
                         +", "+text.right+", "+text.inLayoutImage+", "+text.orderInLayout
                         +", "+text.orderInList+", "+text.x+", "+text.y+", "+text.scale+", "
                         + text.rotation+", "+text.size+", "+text.fontPath+", "+text.fontColor

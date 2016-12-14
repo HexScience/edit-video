@@ -50,6 +50,12 @@ import com.hecorat.editvideo.addtext.FontAdapter;
 import com.hecorat.editvideo.addtext.FontManager;
 import com.hecorat.editvideo.audio.AddSilentAudoTask;
 import com.hecorat.editvideo.audio.VolumeEditor;
+import com.hecorat.editvideo.database.AudioObject;
+import com.hecorat.editvideo.database.AudioTable;
+import com.hecorat.editvideo.database.ImageObject;
+import com.hecorat.editvideo.database.ImageTable;
+import com.hecorat.editvideo.database.TextObject;
+import com.hecorat.editvideo.database.TextTable;
 import com.hecorat.editvideo.database.VideoObject;
 import com.hecorat.editvideo.database.VideoTable;
 import com.hecorat.editvideo.export.ExportFragment;
@@ -139,6 +145,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public ExportFragment mExportFragment;
     public TrimFragment mTrimFragment;
     public VideoTable mVideoTable;
+    public AudioTable mAudioTable;
+    public ImageTable mImageTable;
+    public TextTable mTextTable;
 
     private int mDragCode = DRAG_VIDEO;
     private int mCountVideo = 0;
@@ -339,6 +348,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 //        openLayoutProject();
 
         mVideoTable = new VideoTable(this);
+        mAudioTable = new AudioTable(this);
+        mImageTable = new ImageTable(this);
+        mTextTable = new TextTable(this);
+        mVideoTable.createTable();
+        mImageTable.createTable();
+        mTextTable.createTable();
+        mAudioTable.createTable();
     }
 
     private void openLayoutProject(){
@@ -437,7 +453,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         public void onGlobalLayout() {
             mTimeLineVideoHeight = mLayoutVideo.getHeight() - 10;
             addVideoControler();
-            restoreAllVideoTL();
+            restoreAllVideoTL(1);
             mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
@@ -447,6 +463,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         public void onGlobalLayout() {
             mTimeLineImageHeight = mLayoutImage.getHeight() - 10;
             addExtraNAudioController();
+            restoreAllAudioTL(1);
+            restoreAllImageTL(1);
+            restoreAllTextTL(1);
             mLayoutImage.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
@@ -947,11 +966,18 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View view) {
             pausePreview();
-            saveVideoObjects();
-            Toast.makeText(mActivity, "videos are saved!", Toast.LENGTH_LONG).show();
+            saveProject();
 //            exportVideo();
         }
     };
+
+    public void saveProject() {
+        saveVideoObjects();
+        saveAudioObjects();
+        saveImageObjects();
+        saveTextObjects();
+        Toast.makeText(mActivity, "Project is saved", Toast.LENGTH_LONG).show();
+    }
 
     public void exportVideo() {
         mExportFragment = ExportFragment.newInstance(mActivity);
@@ -961,10 +987,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-
+        log("on destroy");
         stopThreadPreview();
         stopMediaPlayer();
+        super.onDestroy();
     }
 
     Runnable runnablePreview = new Runnable() {
@@ -1395,15 +1421,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mVideoTable.dropTable();
         mVideoTable.createTable();
         getVideoOrder();
-        for (int i=0; i<mVideoList.size(); i++) {
-            VideoTL videoTL = mVideoList.get(i);
+        for (VideoTL videoTL : mVideoList) {
             VideoObject videoObject = videoTL.getVideoObject();
             mVideoTable.insertValue(videoObject);
         }
     }
 
-    public void restoreAllVideoTL(){
-        ArrayList<VideoObject> list = mVideoTable.getData(1);
+    public void restoreAllVideoTL(int projectId){
+        ArrayList<VideoObject> list = mVideoTable.getData(projectId);
         if (list.size()<1){
             return;
         }
@@ -1478,6 +1503,101 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     public void addImage(String imagePath, int imageCoord[]) {
         startAnimationAddImage(imagePath, imageCoord);
+    }
+
+    public void getTextOrder(){
+        for (int i=0; i<mListInLayoutImage.size(); i++){
+            ExtraTL extraTL = mListInLayoutImage.get(i);
+            extraTL.orderInLayout = i;
+        }
+
+        for (int i=0; i<mListInLayoutText.size(); i++){
+            ExtraTL extraTL = mListInLayoutText.get(i);
+            extraTL.orderInLayout = i;
+        }
+
+        for (int i=0; i<mTextList.size(); i++) {
+            ExtraTL extraTL = mTextList.get(i);
+            extraTL.orderInList = i;
+        }
+    }
+
+    public void saveTextObjects() {
+        mTextTable.dropTable();
+        mTextTable.createTable();
+        getTextOrder();
+        for (ExtraTL extraTL : mTextList) {
+            TextObject text = extraTL.getTextObject();
+            mTextTable.insertValue(text);
+        }
+    }
+
+    public class SaveProjectTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            saveProject();
+            return null;
+        }
+    }
+
+    public void getImageOrder(){
+        for (int i=0; i<mListInLayoutImage.size(); i++){
+            ExtraTL extraTL = mListInLayoutImage.get(i);
+            extraTL.orderInLayout = i;
+        }
+
+        for (int i=0; i<mListInLayoutText.size(); i++){
+            ExtraTL extraTL = mListInLayoutText.get(i);
+            extraTL.orderInLayout = i;
+        }
+
+        for (int i=0; i<mImageList.size(); i++) {
+            ExtraTL extraTL = mImageList.get(i);
+            extraTL.orderInList = i;
+        }
+    }
+
+    public void saveImageObjects() {
+        mImageTable.dropTable();
+        mImageTable.createTable();
+        getImageOrder();
+        for (ExtraTL extraTL : mImageList) {
+            ImageObject image = extraTL.getImageObject();
+            mImageTable.insertValue(image);
+        }
+    }
+
+    public void restoreAllImageTL(int projectId) {
+        ArrayList<ImageObject> listImages = mImageTable.getData(projectId);
+        for (ImageObject image : listImages) {
+            restoreImageTL(image);
+        }
+    }
+
+    public void restoreImageTL(ImageObject image){
+        int leftMargin = Integer.parseInt(image.left);
+        ExtraTL extraTL = new ExtraTL(this, image.path, mTimeLineImageHeight, leftMargin, true);
+        extraTL.setOnClickListener(onExtraTimeLineClick);
+        extraTL.setOnLongClickListener(onExtraTimelineLongClick);
+        extraTL.restoreImageTL(image);
+
+        mImageList.add(extraTL.orderInList, extraTL);
+        if (extraTL.inLayoutImage) {
+            mLayoutImage.addView(extraTL);
+            mListInLayoutImage.add(extraTL.orderInLayout, extraTL);
+        } else {
+            mLayoutText.addView(extraTL);
+            mListInLayoutText.add(extraTL.orderInLayout, extraTL);
+        }
+
+        Bitmap bitmap = BitmapFactory.decodeFile(image.path);
+        FloatImage floatImage = new FloatImage(this, bitmap);
+        floatImage.restoreState(image);
+        extraTL.floatImage = floatImage;
+        floatImage.timeline = extraTL;
+        floatImage.drawBorder(false);
+        floatImage.setVisibility(View.GONE);
+        mVideoViewLayout.addView(floatImage);
     }
 
     private void addImageTL() {
@@ -1629,6 +1749,39 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         startAnimationAddText();
     }
 
+    public void restoreAllTextTL(int projectId) {
+        ArrayList<TextObject> listText = mTextTable.getData(projectId);
+        for (TextObject textObject : listText) {
+            restoreTextTL(textObject);
+        }
+    }
+
+    public void restoreTextTL(TextObject textObject) {
+        String text = textObject.text;
+        int leftMargin = Integer.parseInt(textObject.left);
+        ExtraTL extraTL = new ExtraTL(this, text, mTimeLineImageHeight, leftMargin, false);
+        extraTL.setOnClickListener(onExtraTimeLineClick);
+        extraTL.setOnLongClickListener(onExtraTimelineLongClick);
+        extraTL.restoreTextTL(textObject);
+
+        mTextList.add(extraTL.orderInList, extraTL);
+        if (extraTL.inLayoutImage) {
+            mLayoutImage.addView(extraTL);
+            mListInLayoutImage.add(extraTL.orderInLayout, extraTL);
+        } else {
+            mLayoutText.addView(extraTL);
+            mListInLayoutText.add(extraTL.orderInLayout, extraTL);
+        }
+
+        FloatText floatText = new FloatText(this, text);
+        mVideoViewLayout.addView(floatText);
+        extraTL.floatText = floatText;
+        floatText.timeline = extraTL;
+        floatText.restoreState(textObject);
+        floatText.drawBorder(false);
+        floatText.setVisibility(View.GONE);
+    }
+
     private void addTextTL() {
         String text = "Lai Trung Tien";
         int leftMargin = mLeftMarginTimeLine + mScrollView.getScrollX();
@@ -1697,6 +1850,41 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public void addAudio(String audioPath, int[] audioCoord) {
         mAudioPath = audioPath;
         startAnimationAddAudio(audioCoord);
+    }
+
+    public void getAudioOrder() {
+        for (int i=0; i<mAudioList.size(); i++) {
+            AudioTL audioTL = mAudioList.get(i);
+            audioTL.orderInList = i;
+        }
+    }
+
+    public void saveAudioObjects() {
+        mAudioTable.dropTable();
+        mAudioTable.createTable();
+        getAudioOrder();
+        for (AudioTL audioTL : mAudioList) {
+            AudioObject audio = audioTL.getAudioObject();
+            mAudioTable.insertValue(audio);
+        }
+    }
+
+    public void restoreAllAudioTL(int projectId) {
+        ArrayList<AudioObject> list = mAudioTable.getData(projectId);
+        for (AudioObject audio : list) {
+            restoreAudioTL(audio);
+        }
+    }
+
+    public void restoreAudioTL(AudioObject audio) {
+        int leftMargin = Integer.parseInt(audio.left);
+        AudioTL audioTL = new AudioTL(this, audio.path, mTimeLineImageHeight, leftMargin);
+        audioTL.setOnClickListener(onAudioTimeLineClick);
+        audioTL.setOnLongClickListener(onAudioLongClick);
+        audioTL.restoreAudioObject(audio);
+        mLayoutAudio.addView(audioTL);
+        int order = Integer.parseInt(audio.orderInList);
+        mAudioList.add(order, audioTL);
     }
 
     public void addAudioTL() {
@@ -1768,7 +1956,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void changeAudio(AudioTL audio, int startTime) {
         stopMediaPlayer();
-        mMediaPlayer = MediaPlayer.create(this, Uri.parse(audio.audioPreview));
+        mMediaPlayer = MediaPlayer.create(this, Uri.parse(audio.audioPath));
         mMediaPlayer.seekTo(startTime);
         updateSystemVolume();
     }
@@ -1906,11 +2094,17 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     };
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
+        log("on stop");
     }
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        log("on pause");
+//        new SaveProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
 
     private void setHightLighTab(int tab) {
         int videoTabId = tab == VIDEO_TAB ? R.drawable.ic_video_tab_blue : R.drawable.ic_video_tab;
@@ -2552,6 +2746,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     @Override
     protected void onResume() {
         super.onResume();
+        log("resume");
         hideStatusBar();
     }
 

@@ -33,7 +33,7 @@ public class ImageTable {
 
     public void createTable() {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
-        String sql = "create table " + TABLE_NAME + " ("+
+        String sql = "create table if not exists " + TABLE_NAME + " ("+
                 ID + " integer primary key, " +
                 PROJECT_ID + " integer, " +
                 PATH + " text, " +

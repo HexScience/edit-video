@@ -20,6 +20,8 @@ public class AudioTable {
     String END_TIME = "EndTime";
     String LEFT = "Left";
     String ORDER = "_Order";
+    String VOLUME = "Volume";
+    String VOLUME_PREVIEW = "VolumePreview";
     DBHelper mDbHelper;
 
     public AudioTable(Context context) {
@@ -28,14 +30,16 @@ public class AudioTable {
 
     public void createTable() {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
-        String sql = "create table " + TABLE_NAME + " ("+
+        String sql = "create table if not exists " + TABLE_NAME + " ("+
                 ID + " integer primary key, " +
                 PROJECT_ID + " integer, " +
                 PATH + " text, " +
                 START_TIME + " text, " +
                 END_TIME + " text, " +
                 LEFT + " text, " +
-                ORDER + " text)";
+                ORDER + " text, " +
+                VOLUME + " text, " +
+                VOLUME_PREVIEW + " text)";
         sqLiteDatabase.execSQL(sql);
     }
 
@@ -45,15 +49,17 @@ public class AudioTable {
         sqLiteDatabase.execSQL(sql);
     }
 
-    public void insertValue(VideoObject video){
+    public void insertValue(AudioObject audio){
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(PROJECT_ID, video.projectId);
-        contentValues.put(PATH, video.path);
-        contentValues.put(START_TIME, video.startTime);
-        contentValues.put(END_TIME, video.endTime);
-        contentValues.put(LEFT, video.left);
-        contentValues.put(ORDER, video.orderInList);
+        contentValues.put(PROJECT_ID, audio.projectId);
+        contentValues.put(PATH, audio.path);
+        contentValues.put(START_TIME, audio.startTime);
+        contentValues.put(END_TIME, audio.endTime);
+        contentValues.put(LEFT, audio.left);
+        contentValues.put(ORDER, audio.orderInList);
+        contentValues.put(VOLUME, audio.volume);
+        contentValues.put(VOLUME_PREVIEW, audio.volumePreview);
         sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
     }
 
@@ -67,9 +73,13 @@ public class AudioTable {
                 AudioObject audio = new AudioObject();
                 audio.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(ID)));
                 audio.projectId = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
+                audio.path = cursor.getString(cursor.getColumnIndex(PATH));
                 audio.startTime = cursor.getString(cursor.getColumnIndex(START_TIME));
+                audio.endTime = cursor.getString(cursor.getColumnIndex(END_TIME));
                 audio.left = cursor.getString(cursor.getColumnIndex(LEFT));
-                audio.order = cursor.getString(cursor.getColumnIndex(ORDER));
+                audio.orderInList = cursor.getString(cursor.getColumnIndex(ORDER));
+                audio.volume = cursor.getString(cursor.getColumnIndex(VOLUME));
+                audio.volumePreview = cursor.getString(cursor.getColumnIndex(VOLUME_PREVIEW));
                 list.add(audio);
             }
         } finally {
@@ -77,6 +87,4 @@ public class AudioTable {
         }
         return list;
     }
-
-
 }

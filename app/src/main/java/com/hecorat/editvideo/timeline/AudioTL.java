@@ -8,11 +8,13 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.database.AudioObject;
 import com.hecorat.editvideo.export.AudioHolder;
 import com.hecorat.editvideo.main.Constants;
 import com.hecorat.editvideo.main.MainActivity;
@@ -33,6 +35,8 @@ public class AudioTL extends ImageView {
     public int startInTimeline, endInTimeline;
     public int leftMargin;
     public float volume, volumePreview;
+    public int orderInList;
+    public int projectId;
 
     public String name, audioPath, audioPreview;
     public Rect bacgroundRect, rectTop,rectBottom, rectLeft, rectRight;
@@ -48,7 +52,7 @@ public class AudioTL extends ImageView {
         super(context);
         mActivity = (MainActivity) context;
         this.audioPath = audioPath;
-        audioPreview = audioPath;
+        audioPreview = audioPath;//spare
         retriever = new MediaMetadataRetriever();
         retriever.setDataSource(audioPath);
         duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
@@ -73,6 +77,36 @@ public class AudioTL extends ImageView {
         updateTimeLineStatus();
     }
 
+    public void restoreAudioObject(AudioObject audio) {
+        projectId = audio.projectId;
+        startTime = Integer.parseInt(audio.startTime);
+        endTime = Integer.parseInt(audio.endTime);
+        left = Integer.parseInt(audio.left);
+        volume = Float.parseFloat(audio.volume);
+        volumePreview = Float.parseFloat(audio.volumePreview);
+
+        width = (endTime - startTime) / Constants.SCALE_VALUE;
+        right = left + width;
+        start = startTime / Constants.SCALE_VALUE;
+        min = left - start;
+        max = min + duration / Constants.SCALE_VALUE;
+
+        drawTimeLine();
+    }
+
+    public AudioObject getAudioObject() {
+        AudioObject audioObject = new AudioObject();
+        audioObject.projectId = 1;
+        audioObject.path = audioPath;
+        audioObject.startTime = startTime + "";
+        audioObject.endTime = endTime + "";
+        audioObject.left = left + "";
+        audioObject.orderInList = orderInList + "";
+        audioObject.volume = volume + "";
+        audioObject.volumePreview = volumePreview + "";
+        return audioObject;
+    }
+
     public void updateAudioHolder(){
         audioHolder.audioPath = audioPath;
         audioHolder.startTime = startTime/1000f;
@@ -87,6 +121,10 @@ public class AudioTL extends ImageView {
         width = right - left;
         start = left - min; // it for visualation after
 
+        drawTimeLine();
+    }
+
+    private void drawTimeLine(){
         bacgroundRect = new Rect(0, 0, width, height);
         rectTop = new Rect(0, 0, width, Constants.BORDER_WIDTH);
         rectBottom = new Rect(0, height- Constants.BORDER_WIDTH, width, height);
@@ -121,7 +159,7 @@ public class AudioTL extends ImageView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        paint.setColor(getResources().getColor(R.color.background_timeline));
+        paint.setColor(ContextCompat.getColor(mActivity, R.color.background_timeline));
         canvas.drawRect(bacgroundRect, paint);
         paint.setColor(Color.MAGENTA);
         paint.setTextSize(35);
@@ -129,7 +167,7 @@ public class AudioTL extends ImageView {
             canvas.drawBitmap(listBitmap.get(i), i*150 - start, 0, paint);
         }
         canvas.drawText(name, 20, 50, paint);
-        paint.setColor(getResources().getColor(R.color.border_timeline_color));
+        paint.setColor(ContextCompat.getColor(mActivity, R.color.border_timeline_color));
         canvas.drawRect(rectTop, paint);
         canvas.drawRect(rectBottom, paint);
         canvas.drawRect(rectLeft, paint);

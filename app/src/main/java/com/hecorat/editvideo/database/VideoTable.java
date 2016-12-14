@@ -20,6 +20,8 @@ public class VideoTable {
     String END_TIME = "EndTime";
     String LEFT = "Left";
     String ORDER = "_Order";
+    String VOLUME = "Volume";
+    String VOLUME_PREVIEW = "VolumePreview";
     DBHelper mDbHelper;
 
     public VideoTable(Context context) {
@@ -28,14 +30,16 @@ public class VideoTable {
 
     public void createTable() {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
-        String sql = "create table " + TABLE_NAME + " ("+
+        String sql = "create table if not exists " + TABLE_NAME + " ("+
                 ID + " integer primary key, " +
                 PROJECT_ID + " integer, " +
                 PATH + " text, " +
                 START_TIME + " text, " +
                 END_TIME + " text, " +
                 LEFT + " text, " +
-                ORDER + " text)";
+                ORDER + " text, " +
+                VOLUME + " text, " +
+                VOLUME_PREVIEW + " text)";
         sqLiteDatabase.execSQL(sql);
     }
 
@@ -54,6 +58,8 @@ public class VideoTable {
         contentValues.put(END_TIME, video.endTime);
         contentValues.put(LEFT, video.left);
         contentValues.put(ORDER, video.orderInList);
+        contentValues.put(VOLUME, video.volume);
+        contentValues.put(VOLUME_PREVIEW, video.volumePreview);
         sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
     }
 
@@ -72,6 +78,8 @@ public class VideoTable {
                 video.endTime = cursor.getString(cursor.getColumnIndex(END_TIME));
                 video.left = cursor.getString(cursor.getColumnIndex(LEFT));
                 video.orderInList = cursor.getString(cursor.getColumnIndex(ORDER));
+                video.volume = cursor.getString(cursor.getColumnIndex(VOLUME));
+                video.volumePreview = cursor.getString(cursor.getColumnIndex(VOLUME_PREVIEW));
                 list.add(video);
             }
         } finally {
@@ -79,6 +87,5 @@ public class VideoTable {
         }
         return list;
     }
-
 
 }

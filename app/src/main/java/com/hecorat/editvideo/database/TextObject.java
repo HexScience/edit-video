@@ -6,17 +6,17 @@ package com.hecorat.editvideo.database;
 
 public class TextObject {
     public int id, projectId;
-    public String path, left, right, inLayoutImage, orderInLayout, orderInList;
+    public String text, left, right, inLayoutImage, orderInLayout, orderInList;
     public String x, y, scale, rotation, size, fontPath, fontColor, boxColor;
 
     public TextObject(){}
 
-    public TextObject(int projectId, String path, String left, String right,
+    public TextObject(int projectId, String text, String left, String right,
                       String inLayoutImage, String orderInLayout, String orderInList,
                       String x, String y, String scale, String rotation, String size,
                       String fontPath, String fontColor, String boxColor) {
         this.projectId = projectId;
-        this.path = path;
+        this.text = text;
         this.left = left;
         this.right = right;
         this.inLayoutImage = inLayoutImage;

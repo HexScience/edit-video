@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.editvideo.R;
+import com.hecorat.editvideo.database.ImageObject;
 import com.hecorat.editvideo.main.MainActivity;
 import com.hecorat.editvideo.timeline.ExtraTL;
 
@@ -38,7 +39,7 @@ public class FloatImage extends ImageView {
             initTopRightPoint, initBottomLeftPoint, initTopLeftPoint, initBottomRightPoint;
 
     public int width, height;
-    public float x, y, translateX, translateY, xExport, yExport,
+    public float x, y, xExport, yExport,
                     xMin, yMin, xMax, yMax;
     public float rotation = 0;
     public float[] scalePoint, centerPoint, rotatePoint,
@@ -47,7 +48,6 @@ public class FloatImage extends ImageView {
     public float widthScale, heightScale;
     public boolean isCompact;
     public boolean drawBorder;
-    public int maxDimensionLayout;
 
     public static final int MAX_DIMENSION = 300;
     public static final int ROTATE_CONSTANT = 30;
@@ -84,13 +84,24 @@ public class FloatImage extends ImageView {
         scaleBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_scale);
         mainBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
         paint = new Paint();
-        maxDimensionLayout = (int) Math.sqrt(width*width + height*height);
-        params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
         setFullLayout();
         setOnTouchListener(onTouchListener);
         setOnClickListener(onClickListener);
         rectBorder = new Rect(0, 0, (int)widthScale, (int)heightScale);
         drawBorder = true;
+    }
+
+    public void restoreState(ImageObject image) {
+        x = Float.parseFloat(image.x);
+        y = Float.parseFloat(image.y);
+        scaleValue = Float.parseFloat(image.scale);
+        rotation = Float.parseFloat(image.rotation);
+        widthScale = scaleValue * width;
+        heightScale = scaleValue * height;
+
+        invalidate();
     }
 
     private void initBorderPoints(){
@@ -120,23 +131,7 @@ public class FloatImage extends ImageView {
         invalidate();
     }
 
-    private void setCompactLayout(){
-        translateX = (int) (maxDimensionLayout-widthScale)/2;
-        translateY = (int) (maxDimensionLayout-heightScale)/2;
-        log("translateX = "+translateX+" translateY = "+translateY);
-        params.width = maxDimensionLayout;
-        params.height = maxDimensionLayout;
-
-        params.leftMargin =(int) (x - translateX);
-        params.topMargin = (int) (y - translateY);
-        setLayoutParams(params);
-        invalidate();
-        isCompact = true;
-    }
-
     private void setFullLayout(){
-        translateX = x;
-        translateY = y;
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
         params.topMargin = 0;
@@ -190,15 +185,12 @@ public class FloatImage extends ImageView {
             scaleValue = heightScale/height;
             widthScale = scaleValue*width;
         }
-        maxDimensionLayout = (int) Math.sqrt(widthScale*widthScale+heightScale*heightScale);
         invalidate();
     }
 
     public void moveImage(float moveX, float moveY) {
         x += moveX;
         y += moveY;
-        translateX = x;
-        translateY = y;
         invalidate();
     }
 
@@ -225,7 +217,7 @@ public class FloatImage extends ImageView {
         super.onDraw(canvas);
         Matrix matrix = new Matrix();
 
-        matrix.postTranslate(translateX, translateY);
+        matrix.postTranslate(x, y);
 
         initBorderPoints();
 

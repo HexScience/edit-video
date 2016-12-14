@@ -14,6 +14,8 @@ import android.widget.RelativeLayout;
 import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.addimage.FloatImage;
 import com.hecorat.editvideo.addtext.FloatText;
+import com.hecorat.editvideo.database.ImageObject;
+import com.hecorat.editvideo.database.TextObject;
 import com.hecorat.editvideo.export.ImageHolder;
 import com.hecorat.editvideo.export.TextHolder;
 import com.hecorat.editvideo.helper.Utils;
@@ -33,6 +35,8 @@ public class ExtraTL extends ImageView {
     public boolean isImage;
     public boolean inLayoutImage;
     public int leftMarginTimeLine;
+    public int projectId;
+    public int orderInLayout, orderInList;
 
     public MainActivity mActivity;
     public RelativeLayout.LayoutParams params;
@@ -47,7 +51,6 @@ public class ExtraTL extends ImageView {
     public TextHolder textHolder;
 
     public static final float SCALE_TEXT = 1.2f;
-
 
     public ExtraTL(Context context, String pathOrText, int height, int leftMargin, boolean isImage) {
         super(context);
@@ -130,10 +133,76 @@ public class ExtraTL extends ImageView {
         return Bitmap.createScaledBitmap(bitmap, 50, height, false);
     }
 
+    public void restoreTextTL(TextObject textObject) {
+        projectId = textObject.projectId;
+        text = textObject.text;
+        left = Integer.parseInt(textObject.left);
+        right = Integer.parseInt(textObject.right);
+        inLayoutImage = Integer.parseInt(textObject.inLayoutImage) == 1;
+        orderInLayout = Integer.parseInt(textObject.orderInLayout);
+        orderInList = Integer.parseInt(textObject.orderInList);
+
+        drawTimeLine(left, right);
+    }
+
+    public TextObject getTextObject() {
+        TextObject textObject = new TextObject();
+        textObject.projectId = 1;
+        textObject.text = text;
+        textObject.left = left + "";
+        textObject.right = right + "";
+        textObject.inLayoutImage = inLayoutImage? "1" : "0";
+        textObject.orderInLayout = orderInLayout + "";
+        textObject.orderInList = orderInList + "";
+
+        textObject.x = floatText.x + "";
+        textObject.y = floatText.y + "";
+        textObject.scale = floatText.scaleValue + "";
+        textObject.rotation = floatText.rotation + "";
+        textObject.size = floatText.size + "";
+        textObject.fontPath = floatText.fontPath + "";
+        textObject.fontColor = floatText.mColor + "";
+        textObject.boxColor = floatText.mBackgroundColor + "";
+        return textObject;
+    }
+
+    public void restoreImageTL(ImageObject image){
+        projectId = image.projectId;
+        left = Integer.parseInt(image.left);
+        right = Integer.parseInt(image.right);
+        inLayoutImage = Integer.parseInt(image.inLayoutImage) == 1;
+        orderInLayout = Integer.parseInt(image.orderInLayout);
+        orderInList = Integer.parseInt(image.orderInList);
+
+        drawTimeLine(left, right);
+    }
+
+    public ImageObject getImageObject() {
+        ImageObject image = new ImageObject();
+        image.projectId = 1;
+        image.path = imagePath;
+        image.left = left + "";
+        image.right = right + "";
+        image.inLayoutImage = inLayoutImage? "1":"0";
+        image.orderInLayout = orderInLayout + "";
+        image.orderInList = orderInList + "";
+
+        image.x = floatImage.x + "";
+        image.y = floatImage.y + "";
+        image.scale = floatImage.scaleValue + "";
+        image.rotation = floatImage.rotation + "";
+        return image;
+    }
+
     public void drawTimeLine(int left, int right) {
         this.left = left;
         this.right = right;
         width = right - left;
+
+        drawLayout();
+    }
+
+    private void drawLayout() {
         rectBackground = new Rect(0, 0, width, height);
         rectTop = new Rect(0, 0, width, Constants.BORDER_WIDTH);
         rectBottom = new Rect(0, height- Constants.BORDER_WIDTH, width, height);

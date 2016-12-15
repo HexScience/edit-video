@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */
 
 public class TextTable {
-    String TABLE_NAME = "Texts";
+    String TABLE_NAME = "Text";
     String ID = "Id";
     String PROJECT_ID = "ProjectId";
     String TEXT = "Text";
@@ -82,6 +82,13 @@ public class TextTable {
         contentValues.put(FONT_COLOR, text.fontColor);
         contentValues.put(BOX_COLOR, text.boxColor);
         sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
+    }
+
+    public void deleteTextOf(int projectId) {
+        SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
+        String sql = "delete from " + TABLE_NAME +
+                " where " + PROJECT_ID + " = " + projectId;
+        sqLiteDatabase.execSQL(sql);
     }
 
     public ArrayList<TextObject> getData(int projectId){

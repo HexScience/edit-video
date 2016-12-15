@@ -18,4 +18,7 @@
     <dimen name="margin_start_text_background">15dp</dimen>
     <dimen name="indicator_text_color">20dp</dimen>
     <dimen name="text_size_export">17sp</dimen>
+    <dimen name="project_item_height">120dp</dimen>
+    <dimen name="project_item_width">100dp</dimen>
+    <dimen name="project_item_margin">10dp</dimen>
 </resources>

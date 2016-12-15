@@ -1,6 +1,7 @@
 package com.hecorat.editvideo.helper;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -8,8 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Environment;
-import android.provider.SyncStateContract;
-import android.util.DisplayMetrics;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.hecorat.editvideo.main.Constants;
@@ -20,7 +20,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by bkmsx on 11/11/2016.
@@ -34,6 +37,11 @@ public class Utils {
         } catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
         }
+    }
+
+    public static String getDefaultName() {
+        return new SimpleDateFormat("yy_MM_dd_HH_mm_ss", Locale.getDefault())
+                .format(new Date(System.currentTimeMillis()));
     }
 
     public static Bitmap createDefaultBitmap(){
@@ -108,5 +116,19 @@ public class Utils {
             file.mkdirs();
         }
         return tempFolder;
+    }
+
+    public static String getResourceFolder(){
+        String direct = Environment.getExternalStorageDirectory().toString();
+        String resourceFolder = direct+"/"+ Constants.OUTPUT_FOLDER+"/"+Constants.RESOURCE_FOLDER;
+        File file = new File(resourceFolder);
+        if (!file.exists()){
+            file.mkdirs();
+        }
+        return resourceFolder;
+    }
+
+    public static SharedPreferences getSharedPref(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context);
     }
 }

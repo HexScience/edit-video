@@ -55,6 +55,7 @@ public class VideoTL extends ImageView {
     public VideoTL(Context context, String videoPath, int height) {
         super(context);
         mActivity = (MainActivity) context;
+        projectId = mActivity.mProjectId;
         MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
         this.videoPath = videoPath;
         originVideoPath = videoPath;
@@ -103,7 +104,7 @@ public class VideoTL extends ImageView {
 
     public VideoObject getVideoObject() {
         VideoObject videoObject = new VideoObject();
-        videoObject.projectId = 1;
+        videoObject.projectId = projectId;
         videoObject.path = originVideoPath;
         videoObject.startTime = startTime + "";
         videoObject.endTime = endTime + "";

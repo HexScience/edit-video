@@ -17,6 +17,7 @@ public class ProjectTable {
     String ID = "Id";
     String NAME = "Name";
     String DATA = "Data";
+    String FIRST_VIDEO = "FirstVideo";
     DBHelper mDbHelper;
 
     public ProjectTable(Context context) {
@@ -28,6 +29,7 @@ public class ProjectTable {
         String sql = "create table if not exists " + TABLE_NAME + "(" +
                 ID + " integer primary key, " +
                 NAME + " text, " +
+                FIRST_VIDEO + " text, " +
                 DATA + " text)";
         sqLiteDatabase.execSQL(sql);
     }
@@ -38,24 +40,46 @@ public class ProjectTable {
         sqLiteDatabase.execSQL(sql);
     }
 
-    public boolean insertValue(String name, String data) {
+    public long insertValue(String name, String data) {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(NAME, name);
         contentValues.put(DATA, data);
-        sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
-        return true;
+        contentValues.put(FIRST_VIDEO, "");
+        return sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
     }
 
-    public ArrayList<String> getData(String name) {
+    public void updateFirstVideo(int id, String firstVideo) {
+        SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(FIRST_VIDEO, firstVideo);
+        sqLiteDatabase.update(TABLE_NAME, contentValues, ID + " =? ",new String[]{id+""});
+    }
+
+    public void deleteProject(int id) {
+        SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
+        String sql = "delete from " + TABLE_NAME +
+                " where " + ID + " = " + id;
+        sqLiteDatabase.execSQL(sql);
+    }
+
+    public ArrayList<ProjectObject> getData() {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getReadableDatabase();
-        ArrayList<String> list = new ArrayList<>();
-        String sql = "select * from " + TABLE_NAME + " where " + NAME + " = '" + name + "'";
+        ArrayList<ProjectObject> list = new ArrayList<>();
+        String sql = "select * from " + TABLE_NAME;
         Cursor cursor = sqLiteDatabase.rawQuery(sql, null);
-        cursor.moveToFirst();
-        list.add(cursor.getString(cursor.getColumnIndex(ID)));
-        list.add(cursor.getString(cursor.getColumnIndex(NAME)));
-        list.add(cursor.getString(cursor.getColumnIndex(DATA)));
+        try {
+            while (cursor.moveToNext()) {
+                ProjectObject project = new ProjectObject();
+                project.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(ID)));
+                project.name = cursor.getString(cursor.getColumnIndex(NAME));
+                project.data = cursor.getString(cursor.getColumnIndex(DATA));
+                project.firstVideo = cursor.getString(cursor.getColumnIndex(FIRST_VIDEO));
+                list.add(project);
+            }
+        } finally {
+            cursor.close();
+        }
         return list;
     }
 

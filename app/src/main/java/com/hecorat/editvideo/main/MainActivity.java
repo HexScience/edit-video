@@ -38,7 +38,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.hecorat.editvideo.R;
@@ -54,6 +53,8 @@ import com.hecorat.editvideo.database.AudioObject;
 import com.hecorat.editvideo.database.AudioTable;
 import com.hecorat.editvideo.database.ImageObject;
 import com.hecorat.editvideo.database.ImageTable;
+import com.hecorat.editvideo.database.ProjectObject;
+import com.hecorat.editvideo.database.ProjectTable;
 import com.hecorat.editvideo.database.TextObject;
 import com.hecorat.editvideo.database.TextTable;
 import com.hecorat.editvideo.database.VideoObject;
@@ -127,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public ArrayList<String> mFontPath, mFontName;
     public String mVideoPath, mImagePath, mAudioPath;
     private AudioManager mAudioManager;
+    public String mProjectName;
 
     private MainActivity mActivity;
     private FontAdapter mFontAdapter;
@@ -148,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public AudioTable mAudioTable;
     public ImageTable mImageTable;
     public TextTable mTextTable;
+    public ProjectTable mProjectTable;
 
     private int mDragCode = DRAG_VIDEO;
     private int mCountVideo = 0;
@@ -172,6 +175,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public boolean mFinishExport;
     public float mVideoViewLeft;
     public boolean mFoundImage, mFoundText;
+    public int mProjectId;
+    public boolean mOpenLayoutProject;
 
     public static final int TIMELINE_VIDEO = 0;
     public static final int TIMELINE_EXTRA = 1;
@@ -345,16 +350,55 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         saveSystemVolume();
         prepareLayoutAnimationAddFile();
-//        openLayoutProject();
+
+        initDatabase();
+
+        openLayoutProject();
+    }
+
+    private void initDatabase() {
+        boolean firstUse = Utils.getSharedPref(this)
+                .getBoolean(getString(R.string.pref_first_use_app), true);
 
         mVideoTable = new VideoTable(this);
         mAudioTable = new AudioTable(this);
         mImageTable = new ImageTable(this);
         mTextTable = new TextTable(this);
+        mProjectTable = new ProjectTable(this);
+        if (firstUse) {
+            mProjectTable.dropTable();
+            mVideoTable.dropTable();
+            mImageTable.dropTable();
+            mTextTable.dropTable();
+            mAudioTable.dropTable();
+            Utils.getSharedPref(this).edit()
+                    .putBoolean(getString(R.string.pref_first_use_app), false).apply();
+        }
+        mProjectTable.createTable();
         mVideoTable.createTable();
         mImageTable.createTable();
         mTextTable.createTable();
         mAudioTable.createTable();
+    }
+
+    public void resetActivity() {
+        mVideoList.clear();
+        mImageList.clear();
+        mTextList.clear();
+        mAudioList.clear();
+        mListInLayoutImage.clear();
+        mListInLayoutText.clear();
+        mLayoutVideo.removeAllViews();
+        mLayoutImage.removeAllViews();
+        mLayoutText.removeAllViews();
+        mLayoutAudio.removeAllViews();
+        mVideoViewLayout.removeAllViews();
+        setBtnPlayVisible(false);
+        setBtnVolumeVisible(false);
+        setBtnEditVisible(false);
+        setBtnDeleteVisible(false);
+        setBtnExportVisible(false);
+        mCountVideo = 0;
     }
 
     private void openLayoutProject(){
@@ -453,19 +497,22 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         public void onGlobalLayout() {
             mTimeLineVideoHeight = mLayoutVideo.getHeight() - 10;
             addVideoControler();
-            restoreAllVideoTL(1);
             mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
+
+    public void openProject() {
+        restoreAllVideoTL(mProjectId);
+        restoreAllAudioTL(mProjectId);
+        restoreAllImageTL(mProjectId);
+        restoreAllTextTL(mProjectId);
+    }
 
     ViewTreeObserver.OnGlobalLayoutListener onLayoutImageCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override
         public void onGlobalLayout() {
             mTimeLineImageHeight = mLayoutImage.getHeight() - 10;
             addExtraNAudioController();
-            restoreAllAudioTL(1);
-            restoreAllImageTL(1);
-            restoreAllTextTL(1);
             mLayoutImage.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
@@ -811,6 +858,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public void setLayoutFragmentVisible(boolean visible) {
         int visibility = visible ? View.VISIBLE : View.GONE;
         mLayoutFragment.setVisibility(visibility);
+        mOpenLayoutProject = visible;
     }
 
     public void openLayoutEditText(boolean open) {
@@ -966,17 +1014,23 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View view) {
             pausePreview();
-            saveProject();
-//            exportVideo();
+            exportVideo();
         }
     };
 
+    public void deleteProject(int projectId) {
+        mVideoTable.deleteVideoOf(projectId);
+        mAudioTable.deleteAudioOf(projectId);
+        mImageTable.deleteImageOf(projectId);
+        mTextTable.deleteTextOf(projectId);
+    }
+
     public void saveProject() {
+        deleteProject(mProjectId);
         saveVideoObjects();
         saveAudioObjects();
         saveImageObjects();
         saveTextObjects();
-        Toast.makeText(mActivity, "Project is saved", Toast.LENGTH_LONG).show();
     }
 
     public void exportVideo() {
@@ -1418,12 +1472,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void saveVideoObjects() {
-        mVideoTable.dropTable();
-        mVideoTable.createTable();
         getVideoOrder();
         for (VideoTL videoTL : mVideoList) {
             VideoObject videoObject = videoTL.getVideoObject();
             mVideoTable.insertValue(videoObject);
+        }
+        if (mVideoList.size()>0){
+            VideoObject videoObject = mVideoList.get(0).getVideoObject();
+            mProjectTable.updateFirstVideo(mProjectId, videoObject.path);
         }
     }
 
@@ -1523,8 +1579,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void saveTextObjects() {
-        mTextTable.dropTable();
-        mTextTable.createTable();
         getTextOrder();
         for (ExtraTL extraTL : mTextList) {
             TextObject text = extraTL.getTextObject();
@@ -1558,8 +1612,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void saveImageObjects() {
-        mImageTable.dropTable();
-        mImageTable.createTable();
         getImageOrder();
         for (ExtraTL extraTL : mImageList) {
             ImageObject image = extraTL.getImageObject();
@@ -1860,8 +1912,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void saveAudioObjects() {
-        mAudioTable.dropTable();
-        mAudioTable.createTable();
         getAudioOrder();
         for (AudioTL audioTL : mAudioList) {
             AudioObject audio = audioTL.getAudioObject();
@@ -2096,14 +2146,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     @Override
     protected void onStop() {
         super.onStop();
-        log("on stop");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        log("on pause");
-//        new SaveProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new SaveProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void setHightLighTab(int tab) {
@@ -2479,6 +2522,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         if (mSelectedTL == TIMELINE_VIDEO) {
             unSelectVideoTL();
+            return true;
+        }
+
+        if (!mOpenLayoutProject) {
+            pausePreview();
+            saveProject();
+            openLayoutProject();
             return true;
         }
         return false;

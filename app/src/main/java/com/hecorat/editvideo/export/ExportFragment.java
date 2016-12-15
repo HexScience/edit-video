@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.helper.NotificationHelper;
+import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.main.MainActivity;
 
 import java.text.SimpleDateFormat;
@@ -66,9 +67,7 @@ public class ExportFragment extends Fragment{
         mBtnCancel = (Button) view.findViewById(R.id.btn_cancel_export);
         mTextViewTip = (TextView) view.findViewById(R.id.textview_tip);
 
-        String defaultName = new SimpleDateFormat("yy_MM_dd_HH_mm_ss", Locale.getDefault())
-                .format(new Date(System.currentTimeMillis()));
-        mEditText.setText(defaultName);
+        mEditText.setText(mActivity.mProjectName);
 
         mBtnExport.setOnClickListener(onBtnExportClick);
         mBtnBack.setOnClickListener(onBtnBackClick);

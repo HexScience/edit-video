@@ -125,7 +125,7 @@ public class FragmentImagesGallery extends Fragment {
             if (mChooseSticker){
                 String assetsPath = mListStiker.get(i);
                 String nameSticker = assetsPath.replace("/","_");
-                String stickerPath = Utils.getTempFolder()+"/"+nameSticker;
+                String stickerPath = Utils.getResourceFolder()+"/"+nameSticker;
                 Utils.copyFileFromAssets(mActivity, assetsPath, stickerPath);
                 mActivity.addImage(stickerPath, viewCoord);
             } else {

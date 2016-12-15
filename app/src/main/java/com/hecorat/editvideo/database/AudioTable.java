@@ -63,6 +63,13 @@ public class AudioTable {
         sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
     }
 
+    public void deleteAudioOf(int projectId) {
+        SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
+        String sql = "delete from " + TABLE_NAME +
+                " where " + PROJECT_ID + " = " + projectId;
+        sqLiteDatabase.execSQL(sql);
+    }
+
     public ArrayList<AudioObject> getData(int projectId){
         SQLiteDatabase sqLiteDatabase = mDbHelper.getReadableDatabase();
         ArrayList<AudioObject> list = new ArrayList<>();

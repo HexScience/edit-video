@@ -51,6 +51,7 @@ public class AudioTL extends ImageView {
     public AudioTL(Context context, String audioPath, int height, int leftMargin) {
         super(context);
         mActivity = (MainActivity) context;
+        projectId = mActivity.mProjectId;
         this.audioPath = audioPath;
         audioPreview = audioPath;//spare
         retriever = new MediaMetadataRetriever();
@@ -96,7 +97,7 @@ public class AudioTL extends ImageView {
 
     public AudioObject getAudioObject() {
         AudioObject audioObject = new AudioObject();
-        audioObject.projectId = 1;
+        audioObject.projectId = projectId;
         audioObject.path = audioPath;
         audioObject.startTime = startTime + "";
         audioObject.endTime = endTime + "";

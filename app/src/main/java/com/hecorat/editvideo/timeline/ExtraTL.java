@@ -50,11 +50,10 @@ public class ExtraTL extends ImageView {
     public ImageHolder imageHolder;
     public TextHolder textHolder;
 
-    public static final float SCALE_TEXT = 1.2f;
-
     public ExtraTL(Context context, String pathOrText, int height, int leftMargin, boolean isImage) {
         super(context);
         mActivity = (MainActivity) context;
+        projectId = mActivity.mProjectId;
         durationImage = Constants.IMAGE_TEXT_DURATION;
         this.height = height;
 
@@ -147,7 +146,7 @@ public class ExtraTL extends ImageView {
 
     public TextObject getTextObject() {
         TextObject textObject = new TextObject();
-        textObject.projectId = 1;
+        textObject.projectId = projectId;
         textObject.text = text;
         textObject.left = left + "";
         textObject.right = right + "";
@@ -179,7 +178,7 @@ public class ExtraTL extends ImageView {
 
     public ImageObject getImageObject() {
         ImageObject image = new ImageObject();
-        image.projectId = 1;
+        image.projectId = projectId;
         image.path = imagePath;
         image.left = left + "";
         image.right = right + "";

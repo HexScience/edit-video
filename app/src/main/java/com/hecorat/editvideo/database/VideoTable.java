@@ -63,6 +63,13 @@ public class VideoTable {
         sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
     }
 
+    public void deleteVideoOf(int projectId) {
+        SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
+        String sql = "delete from " + TABLE_NAME +
+                " where " + PROJECT_ID + " = " + projectId;
+        sqLiteDatabase.execSQL(sql);
+    }
+
     public ArrayList<VideoObject> getData(int projectId){
         SQLiteDatabase sqLiteDatabase = mDbHelper.getReadableDatabase();
         ArrayList<VideoObject> list = new ArrayList<>();

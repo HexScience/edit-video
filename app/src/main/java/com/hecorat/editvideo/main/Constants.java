@@ -12,4 +12,5 @@ public interface Constants {
 
     String OUTPUT_FOLDER = "AZ_Video_Editor";
     String TEMP_FOLDER = "temp";
+    String RESOURCE_FOLDER = ".resource";
 }

@@ -103,12 +103,25 @@
                 app:cpv_rimColor="@color/circle_progress_rim_color"
                 app:cpv_textColor="@color/circle_progress_text_color"
                 app:cpv_fillColor="@color/circle_progress_fill_color"/>
-            <Button
-                android:id="@+id/btn_cancel_export"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:text="Cancel"/>
+                android:gravity="center_horizontal"
+                android:layout_marginTop="30dp">
+                <Button
+                    android:id="@+id/btn_cancel_export"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible"
+                    android:text="Cancel"/>
+                <Button
+                    android:id="@+id/btn_back_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:text="Back"/>
+            </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/layout_after_export"
                 android:orientation="horizontal"
@@ -121,14 +134,21 @@
                     android:id="@+id/btn_back_after_export"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="20dp"
+                    android:layout_marginEnd="15dp"
                     android:text="Back"/>
 
                 <Button
                     android:id="@+id/btn_watch_video"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="15dp"
                     android:text="Watch Video"/>
+
+                <Button
+                    android:id="@+id/btn_share"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Share"/>
             </LinearLayout>
             <TextView
                 android:id="@+id/textview_tip"

@@ -31,6 +31,8 @@ public class FFmpeg {
     public static String mLineLog;
     public static FFmpeg sFFmpeg;
 
+    private boolean mStop;
+
     public static FFmpeg getInstance(Context context){
         if (sFFmpeg == null){
             sFFmpeg = new FFmpeg();
@@ -40,7 +42,6 @@ public class FFmpeg {
     }
 
     public boolean performGetVideoInfo(String inputVideo, String outputFile){
-        Log.e("Az Plugin: ", "Get to Az plugin");
         LinkedList<String> command = new LinkedList<String>();
 
         command.add(mFfmpegPath);
@@ -56,7 +57,12 @@ public class FFmpeg {
         return mLineLog;
     }
 
+    public void stop() {
+        mStop = true;
+    }
+
     public boolean executeFFmpegCommand(LinkedList<String> command) {
+        mStop = false;
         command.add(0, mFfmpegPath);
         Process ffmpegProcess = null;
         ProcessBuilder procBuilder = new ProcessBuilder(command);
@@ -67,7 +73,7 @@ public class FFmpeg {
                     ffmpegProcess.getInputStream()));
             System.out
                     .println("***Starting FFMPEG***" + procBuilder.toString());
-            while ((mLineLog = reader.readLine()) != null) {
+            while ((mLineLog = reader.readLine()) != null && !mStop) {
                 System.out.println("***" + mLineLog + "***");
                 mAllLog += mLineLog;
             }

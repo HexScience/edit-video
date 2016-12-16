@@ -1,6 +1,5 @@
 package com.hecorat.editvideo.main;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.hecorat.editvideo.R;
 import com.hecorat.editvideo.database.ProjectObject;
 import com.hecorat.editvideo.database.ProjectTable;
+import com.hecorat.editvideo.helper.NameDialog;
 import com.hecorat.editvideo.helper.Utils;
 
 import java.util.ArrayList;
@@ -25,18 +25,19 @@ import java.util.ArrayList;
  * Created by Bkmsx on 12/12/2016.
  */
 
-public class ProjectFragment extends Fragment{
+public class ProjectFragment extends Fragment implements NameDialog.DialogClickListener {
     static MainActivity mActivity;
     public ImageView mBtnAddProject;
     public LinearLayout mLayoutScrollView;
-    public View mPreviousSelectProject;
-    public Button mBtnOpen, mBtnDelete;
+    public View mPreviousSelectProject, mSelectProject;
+    public Button mBtnOpen, mBtnDelete, mBtnRename;
     public LinearLayout mLayoutButton;
 
     public ProjectTable mProjectTable;
     public ArrayList<ProjectObject> mProjectList;
 
     public int mSelectProjectId;
+    private int mCountVideo;
 
     public String mSelectProjectName;
 
@@ -58,17 +59,31 @@ public class ProjectFragment extends Fragment{
         mBtnDelete = (Button) view.findViewById(R.id.btn_delete);
         mBtnDelete.setOnClickListener(onBtnDeleteClick);
 
+        mBtnRename = (Button) view.findViewById(R.id.btn_rename);
+        mBtnRename.setOnClickListener(onBtnRenameClick);
+
         mLayoutScrollView = (LinearLayout) view.findViewById(R.id.layout_scrollview);
 
         mLayoutButton = (LinearLayout) view.findViewById(R.id.layout_button);
 
         mProjectTable = mActivity.mProjectTable;
         mProjectList = mProjectTable.getData();
+        mCountVideo = mProjectList.size();
+
         addProjectsToLayoutScrollView();
         return view;
     }
 
-    private void addProjectsToLayoutScrollView(){
+    View.OnClickListener onBtnRenameClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            NameDialog dialog = NameDialog.newInstance(mActivity, NameDialog.RENAME, mSelectProjectName);
+            dialog.setOnClickListener(ProjectFragment.this);
+            dialog.show(mActivity.getSupportFragmentManager().beginTransaction(), "rename");
+        }
+    };
+
+    private void addProjectsToLayoutScrollView() {
         for (ProjectObject project : mProjectList) {
             View view = LayoutInflater.from(mActivity).inflate(R.layout.project_item, null);
             view.setTag(project);
@@ -81,17 +96,60 @@ public class ProjectFragment extends Fragment{
             nameProject.setText(project.name);
 
             mLayoutScrollView.addView(view);
-            ((LinearLayout.LayoutParams)view.getLayoutParams()).rightMargin = Utils.dpToPixel(mActivity, 10);
+            ((LinearLayout.LayoutParams) view.getLayoutParams()).rightMargin = Utils.dpToPixel(mActivity, 10);
         }
     }
 
     View.OnClickListener onBtnAddProjectClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            NameProjectDialog.newInstance(mActivity)
-                    .show(mActivity.getSupportFragmentManager().beginTransaction(),"name project");
+            String nameProject = "Project_"+(mCountVideo+1);
+            NameDialog dialog = NameDialog.newInstance(mActivity, NameDialog.CREATE_PROJECT, nameProject);
+            dialog.setOnClickListener(ProjectFragment.this);
+            dialog.show(mActivity.getSupportFragmentManager().beginTransaction(), "name project");
         }
     };
+
+    @Override
+    public void onPositiveClick(String name, int type) {
+        switch (type) {
+            case NameDialog.CREATE_PROJECT:
+                createNewProject(name);
+                break;
+            case NameDialog.RENAME:
+                renameProject(name);
+                break;
+        }
+    }
+
+    private void renameProject(String name) {
+        mProjectTable.updateValue(mSelectProjectId, ProjectTable.NAME, name);
+        mSelectProjectName = name;
+
+        ProjectObject projectObject = (ProjectObject) mSelectProject.getTag();
+        projectObject.name = name;
+        mSelectProject.setTag(projectObject);
+
+        TextView nameProject = (TextView) mSelectProject.findViewById(R.id.name_project);
+        nameProject.setText(name);
+
+        mActivity.hideStatusBar();
+    }
+
+    private void createNewProject(String name) {
+        mActivity.setLayoutFragmentVisible(false);
+        mActivity.mProjectName = name;
+        long id = mActivity.mProjectTable.insertValue(mActivity.mProjectName,
+                System.currentTimeMillis() + "");
+        mActivity.mProjectId = (int) id;
+        mActivity.resetActivity();
+        mActivity.hideStatusBar();
+    }
+
+    @Override
+    public void onNegativeClick() {
+        mActivity.hideStatusBar();
+    }
 
     View.OnClickListener onProjectItemClick = new View.OnClickListener() {
         @Override
@@ -99,6 +157,7 @@ public class ProjectFragment extends Fragment{
             ProjectObject project = (ProjectObject) view.getTag();
             mSelectProjectId = project.id;
             mSelectProjectName = project.name;
+            mSelectProject = view;
 
             mLayoutButton.setVisibility(View.VISIBLE);
 
@@ -116,10 +175,11 @@ public class ProjectFragment extends Fragment{
         }
     };
 
-    View.OnClickListener onBtnOpenClick = new View.OnClickListener(){
+    View.OnClickListener onBtnOpenClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             mActivity.setLayoutFragmentVisible(false);
+            mLayoutButton.setVisibility(View.INVISIBLE);
             if (mActivity.mProjectId == mSelectProjectId) {
                 return;
             }
@@ -134,8 +194,11 @@ public class ProjectFragment extends Fragment{
         @Override
         public void onClick(View view) {
             mProjectTable.deleteProject(mSelectProjectId);
-            mActivity.deleteProject(mSelectProjectId);
+            mActivity.deleteAllObjects(mSelectProjectId);
             mLayoutScrollView.removeView(mPreviousSelectProject);
+
+            mLayoutButton.setVisibility(View.INVISIBLE);
+
         }
     };
 

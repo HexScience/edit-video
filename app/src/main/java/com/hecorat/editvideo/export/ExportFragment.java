@@ -1,9 +1,13 @@
 package com.hecorat.editvideo.export;
 
+import android.content.Intent;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ShareCompat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,11 +44,14 @@ public class ExportFragment extends Fragment{
     public LinearLayout mLayoutQuality, mLayoutProgress;
     public EditText mEditText;
     public RadioGroup mRadioGroup;
-    public Button mBtnBackAfterExport, mBtnWatchVideo, mBtnCancel;
+    public Button mBtnBackAfterExport, mBtnWatchVideo;
     public LinearLayout mLayoutAfterExport;
     public TextView mTextViewTip;
+    public Button mBtnShare, mBtnCancel, mBtnBackCancel;
 
     public String mVideoPath;
+
+    private boolean mStop;
 
     public static ExportFragment newInstance(MainActivity activity) {
         mActivity = activity;
@@ -66,6 +73,8 @@ public class ExportFragment extends Fragment{
         mBtnWatchVideo = (Button) view.findViewById(R.id.btn_watch_video);
         mBtnCancel = (Button) view.findViewById(R.id.btn_cancel_export);
         mTextViewTip = (TextView) view.findViewById(R.id.textview_tip);
+        mBtnShare = (Button) view.findViewById(R.id.btn_share);
+        mBtnBackCancel = (Button) view.findViewById(R.id.btn_back_cancel);
 
         mEditText.setText(mActivity.mProjectName);
 
@@ -73,11 +82,59 @@ public class ExportFragment extends Fragment{
         mBtnBack.setOnClickListener(onBtnBackClick);
         mBtnBackAfterExport.setOnClickListener(onBtnBackClick);
         mEditText.setOnEditorActionListener(onNameEdited);
+        mBtnWatchVideo.setOnClickListener(onBtnWatchVideoClick);
+        mBtnShare.setOnClickListener(onBtnShareClick);
+        mBtnCancel.setOnClickListener(onBtnCancelClick);
+        mBtnBackCancel.setOnClickListener(onBtnBackClick);
 
         mCircleProgressBar.setTextMode(TextMode.TEXT);
         setExportProgress(0);
         return view;
     }
+
+    View.OnClickListener onBtnCancelClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            FFmpeg.getInstance(mActivity).stop();
+            mStop = true;
+        }
+    };
+
+    View.OnClickListener onBtnShareClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            MediaScannerConnection.scanFile(mActivity, new String[] { mVideoPath }, null,
+                    onScanCompletedListener);
+        }
+    };
+
+    private void shareVideo(Uri uri) {
+        Intent sendIntent = new Intent(Intent.ACTION_SEND);
+        sendIntent.setType("video/mp4");
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Video");
+        sendIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, "Enjoy the Video");
+        sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        mActivity.startActivity(Intent.createChooser(sendIntent, "Email:"));
+    }
+
+    MediaScannerConnection.OnScanCompletedListener onScanCompletedListener = new MediaScannerConnection.OnScanCompletedListener() {
+
+        @Override
+        public void onScanCompleted(String path, Uri uri) {
+            shareVideo(uri);
+        }
+    };
+
+    View.OnClickListener onBtnWatchVideoClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.parse(mVideoPath), "video/mp4");
+            mActivity.startActivity(intent);
+        }
+    };
 
     TextView.OnEditorActionListener onNameEdited = new TextView.OnEditorActionListener() {
         @Override
@@ -118,6 +175,8 @@ public class ExportFragment extends Fragment{
         RadioButton radioButton = (RadioButton) mLayoutQuality.findViewById(id);
         int quality = Integer.parseInt(radioButton.getTag().toString());
         String name = mEditText.getText().toString();
+        mVideoPath = Utils.getOutputFolder()+"/"+name + ".mp4";
+
         ExportTask exportTask = new ExportTask(mActivity, mActivity.mVideoList, mActivity.mImageList,
                 mActivity.mTextList, mActivity.mAudioList, name, quality);
         exportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -126,7 +185,11 @@ public class ExportFragment extends Fragment{
     public void setExportProgress(int value) {
         mCircleProgressBar.setValue(value);
         if (value == 0) {
-            mCircleProgressBar.setText("Preparing..");
+            if (mStop) {
+                mCircleProgressBar.setText("Canceled!");
+            } else {
+                mCircleProgressBar.setText("Preparing..");
+            }
             mCircleProgressBar.setTextSize(50);
         } else if (value==100){
             mCircleProgressBar.setText("Completed!");
@@ -138,10 +201,16 @@ public class ExportFragment extends Fragment{
     }
 
     public void onExportCompleted() {
-        setExportProgress(100);
         mBtnCancel.setVisibility(View.GONE);
-        mLayoutAfterExport.setVisibility(View.VISIBLE);
-        mTextViewTip.setVisibility(View.INVISIBLE);
-        NotificationHelper.notify(mActivity, "Export video is successful");
+
+        if (mStop) {
+            setExportProgress(0);
+            mBtnBackCancel.setVisibility(View.VISIBLE);
+        } else {
+            setExportProgress(100);
+            mLayoutAfterExport.setVisibility(View.VISIBLE);
+            mTextViewTip.setVisibility(View.INVISIBLE);
+            NotificationHelper.notify(mActivity, "Export video is successful");
+        }
     }
 }

@@ -15,9 +15,9 @@ import java.util.ArrayList;
 public class ProjectTable {
     String TABLE_NAME = "Project";
     String ID = "Id";
-    String NAME = "Name";
-    String DATA = "Data";
-    String FIRST_VIDEO = "FirstVideo";
+    public static final String NAME = "Name";
+    public static final String DATA = "Data";
+    public static final String FIRST_VIDEO = "FirstVideo";
     DBHelper mDbHelper;
 
     public ProjectTable(Context context) {
@@ -49,10 +49,10 @@ public class ProjectTable {
         return sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
     }
 
-    public void updateFirstVideo(int id, String firstVideo) {
+    public void updateValue(int id, String col, String value) {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(FIRST_VIDEO, firstVideo);
+        contentValues.put(col, value);
         sqLiteDatabase.update(TABLE_NAME, contentValues, ID + " =? ",new String[]{id+""});
     }
 

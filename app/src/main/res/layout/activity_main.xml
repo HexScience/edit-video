@@ -124,6 +124,10 @@
                     android:layout_height="match_parent"
                     android:layout_centerHorizontal="true"
                     android:visibility="gone"/>
+                <RelativeLayout
+                    android:id="@+id/layout_floatview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
             </RelativeLayout>
             <FrameLayout
                 android:layout_width="match_parent"

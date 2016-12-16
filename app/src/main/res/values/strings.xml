@@ -11,4 +11,7 @@
     <string name="confirm_export_title">Confirm Export</string>
     <string name="confirm_export_msg">Do you want to export video now?</string>
     <string name="export_progress_msg">Export video</string>
+    <string name="dialog_title_create_project">Name Project</string>
+    <string name="dialog_title_rename">Rename</string>
+    <string name="positive_btn_text_create_project">Create Project</string>
 </resources>

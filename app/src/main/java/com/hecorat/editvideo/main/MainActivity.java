@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -27,6 +28,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -53,7 +55,6 @@ import com.hecorat.editvideo.database.AudioObject;
 import com.hecorat.editvideo.database.AudioTable;
 import com.hecorat.editvideo.database.ImageObject;
 import com.hecorat.editvideo.database.ImageTable;
-import com.hecorat.editvideo.database.ProjectObject;
 import com.hecorat.editvideo.database.ProjectTable;
 import com.hecorat.editvideo.database.TextObject;
 import com.hecorat.editvideo.database.TextTable;
@@ -118,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private RelativeLayout mLayoutAnimationAddFile;
     private ImageView mImageShadowAnimation;
     public FrameLayout mLayoutFragment;
+    private RelativeLayout mLayoutFloatView;
 
     private Thread mThreadPreviewVideo;
     public ArrayList<VideoTL> mVideoList;
@@ -126,9 +128,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public ArrayList<AudioTL> mAudioList;
     private ArrayList<ExtraTL> mListInLayoutImage, mListInLayoutText;
     public ArrayList<String> mFontPath, mFontName;
-    public String mVideoPath, mImagePath, mAudioPath;
     private AudioManager mAudioManager;
+
     public String mProjectName;
+    public String mVideoPath, mImagePath, mAudioPath;
 
     private MainActivity mActivity;
     private FontAdapter mFontAdapter;
@@ -268,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mMainLayout = (RelativeLayout) findViewById(R.id.main_layout);
         mSeekbarIndicator = (LinearLayout) findViewById(R.id.seekbar_indicator);
         mLayoutFragment = (FrameLayout) findViewById(R.id.layout_fragment);
+        mLayoutFloatView = (RelativeLayout) findViewById(R.id.layout_floatview);
 
         mColorPicker.setAlphaSliderVisible(true);
         mColorPicker.setOnColorChangedListener(this);
@@ -354,6 +358,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         initDatabase();
 
         openLayoutProject();
+        keepScreenOn();
+    }
+
+    private void keepScreenOn() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     private void initDatabase() {
@@ -392,13 +401,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutImage.removeAllViews();
         mLayoutText.removeAllViews();
         mLayoutAudio.removeAllViews();
-        mVideoViewLayout.removeAllViews();
+        mLayoutFloatView.removeAllViews();
         setBtnPlayVisible(false);
         setBtnVolumeVisible(false);
         setBtnEditVisible(false);
         setBtnDeleteVisible(false);
         setBtnExportVisible(false);
         mCountVideo = 0;
+        mCurrentVideoId = -1;
+        mTLPositionInMs = 0;
     }
 
     private void openLayoutProject(){
@@ -506,6 +517,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         restoreAllAudioTL(mProjectId);
         restoreAllImageTL(mProjectId);
         restoreAllTextTL(mProjectId);
+
+        updateBtnExportVisible();
     }
 
     ViewTreeObserver.OnGlobalLayoutListener onLayoutImageCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -927,10 +940,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private void deleteExtraTimeline() {
         if (mSelectedExtraTL.isImage) {
             mImageList.remove(mSelectedExtraTL);
-            mVideoViewLayout.removeView(mSelectedExtraTL.floatImage);
+            mLayoutFloatView.removeView(mSelectedExtraTL.floatImage);
         } else {
             mTextList.remove(mSelectedExtraTL);
-            mVideoViewLayout.removeView(mSelectedExtraTL.floatText);
+            mLayoutFloatView.removeView(mSelectedExtraTL.floatText);
         }
         if (mSelectedExtraTL.inLayoutImage) {
             mLayoutImage.removeView(mSelectedExtraTL);
@@ -1018,7 +1031,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     };
 
-    public void deleteProject(int projectId) {
+    public void deleteAllObjects(int projectId) {
         mVideoTable.deleteVideoOf(projectId);
         mAudioTable.deleteAudioOf(projectId);
         mImageTable.deleteImageOf(projectId);
@@ -1026,11 +1039,19 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void saveProject() {
-        deleteProject(mProjectId);
+        deleteAllObjects(mProjectId);
         saveVideoObjects();
         saveAudioObjects();
         saveImageObjects();
         saveTextObjects();
+        deleteProjectIfEmpty();
+    }
+
+    private void deleteProjectIfEmpty() {
+        if (mVideoList.isEmpty() && mImageList.isEmpty()
+                && mTextList.isEmpty() && mAudioList.isEmpty()) {
+            mProjectTable.deleteProject(mProjectId);
+        }
     }
 
     public void exportVideo() {
@@ -1389,6 +1410,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 startThreadPreview();
                 startPreview();
                 hideAllFloatNControlers();
+                log("Video count: "+mCountVideo);
+                log("current id" + mCurrentVideoId);
+                log("max timeline" + mMaxTimeLine);
+                log("curren position: "+mTLPositionInMs);
             }
         }
     };
@@ -1479,7 +1504,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
         if (mVideoList.size()>0){
             VideoObject videoObject = mVideoList.get(0).getVideoObject();
-            mProjectTable.updateFirstVideo(mProjectId, videoObject.path);
+            mProjectTable.updateValue(mProjectId, ProjectTable.FIRST_VIDEO,videoObject.path);
         }
     }
 
@@ -1509,7 +1534,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 //        fixIfVideoHasNoAudio(videoTL);
 
         setBtnPlayVisible(true);
-        updateBtnExportVisible();
     }
 
     private void addVideoTL() {
@@ -1649,7 +1673,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         floatImage.timeline = extraTL;
         floatImage.drawBorder(false);
         floatImage.setVisibility(View.GONE);
-        mVideoViewLayout.addView(floatImage);
+        mLayoutFloatView.addView(floatImage);
     }
 
     private void addImageTL() {
@@ -1664,7 +1688,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         FloatImage floatImage = new FloatImage(this, bitmap);
         extraTL.floatImage = floatImage;
         floatImage.timeline = extraTL;
-        mVideoViewLayout.addView(floatImage);
+        mLayoutFloatView.addView(floatImage);
         setFloatImageVisible(mSelectedExtraTL);
         setFloatTextVisible(null);
         floatImage.drawBorder(true);
@@ -1826,12 +1850,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
 
         FloatText floatText = new FloatText(this, text);
-        mVideoViewLayout.addView(floatText);
+        mLayoutFloatView.addView(floatText);
         extraTL.floatText = floatText;
         floatText.timeline = extraTL;
         floatText.restoreState(textObject);
         floatText.drawBorder(false);
         floatText.setVisibility(View.GONE);
+
     }
 
     private void addTextTL() {
@@ -1845,7 +1870,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mSelectedExtraTL = extraTL;
 
         FloatText floatText = new FloatText(this, text);
-        mVideoViewLayout.addView(floatText);
+        mLayoutFloatView.addView(floatText);
         extraTL.floatText = floatText;
         floatText.timeline = extraTL;
         setFloatImageVisible(null);

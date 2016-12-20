@@ -38,4 +38,5 @@ public class CustomVideoView extends VideoView implements MediaPlayer.OnPrepared
         } catch (IllegalStateException e) {
         }
     }
+
 }

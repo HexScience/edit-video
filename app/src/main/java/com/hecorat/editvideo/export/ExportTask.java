@@ -136,7 +136,7 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         for (int i=0; i<mListVideo.size(); i++){
             VideoHolder video = mListVideo.get(i).videoHolder;
             command.add("-ss");
-            command.add(video.startTime+"");
+            command.add(video.startTimeMs +"");
             command.add("-t");
             command.add(video.duration+"");
             command.add("-i");
@@ -145,7 +145,7 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         for (int i=0; i<mListAudio.size(); i++){
             AudioHolder audio = mListAudio.get(i).audioHolder;
             command.add("-ss");
-            command.add(audio.startTime+"");
+            command.add(audio.startTimeMs +"");
             command.add("-t");
             command.add(audio.duration+"");
             command.add("-i");

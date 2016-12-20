@@ -15,7 +15,7 @@ public class AudioFilter {
         filter += setVolume(videoVolume, 0, false);
         for (int i=0; i<listAudio.size(); i++){
             AudioHolder audio = listAudio.get(i).audioHolder;
-            filter += prepareAudio(audio.startInTimeLine, i+order);
+            filter += prepareAudio(audio.startInTimeLineMs, i+order);
             filter += setVolume(audio.volume, i+order, true);
             in += "[auv"+(i+order)+"]";
         }

@@ -1,7 +1,6 @@
 package com.hecorat.editvideo.video;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -56,7 +55,7 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
         mBtnOk.setOnClickListener(onBtnOkClick);
         setLayoutTrimVideo();
         mVideoView.setVideoPath(mVideoPath);
-        int seekTime = Math.max(10, mVideoTL.startTime);
+        int seekTime = Math.max(10, mVideoTL.startTimeMs);
         mVideoView.seekTo(seekTime);
         return view;
     }
@@ -114,6 +113,6 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
 
         mRangeSeekBar = new RangeSeekBar(mActivity, (int)layoutWidth, 100, mVideoPath);
         mLayoutSeekbar.addView(mRangeSeekBar);
-        setInitPosition(mVideoTL.startTime, mVideoTL.endTime);
+        setInitPosition(mVideoTL.startTimeMs, mVideoTL.endTimeMs);
     }
 }

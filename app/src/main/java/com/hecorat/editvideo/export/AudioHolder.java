@@ -7,6 +7,6 @@ package com.hecorat.editvideo.export;
 public class AudioHolder {
     public String audioPath;
     public float volume;
-    public float startInTimeLine, duration;
-    public float startTime;
+    public float startInTimeLineMs, duration;
+    public float startTimeMs;
 }

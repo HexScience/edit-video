@@ -32,8 +32,8 @@ public class ImageFilter {
 
     private static String addImage(String input, String output, ImageHolder image, int index){
         String filter= input+"[ov"+index+"]overlay="+image.x
-                    +":"+image.y+":enable='between=(t,"+image.startInTimeLine +","
-                    +image.endInTimeLine +")'"+output;
+                    +":"+image.y+":enable='between=(t,"+image.startInTimeLineMs +","
+                    +image.endInTimeLineMs +")'"+output;
         return filter;
     }
 }

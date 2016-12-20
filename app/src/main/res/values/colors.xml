@@ -16,4 +16,5 @@
     <color name="orange">#FF7043</color>
     <color name="video_timeline_highline">#fd9003</color>
     <color name="range_seekbar_bgr">#b44444</color>
+    <color name="wave_sound_color">#c2db85</color>
 </resources>

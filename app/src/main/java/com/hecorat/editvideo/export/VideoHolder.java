@@ -6,6 +6,6 @@ package com.hecorat.editvideo.export;
 
 public class VideoHolder {
     public String videoPath;
-    public float startTime, duration;
+    public float startTimeMs, duration;
     public float volume;
 }

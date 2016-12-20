@@ -3,11 +3,11 @@ package com.hecorat.editvideo.timeline;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.ImageView;
@@ -20,6 +20,7 @@ import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.main.Constants;
 import com.hecorat.editvideo.main.MainActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -38,8 +39,8 @@ public class VideoTL extends ImageView {
 
     public int width, height;
     public int MARGIN_LEFT_TIME_LINE;
-    public int startInTimeLine, endInTimeLine;
-    public int startTime, endTime;
+    public int startInTimeLineMs, endInTimeLineMs;
+    public int startTimeMs, endTimeMs;
     public int startPosition;
     public int left, right;
     public int min, max;
@@ -51,6 +52,7 @@ public class VideoTL extends ImageView {
     public boolean isHighLight;
     public int orderInList;
     public int projectId;
+    public boolean isExists;
 
     public VideoTL(Context context, String videoPath, int height) {
         super(context);
@@ -60,20 +62,29 @@ public class VideoTL extends ImageView {
         this.videoPath = videoPath;
         originVideoPath = videoPath;
         this.height = height;
-        paint = new Paint();
-        retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(videoPath);
+
         listBitmap = new ArrayList<>();
+        paint = new Paint();
         hasAudio = true;
-        durationVideo = Integer.parseInt(retriever.extractMetadata
-                (MediaMetadataRetriever.METADATA_KEY_DURATION));
-        defaultBitmap = Utils.createDefaultBitmap();
         videoHolder = new VideoHolder();
         mBackgroundColor = ContextCompat.getColor(mActivity, R.color.background_timeline);
         mBorderColor = mBackgroundColor;
+        defaultBitmap = Utils.createDefaultBitmap();
 
-        startTime = 0;
-        endTime = durationVideo;
+        isExists = new File(videoPath).exists();
+        if (isExists) {
+            retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(videoPath);
+            durationVideo = Integer.parseInt(retriever.extractMetadata
+                    (MediaMetadataRetriever.METADATA_KEY_DURATION));
+            new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            durationVideo = Constants.DEFAULT_DURATION;
+            mBackgroundColor = Color.RED;
+        }
+
+        startTimeMs = 0;
+        endTimeMs = durationVideo;
         left = 0;
         width = durationVideo/ Constants.SCALE_VALUE;
         min = left;
@@ -84,9 +95,7 @@ public class VideoTL extends ImageView {
 
         params = new RelativeLayout.LayoutParams(width, height);
         setLayoutParams(params);
-        drawTimeLineWith(startTime, endTime);
-
-        new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        drawTimeLineWith(startTimeMs, endTimeMs);
 
         // spare
         this.audioPreview = videoPath;
@@ -94,20 +103,20 @@ public class VideoTL extends ImageView {
 
     public void restoreVideoObject(VideoObject video) {
         projectId = video.projectId;
-        startTime = Integer.parseInt(video.startTime);
-        endTime = Integer.parseInt(video.endTime);
+        startTimeMs = Integer.parseInt(video.startTime);
+        endTimeMs = Integer.parseInt(video.endTime);
         left = Integer.parseInt(video.left);
         volume = Float.parseFloat(video.volume);
         volumePreview = Float.parseFloat(video.volumePreview);
-        drawTimeLineWith(startTime, endTime);
+        drawTimeLineWith(startTimeMs, endTimeMs);
     }
 
     public VideoObject getVideoObject() {
         VideoObject videoObject = new VideoObject();
         videoObject.projectId = projectId;
         videoObject.path = originVideoPath;
-        videoObject.startTime = startTime + "";
-        videoObject.endTime = endTime + "";
+        videoObject.startTime = startTimeMs + "";
+        videoObject.endTime = endTimeMs + "";
         videoObject.left = left + "";
         videoObject.orderInList = orderInList + "";
         videoObject.volume = volume + "";
@@ -169,25 +178,25 @@ public class VideoTL extends ImageView {
         rectTop = new Rect(0, 0 , width, Constants.BORDER_WIDTH);
         rectBottom = new Rect(0, height-Constants.BORDER_WIDTH, width, height);
 
-        this.startTime = startTime;
-        this.endTime = endTime;
-        startInTimeLine = (left - MARGIN_LEFT_TIME_LINE)* Constants.SCALE_VALUE;
-        endInTimeLine = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
+        this.startTimeMs = startTime;
+        this.endTimeMs = endTime;
+        startInTimeLineMs = (left - MARGIN_LEFT_TIME_LINE)* Constants.SCALE_VALUE;
+        endInTimeLineMs = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
         invalidate();
     }
 
 
     public void updateTimeLineStatus() {
-        startTime = startPosition* Constants.SCALE_VALUE;
-        endTime = (right - min) * Constants.SCALE_VALUE;
-        startInTimeLine = (left - MARGIN_LEFT_TIME_LINE)* Constants.SCALE_VALUE;
-        endInTimeLine = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
+        startTimeMs = startPosition* Constants.SCALE_VALUE;
+        endTimeMs = (right - min) * Constants.SCALE_VALUE;
+        startInTimeLineMs = (left - MARGIN_LEFT_TIME_LINE)* Constants.SCALE_VALUE;
+        endInTimeLineMs = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
     }
 
     public VideoHolder updateVideoHolder(){
         videoHolder.videoPath = videoPath;
-        videoHolder.startTime = startTime/1000f;
-        videoHolder.duration = (endTime-startTime)/1000f;
+        videoHolder.startTimeMs = startTimeMs /1000f;
+        videoHolder.duration = (endTimeMs - startTimeMs)/1000f;
         videoHolder.volume = volume;
         return videoHolder;
     }

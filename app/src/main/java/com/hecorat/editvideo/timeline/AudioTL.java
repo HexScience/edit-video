@@ -1,7 +1,6 @@
 package com.hecorat.editvideo.timeline;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -18,8 +17,10 @@ import com.hecorat.editvideo.database.AudioObject;
 import com.hecorat.editvideo.export.AudioHolder;
 import com.hecorat.editvideo.main.Constants;
 import com.hecorat.editvideo.main.MainActivity;
+import com.semantive.waveformandroid.waveform.soundfile.CheapSoundFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -29,24 +30,34 @@ public class AudioTL extends ImageView {
     public int min, max;
     public int left, right;
     public int width, height;
-    public int startTime, endTime;
+    public int startTimeMs, endTimeMs;
     public int start;
     public int duration;
-    public int startInTimeline, endInTimeline;
+    public int startInTimelineMs, endInTimelineMs;
     public int leftMargin;
     public float volume, volumePreview;
     public int orderInList;
     public int projectId;
+    public boolean isExists;
+    public int background, nameColor;
+    private float range=0;
+    private float minGain=0;
+    private boolean soundWaveReady;
+    private float step;
+    private int[] frameGains;
 
     public String name, audioPath, audioPreview;
     public Rect bacgroundRect, rectTop,rectBottom, rectLeft, rectRight;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
     public MediaMetadataRetriever retriever;
-    public Bitmap defaultBitmap;
-    public ArrayList<Bitmap> listBitmap;
+
     public AudioHolder audioHolder;
     public MainActivity mActivity;
+    private CheapSoundFile soundFile;
+
+    public static final int SPACE = 1;
+    public static final float MIN_LIMIT = 0.85f;
 
     public AudioTL(Context context, String audioPath, int height, int leftMargin) {
         super(context);
@@ -54,18 +65,28 @@ public class AudioTL extends ImageView {
         projectId = mActivity.mProjectId;
         this.audioPath = audioPath;
         audioPreview = audioPath;//spare
-        retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(audioPath);
-        duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        name = new File(audioPath).getName();
-        defaultBitmap = createDefaultBitmap();
-        listBitmap = new ArrayList<>();
         audioHolder = new AudioHolder();
-
-        width = duration/ Constants.SCALE_VALUE;
-        this.leftMargin = mActivity.mLeftMarginTimeLine;
+        paint = new Paint();
         this.height = height;
         left = leftMargin;
+        this.leftMargin = mActivity.mLeftMarginTimeLine;
+        background = ContextCompat.getColor(mActivity, R.color.background_timeline);
+
+        isExists = new File(audioPath).exists();
+        if (isExists) {
+            retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(audioPath);
+            duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+            name = new File(audioPath).getName();
+            nameColor = Color.MAGENTA;
+        } else {
+            duration = Constants.DEFAULT_DURATION;
+            name = "??????";
+            background = Color.RED;
+            nameColor = Color.WHITE;
+        }
+
+        width = duration / Constants.SCALE_VALUE;
         right = leftMargin + width;
         min = leftMargin;
         max = leftMargin + width;
@@ -74,21 +95,26 @@ public class AudioTL extends ImageView {
 
         params = new RelativeLayout.LayoutParams(width, height);
         seekTimeLine(left, right);
-        paint = new Paint();
+
         updateTimeLineStatus();
+
+        soundWaveReady = false;
+        if (isExists) {
+            new LoadWaveSoundTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     public void restoreAudioObject(AudioObject audio) {
         projectId = audio.projectId;
-        startTime = Integer.parseInt(audio.startTime);
-        endTime = Integer.parseInt(audio.endTime);
+        startTimeMs = Integer.parseInt(audio.startTime);
+        endTimeMs = Integer.parseInt(audio.endTime);
         left = Integer.parseInt(audio.left);
         volume = Float.parseFloat(audio.volume);
         volumePreview = Float.parseFloat(audio.volumePreview);
 
-        width = (endTime - startTime) / Constants.SCALE_VALUE;
+        width = (endTimeMs - startTimeMs) / Constants.SCALE_VALUE;
         right = left + width;
-        start = startTime / Constants.SCALE_VALUE;
+        start = startTimeMs / Constants.SCALE_VALUE;
         min = left - start;
         max = min + duration / Constants.SCALE_VALUE;
 
@@ -99,8 +125,8 @@ public class AudioTL extends ImageView {
         AudioObject audioObject = new AudioObject();
         audioObject.projectId = projectId;
         audioObject.path = audioPath;
-        audioObject.startTime = startTime + "";
-        audioObject.endTime = endTime + "";
+        audioObject.startTime = startTimeMs + "";
+        audioObject.endTime = endTimeMs + "";
         audioObject.left = left + "";
         audioObject.orderInList = orderInList + "";
         audioObject.volume = volume + "";
@@ -110,9 +136,9 @@ public class AudioTL extends ImageView {
 
     public void updateAudioHolder(){
         audioHolder.audioPath = audioPath;
-        audioHolder.startTime = startTime/1000f;
-        audioHolder.startInTimeLine = startInTimeline/1000f;
-        audioHolder.duration = (endInTimeline-startInTimeline)/1000f;
+        audioHolder.startTimeMs = startTimeMs /1000f;
+        audioHolder.startInTimeLineMs = startInTimelineMs /1000f;
+        audioHolder.duration = (endInTimelineMs - startInTimelineMs)/1000f;
         audioHolder.volume = volume;
     }
 
@@ -120,7 +146,7 @@ public class AudioTL extends ImageView {
         this.left = left;
         this.right = right;
         width = right - left;
-        start = left - min; // it for visualation after
+        start = left - min;
 
         drawTimeLine();
     }
@@ -150,24 +176,35 @@ public class AudioTL extends ImageView {
     }
 
     public void updateTimeLineStatus(){
-        startTime = start* Constants.SCALE_VALUE;
-        endTime = (start + width)* Constants.SCALE_VALUE;
-        startInTimeline = (left-leftMargin)* Constants.SCALE_VALUE;
-        endInTimeline = (right-leftMargin)* Constants.SCALE_VALUE;
-        log("start: "+startTime);
+        startTimeMs = start* Constants.SCALE_VALUE;
+        endTimeMs = (start + width)* Constants.SCALE_VALUE;
+        startInTimelineMs = (left-leftMargin)* Constants.SCALE_VALUE;
+        endInTimelineMs = (right-leftMargin)* Constants.SCALE_VALUE;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        paint.setColor(ContextCompat.getColor(mActivity, R.color.background_timeline));
+        // draw background
+        paint.setColor(background);
         canvas.drawRect(bacgroundRect, paint);
-        paint.setColor(Color.MAGENTA);
-        paint.setTextSize(35);
-        for (int i=0; i < listBitmap.size(); i++) {
-            canvas.drawBitmap(listBitmap.get(i), i*150 - start, 0, paint);
+
+        //draw Sound Wave
+        if (soundWaveReady) {
+            paint.setColor(ContextCompat.getColor(mActivity, R.color.wave_sound_color));
+
+            int end = start + width;
+            for (int i = start; i < end; i++) {
+                drawWaveform(canvas, i * SPACE, step / SPACE, height / 2, paint);
+            }
         }
+
+        //draw Audio name
+        paint.setColor(nameColor);
+        paint.setTextSize(35);
         canvas.drawText(name, 20, 50, paint);
+
+        //draw borders
         paint.setColor(ContextCompat.getColor(mActivity, R.color.border_timeline_color));
         canvas.drawRect(rectTop, paint);
         canvas.drawRect(rectBottom, paint);
@@ -175,45 +212,102 @@ public class AudioTL extends ImageView {
         canvas.drawRect(rectRight, paint);
     }
 
-    private Bitmap createDefaultBitmap(){
-        Paint paint = new Paint();
-        Bitmap bitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        paint.setColor(Color.BLACK);
-        canvas.drawRect(0, 0, bitmap.getWidth(), bitmap.getHeight(), paint);
-        return bitmap;
+    protected void drawWaveform(Canvas canvas, int x, float step, int centerVertical, Paint paint) {
+        int heightWave = (int) (getScaledHeight((int)(x * step)) * centerVertical);
+        drawVerticalLine( canvas, x - start, centerVertical - heightWave, centerVertical + 1 + heightWave, paint);
     }
 
-    private class AsyncTaskExtractFrame extends AsyncTask<Void, Void, Void> {
+    protected void drawVerticalLine(Canvas canvas, int x, int y0, int y1, Paint paint) {
+        canvas.drawLine(x, y0, x, y1, paint);
+    }
+
+    protected float getScaledHeight(int x) {
+        float value = (frameGains[x] - minGain) / range;
+        if (value < 0.0)
+            value = 0.0f;
+        if (value > 1.0)
+            value = 1.0f;
+        return value;
+    }
+
+    public void initSoundWave() {
+        frameGains = soundFile.getFrameGains();
+        step = (float) soundFile.getNumFrames() / width;
+
+        ArrayList<Float> listFrameGain = new ArrayList<>();
+        for (float gain : frameGains) {
+            listFrameGain.add(gain);
+        }
+        float average = getAverage(listFrameGain);
+        listFrameGain.clear();
+        for (float gain : frameGains) {
+            if (gain > average/2) {
+                listFrameGain.add(gain);
+            }
+        }
+        average = getAverage(listFrameGain);
+
+        ArrayList<Float> listFrameMins = new ArrayList<>();
+        ArrayList<Float> listFrameMaxs = new ArrayList<>();
+        for (float gain : listFrameGain) {
+            if (gain < average && gain > average*MIN_LIMIT) {
+                listFrameMins.add(gain);
+            } else if (gain > average) {
+                listFrameMaxs.add(gain);
+            }
+        }
+
+        minGain = average;
+        for (float gain : listFrameMins) {
+            minGain = Math.min(minGain, gain);
+        }
+
+        float maxGain = average;
+        for (float gain : listFrameMaxs) {
+            maxGain = Math.max(maxGain, gain);
+        }
+
+        range = maxGain - minGain;
+    }
+
+    private float getAverage(ArrayList<Float> list) {
+        float sum = 0;
+        for (float gain : list) {
+            sum += gain;
+        }
+        return sum/list.size();
+    }
+
+    private class LoadWaveSoundTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            int microDuration = duration * 1000;
-            int timeStamp = 0;
-            while (timeStamp < microDuration) {
-                Bitmap bitmap = null;
-                int currentTimeStamp = timeStamp;
-                while (bitmap==null && currentTimeStamp < Math.min(timeStamp+2900000, microDuration)) {
-                    bitmap = retriever.getFrameAtTime(timeStamp, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
-                    currentTimeStamp += 60000;
-                }
-                if (bitmap == null) {
-                    bitmap = defaultBitmap;
-                }
-                Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, 150, height, false);
-                listBitmap.add(scaleBitmap);
-                publishProgress();
-                timeStamp += 3000000;
+            try {
+                soundFile = CheapSoundFile.create(audioPath, listener);
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
             return null;
         }
-
         @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            initSoundWave();
+            soundWaveReady = true;
             invalidate();
         }
     }
+
+    CheapSoundFile.ProgressListener listener = new CheapSoundFile.ProgressListener() {
+        @Override
+        public boolean reportProgress(double v) {
+            return true;
+        }
+    };
+
+
 
     private void log(String msg) {
         Log.e("Log for audio", msg);

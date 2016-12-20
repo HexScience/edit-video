@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -30,13 +31,15 @@ import java.io.File;
 public class ExtraTL extends ImageView {
     public int width, height;
     public int durationImage;
-    public int startInTimeLine, endInTimeLine;
+    public int startInTimeLineMs, endInTimeLineMs;
     public int left, right;
     public boolean isImage;
     public boolean inLayoutImage;
     public int leftMarginTimeLine;
     public int projectId;
     public int orderInLayout, orderInList;
+    public boolean isExists;
+    public int background;
 
     public MainActivity mActivity;
     public RelativeLayout.LayoutParams params;
@@ -54,13 +57,23 @@ public class ExtraTL extends ImageView {
         super(context);
         mActivity = (MainActivity) context;
         projectId = mActivity.mProjectId;
-        durationImage = Constants.IMAGE_TEXT_DURATION;
+        durationImage = Constants.DEFAULT_DURATION;
         this.height = height;
-
+        background = ContextCompat.getColor(mActivity, R.color.background_timeline);
         paint = new Paint();
+        this.isImage = isImage;
+        left = leftMargin;
+
         if (isImage) {
-            bitmap = getBitmap(pathOrText);
             imagePath = pathOrText;
+            isExists = new File(imagePath).exists();
+            if (isExists) {
+                bitmap = getBitmap(imagePath);
+            } else {
+                Bitmap rawBitmap = BitmapFactory.decodeResource(mActivity.getResources(), R.drawable.ic_unknow_file);
+                bitmap = Bitmap.createScaledBitmap(rawBitmap, 50, height, false);
+                background = Color.RED;
+            }
             inLayoutImage = true;
             imageHolder = new ImageHolder();
         } else {
@@ -68,12 +81,13 @@ public class ExtraTL extends ImageView {
             inLayoutImage = false;
             textHolder = new TextHolder();
         }
-        this.isImage = isImage;
-        left = leftMargin;
+
+
         leftMarginTimeLine = mActivity.mLeftMarginTimeLine;
         width = durationImage/ Constants.SCALE_VALUE;
         right = left + width;
         params = new RelativeLayout.LayoutParams(width, height);
+
         setLayoutParams(params);
         drawTimeLine(left, right);
         updateTimeLineStatus();
@@ -86,8 +100,8 @@ public class ExtraTL extends ImageView {
         imageHolder.x = floatImage.xExport*layoutScale;
         imageHolder.y = floatImage.yExport*layoutScale;
         imageHolder.rotate = (float) (-floatImage.rotation* Math.PI/180);
-        imageHolder.startInTimeLine = startInTimeLine/1000f;
-        imageHolder.endInTimeLine = endInTimeLine/1000f;
+        imageHolder.startInTimeLineMs = startInTimeLineMs /1000f;
+        imageHolder.endInTimeLineMs = endInTimeLineMs /1000f;
     }
 
     public void updateTextHolder(float layoutScale){
@@ -101,8 +115,8 @@ public class ExtraTL extends ImageView {
         textHolder.boxColor = convertToHexColor(floatText.mBackgroundColor);
         textHolder.x = floatText.xExport*layoutScale - textCorrection;
         textHolder.y = floatText.yExport*layoutScale - textCorrection;
-        textHolder.startInTimeLine = startInTimeLine/1000f;
-        textHolder.endInTimeLine = endInTimeLine/1000f;
+        textHolder.startInTimeLine = startInTimeLineMs /1000f;
+        textHolder.endInTimeLine = endInTimeLineMs /1000f;
         textHolder.rotate = (float) (-floatText.rotation* Math.PI/180);
         textHolder.width = (int) ((floatText.widthScale+FloatText.PADDING*2)*layoutScale);
         textHolder.height = (int) ((floatText.heightScale+FloatText.PADDING*2)*layoutScale);
@@ -122,8 +136,8 @@ public class ExtraTL extends ImageView {
     }
 
     public void updateTimeLineStatus(){
-        startInTimeLine = (left - leftMarginTimeLine)* Constants.SCALE_VALUE;
-        endInTimeLine = (right - leftMarginTimeLine)* Constants.SCALE_VALUE;
+        startInTimeLineMs = (left - leftMarginTimeLine)* Constants.SCALE_VALUE;
+        endInTimeLineMs = (right - leftMarginTimeLine)* Constants.SCALE_VALUE;
     }
 
     private Bitmap getBitmap(String imagePath) {
@@ -224,7 +238,7 @@ public class ExtraTL extends ImageView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         setLayoutParams(params);
-        paint.setColor(getResources().getColor(R.color.background_timeline));
+        paint.setColor(background);
         canvas.drawRect(rectBackground, paint);
         if (isImage) {
             canvas.drawBitmap(bitmap, 20, 0, paint);

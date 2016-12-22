@@ -1,5 +1,6 @@
 package com.hecorat.editvideo.main;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -67,11 +68,25 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         mLayoutButton = (LinearLayout) view.findViewById(R.id.layout_button);
 
         mProjectTable = mActivity.mProjectTable;
-        mProjectList = mProjectTable.getData();
-        mCountVideo = mProjectList.size();
 
-        addProjectsToLayoutScrollView();
+        new LoadProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
         return view;
+    }
+
+    private class LoadProjectTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mProjectList = mProjectTable.getData();
+            mCountVideo = mProjectList.size();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            addProjectsToLayoutScrollView();
+        }
     }
 
     View.OnClickListener onBtnRenameClick = new View.OnClickListener() {

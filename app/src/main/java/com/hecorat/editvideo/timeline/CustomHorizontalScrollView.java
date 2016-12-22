@@ -17,26 +17,31 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
         super(context, attrs);
 
     }
+
     float startX;
     public boolean scroll = true;
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (scroll) {
-            switch (event.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    startX = event.getX();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    float moveX = Math.abs(event.getX()-startX);
-                    if (moveX>100) {
-                        return true;
-                    }
-                    break;
-                case MotionEvent.ACTION_UP:
+//        log(" scroll = " + scroll);
 
-                    break;
-            }
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                log("intercept - down");
+                startX = event.getX();
+                break;
+            case MotionEvent.ACTION_MOVE:
+//                    log("intercept - move");
+                float moveX = Math.abs(event.getX() - startX);
+                if (moveX > 50 && scroll) {
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+//                    log("intercept - up");
+                break;
         }
+
         return false;
     }
 
@@ -44,23 +49,27 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if (mOnCustomScrollChanged != null){
+//                log("touch - down");
+                startX = event.getX();
+                if (mOnCustomScrollChanged != null) {
                     mOnCustomScrollChanged.onStartScroll();
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
                 break;
             case MotionEvent.ACTION_UP:
-                if (mOnCustomScrollChanged != null){
+//                log("touch - up");
+                if (mOnCustomScrollChanged != null) {
                     mOnCustomScrollChanged.onEndScroll();
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
+//                log("touch - move");
                 float x = event.getX();
                 float deltaX = x - startX;
-                smoothScrollBy((int)(-3*deltaX), 0);
+                scrollBy((int) (-1 * deltaX), 0);
                 startX = event.getX();
-                if (mOnCustomScrollChanged!=null) {
+                if (mOnCustomScrollChanged != null) {
                     mOnCustomScrollChanged.onScrollChanged();
                 }
                 break;
@@ -75,11 +84,13 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
 
     public interface OnCustomScrollChanged {
         void onScrollChanged();
+
         void onStartScroll();
+
         void onEndScroll();
     }
 
-    private void log(String msg){
+    private void log(String msg) {
         Log.e("Horizotal Scrollview", msg);
     }
 }

@@ -8,20 +8,43 @@ import com.hecorat.editvideo.helper.Utils;
 import com.hecorat.editvideo.helper.VideoMetaData;
 import com.hecorat.editvideo.timeline.VideoTL;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
  * Created by TienDam on 11/29/2016.
  */
 
-public class AddSilentAudoTask extends AsyncTask<VideoTL, Void, Void>{
+public class AddSilentAudoTask extends AsyncTask<Void, Void, Void>{
     Context context;
-    public AddSilentAudoTask(Context context){
+    boolean inRestore;
+    VideoTL videoTL;
+    ArrayList<VideoTL> listVideo;
+    public AddSilentAudoTask(Context context, VideoTL videoTL){
         this.context = context;
+        this.videoTL = videoTL;
+        inRestore = false;
     }
+
+    public AddSilentAudoTask(Context context, ArrayList<VideoTL> listVideo){
+        this.context = context;
+        this.listVideo = listVideo;
+        inRestore = true;
+    }
+
     @Override
-    protected Void doInBackground(VideoTL... params) {
-        VideoTL videoTL = params[0];
+    protected Void doInBackground(Void... params) {
+        if (inRestore) {
+            for (VideoTL videoTL : listVideo) {
+                fixOne(videoTL);
+            }
+        } else {
+            fixOne(videoTL);
+        }
+        return null;
+    }
+
+    private void fixOne(VideoTL videoTL) {
         VideoMetaData videoMetaData = VideoMetaData.getMetaData(context, videoTL.videoPath);
         if (!videoMetaData.hasAudio){
             String outPath = Utils.getTempFolder()+"/"+System.currentTimeMillis()+".mp4";
@@ -30,7 +53,6 @@ public class AddSilentAudoTask extends AsyncTask<VideoTL, Void, Void>{
             videoTL.audioPreview = outPath;
             videoTL.hasAudio = false;
         }
-        return null;
     }
 
     private void addSilentAudio(String videoPath, String outPath){

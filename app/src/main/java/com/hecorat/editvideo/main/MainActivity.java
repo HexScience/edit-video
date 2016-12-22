@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private FragmentVideosGallery mFragmentVideosGallery;
     private FragmentImagesGallery mFragmentImagesGallery;
     private FragmentAudioGallery mFragmentAudioGallery;
-    private CustomHorizontalScrollView mScrollView;
+    public CustomHorizontalScrollView mScrollView;
     public ExportFragment mExportFragment;
     public TrimFragment mTrimFragment;
     public VideoTable mVideoTable;
@@ -154,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public ImageTable mImageTable;
     public TextTable mTextTable;
     public ProjectTable mProjectTable;
+    private GalleryPagerAdapter mGalleryPagerAdapter;
 
     private int mDragCode = DRAG_VIDEO;
     private int mCountVideo = 0;
@@ -298,13 +299,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mListInLayoutImage = new ArrayList<>();
         mListInLayoutText = new ArrayList<>();
 
-        GalleryPagerAdapter galleryPagerAdapter = new GalleryPagerAdapter(getSupportFragmentManager());
-        mViewPager.setAdapter(galleryPagerAdapter);
-        mViewPager.addOnPageChangeListener(onViewPagerChanged);
-        mFragmentVideosGallery = new FragmentVideosGallery();
-        mFragmentImagesGallery = new FragmentImagesGallery();
-        mFragmentAudioGallery = new FragmentAudioGallery();
-
         mBtnBack.setOnClickListener(onBtnBackClick);
         mBtnAdd.setOnClickListener(onBtnAddClick);
         mBtnPlay.setOnClickListener(onBtnPlayClick);
@@ -344,11 +338,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutVideo.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutVideoCreated);
         mLayoutImage.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutImageCreated);
 
-        mFontPath = FontManager.getFontPaths();
-        mFontName = FontManager.getFontName();
-        mFontAdapter = new FontAdapter(this, android.R.layout.simple_spinner_item, mFontName);
-        mFontSpinner.setAdapter(mFontAdapter);
-        mFontSpinner.setOnItemSelectedListener(onFontSelectedListener);
+        initFontManager();
 
         mMediaPlayer = new MediaPlayer();
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
@@ -361,6 +351,41 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         keepScreenOn();
     }
 
+    private void initFontManager() {
+        if (mFontPath != null) {
+            return;
+        }
+        new LoadFontTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private class LoadFontTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mFontPath = FontManager.getFontPaths();
+            mFontName = FontManager.getFontName();
+            mFontAdapter = new FontAdapter(mActivity, android.R.layout.simple_spinner_item, mFontName);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mFontSpinner.setAdapter(mFontAdapter);
+            mFontSpinner.setOnItemSelectedListener(onFontSelectedListener);
+        }
+    }
+
+    private void initFileManager() {
+        if (mGalleryPagerAdapter != null) {
+            return;
+        }
+        mGalleryPagerAdapter = new GalleryPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mGalleryPagerAdapter);
+        mViewPager.addOnPageChangeListener(onViewPagerChanged);
+        mFragmentVideosGallery = new FragmentVideosGallery();
+        mFragmentImagesGallery = new FragmentImagesGallery();
+        mFragmentAudioGallery = new FragmentAudioGallery();
+    }
 
     private void keepScreenOn() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -518,6 +543,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         restoreAllAudioTL(mProjectId);
         restoreAllImageTL(mProjectId);
         restoreAllTextTL(mProjectId);
+
+        updateBtnExportVisible();
+        fixAllVideosHasNoAudio();
     }
 
     ViewTreeObserver.OnGlobalLayoutListener onLayoutImageCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -841,6 +869,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 if (mOpenLayoutEditText) {
                     openLayoutEditText(false);
                 } else {
+                    initFontManager();
                     openLayoutEditText(true);
                 }
             }
@@ -902,9 +931,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     View.OnClickListener onBtnAddMediaClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            initFileManager();
             openFileManager(true);
             openLayoutAdd(false);
-
         }
     };
 
@@ -1570,8 +1599,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutVideo.addView(videoTL);
         mCountVideo++;
 
-//        fixIfVideoHasNoAudio(videoTL);
-
         setBtnPlayVisible(true);
     }
 
@@ -1607,7 +1634,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void fixIfVideoHasNoAudio(VideoTL videoTL) {
-        new AddSilentAudoTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, videoTL);
+        new AddSilentAudoTask(this, videoTL).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void fixAllVideosHasNoAudio() {
+        new AddSilentAudoTask(this, mVideoList).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void setBtnPlayVisible(boolean visible) {
@@ -1953,11 +1984,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     public void restoreExtraControl(ExtraTL extraTL) {
         mExtraTLControl.restoreTimeLineStatus(extraTL);
-        readdExtraControl();
+        reAddExtraControl();
         mSelectedExtraTL = extraTL;
     }
 
-    private void readdExtraControl() {
+    private void reAddExtraControl() {
         ViewGroup parent = (ViewGroup) mExtraTLControl.getParent();
         if (parent != null) {
             parent.removeView(mExtraTLControl);
@@ -2641,7 +2672,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             setExtraControlVisible(true);
             unSelectVideoTL();
             mExtraTLControl.restoreTimeLineStatus(mSelectedExtraTL);
-            readdExtraControl();
+            reAddExtraControl();
             scrollTo(mSelectedExtraTL.startInTimeLineMs);
             onCustomScrollChanged.onScrollChanged();
 
@@ -2764,12 +2795,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public void setExtraControlVisible(boolean visible) {
         if (visible) {
             mExtraTLControl.setVisibility(View.VISIBLE);
-            mScrollView.scroll = false;
             mVideoTLControl.setVisibility(View.GONE);
             mAudioTLControl.setVisibility(View.GONE);
         } else {
             mExtraTLControl.setVisibility(View.GONE);
-            mScrollView.scroll = true;
             if (mSelectedExtraTL != null) {
                 if (mSelectedExtraTL.isImage) {
                     mSelectedExtraTL.floatImage.drawBorder(false);

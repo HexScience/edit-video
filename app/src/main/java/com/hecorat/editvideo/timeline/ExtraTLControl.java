@@ -118,7 +118,8 @@ public class ExtraTLControl extends ImageView {
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-
+                    log("extra control -  down");
+                    mActivity.mScrollView.scroll = false;
                     updateLayoutMatchParent(left, right);
 
                     oldX = motionEvent.getX()+left-THUMB_WIDTH;
@@ -131,10 +132,10 @@ public class ExtraTLControl extends ImageView {
                     } else {
                         touch = TOUCH_CENTER;
                     }
-                    log("touch extra: "+touch);
+
                     return true;
                 case MotionEvent.ACTION_MOVE:
-
+                    log("extra control -  move");
                     moveX = motionEvent.getX() - oldX;
 
                     if (touch == TOUCH_LEFT) {
@@ -157,6 +158,7 @@ public class ExtraTLControl extends ImageView {
                     updateLayoutMatchParent(leftPosition, rightPosition);
                     return true;
                 case MotionEvent.ACTION_UP:
+                    log("extra control -  up");
                     if (touch == TOUCH_CENTER) {
                         mOnControlTimeLineChanged.invisibleExtraControl();
                         return true;
@@ -165,6 +167,7 @@ public class ExtraTLControl extends ImageView {
                     right = rightPosition;
                     updateLayoutWidth(left, right);
                     mOnControlTimeLineChanged.updateExtraTimeLine(left, right);
+                    mActivity.mScrollView.scroll = true;
                     touch = 0;
                     return true;
                 default:

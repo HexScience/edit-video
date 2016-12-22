@@ -110,6 +110,7 @@ public class AudioTLControl extends ImageView {
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    mActivity.mScrollView.scroll = false;
                     updateLayoutMatchParent(left, right);
                     oldX = motionEvent.getX() + left - THUMB_WIDTH;
                     oldY = motionEvent.getY() ;
@@ -163,6 +164,7 @@ public class AudioTLControl extends ImageView {
                     right = endPosition;
                     updateLayoutWidth(left, right);
                     mOnAudioControlTimeLineChanged.updateAudioTimeLine(left, right);
+                    mActivity.mScrollView.scroll = true;
                     touch = 0;
                     return true;
                 default:

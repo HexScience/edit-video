@@ -82,7 +82,6 @@ public class ExtraTL extends ImageView {
             textHolder = new TextHolder();
         }
 
-
         leftMarginTimeLine = mActivity.mLeftMarginTimeLine;
         width = durationImage/ Constants.SCALE_VALUE;
         right = left + width;
@@ -176,6 +175,7 @@ public class ExtraTL extends ImageView {
         textObject.fontPath = floatText.fontPath + "";
         textObject.fontColor = floatText.mColor + "";
         textObject.boxColor = floatText.mBackgroundColor + "";
+        textObject.fontId = floatText.fontId + "";
         return textObject;
     }
 

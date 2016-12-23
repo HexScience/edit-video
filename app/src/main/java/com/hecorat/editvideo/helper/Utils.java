@@ -128,6 +128,16 @@ public class Utils {
         return resourceFolder;
     }
 
+    public static String getFontFolder(){
+        String direct = Environment.getExternalStorageDirectory().toString();
+        String resourceFolder = direct+"/"+ Constants.OUTPUT_FOLDER+"/"+Constants.FONT_FOLDER;
+        File file = new File(resourceFolder);
+        if (!file.exists()){
+            file.mkdirs();
+        }
+        return resourceFolder;
+    }
+
     public static SharedPreferences getSharedPref(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);
     }

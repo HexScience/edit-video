@@ -2,7 +2,9 @@ package com.hecorat.editvideo.addtext;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +20,9 @@ import java.util.List;
  */
 
 public class FontAdapter extends ArrayAdapter<String> {
+    public static final String TAG = "FontAdapter";
     int selected;
+
     public FontAdapter(Context context, int resource, List<String> objects) {
         super(context, resource, objects);
         setSelectedItem(0);
@@ -27,6 +31,18 @@ public class FontAdapter extends ArrayAdapter<String> {
     public void setSelectedItem(int position) {
         selected = position;
         notifyDataSetChanged();
+    }
+
+    @NonNull
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View view = super.getView(position, convertView, parent);
+        TextView textView = (TextView) view.findViewById(android.R.id.text1);
+        textView.setText(getContext().getString(R.string.spinner_text));
+
+        Typeface typeface = Typeface.createFromFile(getItem(position));
+        textView.setTypeface(typeface);
+        return view;
     }
 
     @NonNull
@@ -40,7 +56,8 @@ public class FontAdapter extends ArrayAdapter<String> {
             textView.setBackgroundColor(Color.DKGRAY);
         }
 
-        textView.setText(getItem(position));
+        Typeface typeface = Typeface.createFromFile(getItem(position));
+        textView.setTypeface(typeface);
         return view;
     }
 

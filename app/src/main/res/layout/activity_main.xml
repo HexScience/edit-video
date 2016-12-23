@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/main_layout"
     tools:context=".main.MainActivity">
 
     <LinearLayout
@@ -14,613 +14,669 @@
         android:background="#111111"
         android:gravity="center_horizontal"
         android:orientation="vertical">
+
         <ImageView
             android:id="@+id/btn_back"
             android:layout_width="@dimen/toolbar_icon_dimension"
             android:layout_height="@dimen/toolbar_icon_dimension"
-            android:padding="@dimen/toolbar_icon_padding"
-            android:src="@drawable/ic_back"
-            android:clickable="true"
             android:layout_marginBottom="@dimen/margin_bottom_toolbar"
-            android:background="@drawable/btn_touch_feedback_oval"/>
+            android:background="@drawable/btn_touch_feedback_oval"
+            android:clickable="true"
+            android:padding="@dimen/toolbar_icon_padding"
+            android:src="@drawable/ic_back" />
+
         <ImageView
             android:id="@+id/btn_add"
             android:layout_width="@dimen/toolbar_icon_dimension"
             android:layout_height="@dimen/toolbar_icon_dimension"
-            android:padding="@dimen/toolbar_icon_padding"
-            android:src="@drawable/ic_add_media"
-            android:clickable="true"
             android:layout_marginBottom="@dimen/margin_bottom_toolbar"
-            android:background="@drawable/btn_touch_feedback_oval"/>
+            android:background="@drawable/btn_touch_feedback_oval"
+            android:clickable="true"
+            android:padding="@dimen/toolbar_icon_padding"
+            android:src="@drawable/ic_add_media" />
+
         <ImageView
             android:id="@+id/btn_edit_text"
             android:layout_width="@dimen/toolbar_icon_dimension"
             android:layout_height="@dimen/toolbar_icon_dimension"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"
+            android:clickable="true"
             android:padding="@dimen/toolbar_icon_padding"
             android:src="@drawable/ic_edit_text"
-            android:clickable="true"
-            android:visibility="gone"
-            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
-            android:background="@drawable/btn_touch_feedback_oval"/>
+            android:visibility="gone" />
+
         <ImageView
             android:id="@+id/btn_undo"
             android:layout_width="@dimen/toolbar_icon_dimension"
             android:layout_height="@dimen/toolbar_icon_dimension"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"
+            android:clickable="true"
             android:padding="@dimen/toolbar_icon_padding"
             android:src="@drawable/ic_undo"
-            android:visibility="gone"
-            android:clickable="true"
-            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
-            android:background="@drawable/btn_touch_feedback_oval"/>
+            android:visibility="gone" />
+
         <ImageView
             android:id="@+id/btn_delete"
             android:layout_width="@dimen/toolbar_icon_dimension"
             android:layout_height="@dimen/toolbar_icon_dimension"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"
+            android:clickable="true"
             android:padding="@dimen/toolbar_icon_padding"
             android:src="@drawable/ic_delete"
-            android:visibility="gone"
-            android:clickable="true"
-            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
-            android:background="@drawable/btn_touch_feedback_oval"/>
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/btn_volume"
             android:layout_width="@dimen/toolbar_icon_dimension"
             android:layout_height="@dimen/toolbar_icon_dimension"
-            android:padding="@dimen/toolbar_icon_padding"
-            android:visibility="gone"
-            android:src="@drawable/ic_btn_volume"
-            android:clickable="true"
             android:layout_marginBottom="@dimen/margin_bottom_toolbar"
-            android:background="@drawable/btn_touch_feedback_oval"/>
+            android:background="@drawable/btn_touch_feedback_oval"
+            android:clickable="true"
+            android:padding="@dimen/toolbar_icon_padding"
+            android:src="@drawable/ic_btn_volume"
+            android:visibility="gone" />
+
         <ImageView
             android:id="@+id/btn_export"
             android:layout_width="@dimen/toolbar_icon_dimension"
             android:layout_height="@dimen/toolbar_icon_dimension"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"
+            android:clickable="true"
             android:padding="@dimen/toolbar_icon_padding"
             android:src="@drawable/ic_export"
-            android:clickable="true"
-            android:visibility="gone"
-            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
-            android:background="@drawable/btn_touch_feedback_oval"/>
+            android:visibility="gone" />
+
         <ImageView
             android:id="@+id/btn_play"
             android:layout_width="@dimen/toolbar_icon_dimension"
             android:layout_height="@dimen/toolbar_icon_dimension"
+            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
+            android:background="@drawable/btn_touch_feedback_oval"
+            android:clickable="true"
             android:padding="@dimen/toolbar_icon_padding"
             android:src="@drawable/ic_play"
-            android:visibility="gone"
-            android:clickable="true"
-            android:layout_marginBottom="@dimen/margin_bottom_toolbar"
-            android:background="@drawable/btn_touch_feedback_oval"/>
+            android:visibility="gone" />
     </LinearLayout>
+
     <LinearLayout
 
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#222222"
         android:layout_toEndOf="@+id/main_toolbar"
+        android:background="#222222"
         android:orientation="vertical">
+
         <RelativeLayout
             android:id="@+id/top_layout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/video_view_height"
             android:background="#555555">
+
             <RelativeLayout
                 android:id="@+id/video_view_layout"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/video_view_height"
                 android:layout_centerInParent="true"
-                android:orientation="horizontal"
-                android:background="#060606">
+                android:background="#060606"
+                android:orientation="horizontal">
+
                 <com.hecorat.editvideo.preview.CustomVideoView
                     android:id="@+id/video_view1"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_centerHorizontal="true"/>
+                    android:layout_centerHorizontal="true" />
+
                 <com.hecorat.editvideo.preview.CustomVideoView
                     android:id="@+id/video_view2"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_centerHorizontal="true"
-                    android:visibility="gone"/>
+                    android:visibility="gone" />
+
                 <RelativeLayout
                     android:id="@+id/layout_floatview"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent" />
             </RelativeLayout>
+
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_toEndOf="@+id/video_view_layout"
-                android:background="#555555"/>
+                android:background="#555555" />
+
             <LinearLayout
                 android:id="@+id/layout_add"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:visibility="gone">
+
                 <TextView
                     android:id="@+id/btn_add_media"
                     android:layout_width="60dp"
                     android:layout_height="40dp"
                     android:layout_marginTop="40dp"
-                    android:gravity="center"
                     android:background="#252121"
-                    android:text="@string/txt_add_media"/>
+                    android:gravity="center"
+                    android:text="@string/txt_add_media" />
+
                 <FrameLayout
                     android:layout_width="60dp"
                     android:layout_height="1dp"
-                    android:background="#2a2929"/>
+                    android:background="#2a2929" />
+
                 <TextView
                     android:id="@+id/btn_add_text"
                     android:layout_width="60dp"
                     android:layout_height="40dp"
+                    android:background="#252121"
                     android:gravity="center"
-                    android:text="@string/txt_add_text"
-                    android:background="#252121"/>
+                    android:text="@string/txt_add_text" />
             </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/layout_file_manager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:orientation="horizontal"
+                    android:background="#111111"
                     android:gravity="center_vertical"
-                    android:background="#111111">
+                    android:orientation="horizontal">
+
                     <TextView
                         android:id="@+id/text_folder_name"
                         android:layout_width="0dp"
-                        android:layout_weight="2"
-                        android:paddingStart="20dp"
                         android:layout_height="wrap_content"
-                        android:maxLines="1"
+                        android:layout_weight="2"
                         android:ellipsize="end"
-                        android:textSize="17sp"
+                        android:maxLines="1"
+                        android:paddingStart="20dp"
                         android:text="@string/video_tab_title"
-                        android:textColor="@android:color/white"/>
+                        android:textColor="@android:color/white"
+                        android:textSize="17sp" />
+
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
                         android:id="@+id/video_tab_layout"
-                        android:gravity="center_horizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
                         android:background="@drawable/btn_touch_feedback_rec"
-                        android:layout_height="match_parent">
+                        android:gravity="center_horizontal">
+
                         <ImageView
                             android:id="@+id/video_tab"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:src="@drawable/ic_video_tab_blue"/>
+                            android:src="@drawable/ic_video_tab_blue" />
                     </LinearLayout>
+
                     <LinearLayout
                         android:id="@+id/image_tab_layout"
                         android:layout_width="0dp"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:gravity="center_horizontal"
                         android:background="@drawable/btn_touch_feedback_rec"
-                        android:layout_height="match_parent">
+                        android:gravity="center_horizontal">
+
                         <ImageView
                             android:id="@+id/image_tab"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:src="@drawable/ic_image_tab"/>
+                            android:src="@drawable/ic_image_tab" />
                     </LinearLayout>
+
                     <LinearLayout
                         android:id="@+id/audio_tab_layout"
                         android:layout_width="0dp"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:gravity="center_horizontal"
                         android:background="@drawable/btn_touch_feedback_rec"
-                        android:layout_height="match_parent">
+                        android:gravity="center_horizontal">
+
                         <ImageView
                             android:id="@+id/audio_tab"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:src="@drawable/ic_audio_tab"/>
+                            android:src="@drawable/ic_audio_tab" />
                     </LinearLayout>
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
-                    android:background="#326ee6"/>
+                    android:background="#326ee6" />
 
                 <android.support.v4.view.ViewPager
                     android:id="@+id/view_pager"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#696969"/>
+                    android:background="#696969" />
 
             </LinearLayout>
         </RelativeLayout>
+
         <RelativeLayout
             android:id="@+id/layout_timeline"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#444444">
+
             <LinearLayout
                 android:id="@+id/layout_menu"
                 android:layout_width="45dp"
                 android:layout_height="match_parent"
                 android:background="#2d2c2c"
                 android:orientation="vertical">
+
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/layout_timeline_height"/>
+                    android:layout_height="@dimen/layout_timeline_height" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/seperate_line_height"
-                    android:background="@color/seperate_line_layer_icon_color"/>
+                    android:background="@color/seperate_line_layer_icon_color" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:gravity="center"
-                    android:layout_weight="2">
+                    android:layout_weight="2"
+                    android:gravity="center">
+
                     <ImageView
                         android:layout_width="25dp"
                         android:layout_height="25dp"
-                        android:src="@drawable/ic_movie_layer"/>
+                        android:src="@drawable/ic_movie_layer" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/seperate_line_height"
-                    android:background="@color/seperate_line_layer_icon_color"/>
+                    android:background="@color/seperate_line_layer_icon_color" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:gravity="center"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:gravity="center">
+
                     <ImageView
                         android:layout_width="@dimen/layer_icon_dimension"
                         android:layout_height="@dimen/layer_icon_dimension"
-                        android:src="@drawable/ic_image_layer"/>
+                        android:src="@drawable/ic_image_layer" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/seperate_line_height"
-                    android:background="@color/seperate_line_layer_icon_color"/>
+                    android:background="@color/seperate_line_layer_icon_color" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:gravity="center"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:gravity="center">
+
                     <ImageView
                         android:layout_width="@dimen/layer_icon_dimension"
                         android:layout_height="@dimen/layer_icon_dimension"
-                        android:src="@drawable/ic_text_layer"/>
+                        android:src="@drawable/ic_text_layer" />
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/seperate_line_height"
-                    android:background="@color/seperate_line_layer_icon_color"/>
+                    android:background="@color/seperate_line_layer_icon_color" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:gravity="center"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:gravity="center">
+
                     <ImageView
                         android:layout_width="@dimen/layer_icon_dimension"
                         android:layout_height="@dimen/layer_icon_dimension"
-                        android:src="@drawable/ic_audio_layer"/>
+                        android:src="@drawable/ic_audio_layer" />
                 </LinearLayout>
             </LinearLayout>
+
             <com.hecorat.editvideo.timeline.CustomHorizontalScrollView
                 android:id="@+id/scroll_view"
-                android:layout_toRightOf="@+id/layout_menu"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_toRightOf="@+id/layout_menu"
                 android:background="#393737">
+
                 <LinearLayout
                     android:id="@+id/layout_scrollview"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
+
                     <RelativeLayout
                         android:id="@+id/layout_timemark"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/layout_timeline_height"/>
+                        android:layout_height="@dimen/layout_timeline_height" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/seperate_line_height"
-                        android:background="@color/seperate_line_layer_color"/>
+                        android:background="@color/seperate_line_layer_color" />
+
                     <RelativeLayout
                         android:id="@+id/timeline_video"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="2">
+
                         <RelativeLayout
                             android:id="@+id/layout_video"
                             android:layout_width="10000dp"
-                            android:layout_height="match_parent"/>
+                            android:layout_height="match_parent" />
+
                         <FrameLayout
                             android:id="@+id/limit_timeline_video"
                             android:layout_width="@dimen/seperate_line_height"
                             android:layout_height="match_parent"
-                            android:background="@color/seperate_line_layer_color"/>
+                            android:background="@color/seperate_line_layer_color" />
                     </RelativeLayout>
 
                     <FrameLayout
                         android:id="@+id/seperate_line_video"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/seperate_line_height"
-                        android:background="@color/seperate_line_layer_color"/>
+                        android:background="@color/seperate_line_layer_color" />
+
                     <RelativeLayout
                         android:id="@+id/timeline_image"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1">
+
                         <RelativeLayout
                             android:id="@+id/layout_image"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
+                            android:layout_height="match_parent" />
+
                         <FrameLayout
                             android:id="@+id/limit_timeline_image"
                             android:layout_width="@dimen/seperate_line_height"
                             android:layout_height="match_parent"
-                            android:background="@color/seperate_line_layer_color"/>
+                            android:background="@color/seperate_line_layer_color" />
                     </RelativeLayout>
+
                     <FrameLayout
                         android:id="@+id/seperate_line_image"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/seperate_line_height"
-                        android:background="@color/seperate_line_layer_color"/>
+                        android:background="@color/seperate_line_layer_color" />
+
                     <RelativeLayout
                         android:id="@+id/timeline_text"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1">
+
                         <RelativeLayout
                             android:id="@+id/layout_text"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
+                            android:layout_height="match_parent" />
+
                         <FrameLayout
                             android:id="@+id/limit_timeline_text"
                             android:layout_width="@dimen/seperate_line_height"
                             android:layout_height="match_parent"
-                            android:background="@color/seperate_line_layer_color"/>
+                            android:background="@color/seperate_line_layer_color" />
                     </RelativeLayout>
+
                     <FrameLayout
                         android:id="@+id/seperate_line_text"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/seperate_line_height"
-                        android:background="@color/seperate_line_layer_color"/>
+                        android:background="@color/seperate_line_layer_color" />
+
                     <RelativeLayout
                         android:id="@+id/timeline_audio"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1">
+
                         <RelativeLayout
                             android:id="@+id/layout_audio"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
+                            android:layout_height="match_parent" />
+
                         <FrameLayout
                             android:id="@+id/limit_timeline_audio"
                             android:layout_width="@dimen/seperate_line_height"
                             android:layout_height="match_parent"
-                            android:background="@color/seperate_line_layer_color"/>
+                            android:background="@color/seperate_line_layer_color" />
                     </RelativeLayout>
                 </LinearLayout>
             </com.hecorat.editvideo.timeline.CustomHorizontalScrollView>
+
             <LinearLayout
                 android:id="@+id/seekbar_indicator"
                 android:layout_width="2dp"
                 android:layout_height="match_parent"
-                android:layout_marginTop="20dp"
                 android:layout_centerHorizontal="true"
+                android:layout_marginTop="20dp"
                 android:background="#1083ef"
-                android:orientation="horizontal"/>
+                android:orientation="horizontal" />
+
             <LinearLayout
                 android:id="@+id/layout_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
+
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@drawable/gradient_edttext"/>
+                    android:background="@drawable/gradient_edttext" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="#0277BD"
                     android:orientation="horizontal">
+
                     <RelativeLayout
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1">
+
                         <EditText
                             android:id="@+id/edittext_input"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="top"
-                            android:background="@drawable/edittext_border"
-                            android:inputType="textNoSuggestions|textMultiLine"
                             android:layout_margin="20dp"
-                            android:padding="5dp"/>
+                            android:background="@drawable/edittext_border"
+                            android:gravity="top"
+                            android:inputType="textNoSuggestions|textMultiLine"
+                            android:padding="5dp" />
+
                         <LinearLayout
                             android:id="@+id/layout_color_picker"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:visibility="gone"
+                            android:background="@drawable/pickcolor_border"
                             android:clickable="true"
-                            android:background="@drawable/pickcolor_border">
+                            android:visibility="gone">
 
                             <LinearLayout
                                 android:layout_width="0dp"
+                                android:layout_height="match_parent"
                                 android:layout_weight="1"
-                                android:orientation="vertical"
                                 android:gravity="center_horizontal|bottom"
-                                android:layout_height="match_parent">
+                                android:orientation="vertical">
+
                                 <Button
                                     android:id="@+id/btn_close_colorpicker"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="10dp"
                                     android:layout_marginBottom="20dp"
+                                    android:layout_marginTop="10dp"
                                     android:background="#857e7e"
-                                    android:text="OK"/>
+                                    android:text="OK" />
+
                                 <LinearLayout
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content">
+
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:textColor="#222222"
                                         android:layout_marginStart="3dp"
-                                        android:text="#"/>
+                                        android:text="#"
+                                        android:textColor="#222222" />
+
                                     <EditText
                                         android:id="@+id/edt_color_hex"
                                         android:layout_width="match_parent"
                                         android:layout_height="30dp"
                                         android:layout_marginBottom="10dp"
                                         android:layout_marginEnd="5dp"
-                                        android:imeOptions="actionDone"
-                                        android:background="@drawable/edittext_border"/>
+                                        android:background="@drawable/edittext_border"
+                                        android:imeOptions="actionDone" />
                                 </LinearLayout>
                             </LinearLayout>
+
                             <com.hecorat.editvideo.addtext.ColorPickerView
                                 android:id="@+id/color_picker"
                                 android:layout_width="0dp"
-                                android:layout_weight="1.5"
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="20dp"
+                                android:layout_weight="1.5"
                                 android:layerType="software"
-                                android:tag="portrait"/>
+                                android:tag="portrait" />
                         </LinearLayout>
                     </RelativeLayout>
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:layout_weight="1">
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
+                            android:layout_marginBottom="@dimen/margin_bottom_edittext"
+                            android:layout_marginTop="10dp"
                             android:layout_weight="1"
                             android:gravity="center_vertical"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="@dimen/margin_bottom_edittext"
                             android:orientation="horizontal">
+
                             <ImageView
                                 android:id="@+id/indicator_textcolor"
                                 android:layout_width="@dimen/indicator_text_color"
                                 android:layout_height="@dimen/indicator_text_color"
                                 android:layout_centerVertical="true"
-                                android:visibility="invisible"
                                 android:layout_marginStart="5dp"
-                                android:src="@drawable/ic_left_arrow"/>
+                                android:src="@drawable/ic_left_arrow"
+                                android:visibility="invisible" />
 
                             <RelativeLayout
                                 android:id="@+id/layout_btn_text_color"
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/dimen_layout_text_background"
+                                android:layout_alignParentEnd="true"
+                                android:layout_marginStart="@dimen/margin_start_text_background"
                                 android:layout_toEndOf="@+id/indicator_textcolor"
                                 android:background="@drawable/btn_touch_feedback_rec_nobackground"
-                                android:layout_marginStart="@dimen/margin_start_text_background"
-                                android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
+
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="5dp"
-                                    android:text="Text color"/>
+                                    android:text="Text color" />
+
                                 <ImageView
                                     android:id="@+id/btn_text_color"
                                     android:layout_width="@dimen/dimen_btn_text_background"
                                     android:layout_height="@dimen/dimen_btn_text_background"
                                     android:layout_alignParentEnd="true"
                                     android:layout_marginEnd="40dp"
-                                    android:src="@drawable/ic_text_background"/>
+                                    android:src="@drawable/ic_text_background" />
                             </RelativeLayout>
                         </RelativeLayout>
+
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
+                            android:layout_marginBottom="@dimen/margin_bottom_edittext"
                             android:layout_weight="1"
                             android:clickable="true"
                             android:gravity="center_vertical"
-                            android:layout_marginBottom="@dimen/margin_bottom_edittext"
                             android:orientation="horizontal">
+
                             <ImageView
                                 android:id="@+id/indicator_textbackground"
                                 android:layout_width="@dimen/indicator_text_color"
                                 android:layout_height="@dimen/indicator_text_color"
-                                android:visibility="invisible"
                                 android:layout_centerVertical="true"
                                 android:layout_marginStart="5dp"
-                                android:src="@drawable/ic_left_arrow"/>
+                                android:src="@drawable/ic_left_arrow"
+                                android:visibility="invisible" />
+
                             <RelativeLayout
                                 android:id="@+id/layout_btn_text_bgr_color"
                                 android:layout_width="match_parent"
                                 android:layout_height="@dimen/dimen_layout_text_background"
+                                android:layout_alignParentEnd="true"
+                                android:layout_marginStart="@dimen/margin_start_text_background"
                                 android:layout_toEndOf="@+id/indicator_textbackground"
                                 android:background="@drawable/btn_touch_feedback_rec_nobackground"
-                                android:layout_marginStart="@dimen/margin_start_text_background"
-                                android:layout_alignParentEnd="true"
                                 android:gravity="center_vertical">
+
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="5dp"
-                                    android:text="Background"/>
+                                    android:text="Background" />
+
                                 <ImageView
                                     android:id="@+id/btn_text_background_color"
                                     android:layout_width="@dimen/dimen_btn_text_background"
                                     android:layout_height="@dimen/dimen_btn_text_background"
                                     android:layout_alignParentEnd="true"
                                     android:layout_marginEnd="40dp"
-                                    android:src="@drawable/ic_text_background"/>
+                                    android:src="@drawable/ic_text_background" />
                             </RelativeLayout>
                         </RelativeLayout>
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_marginBottom="@dimen/margin_bottom_edittext"
-                            android:layout_height="0dp"
-                            android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/layout_btn_bold"
-                                android:layout_width="0dp"
-                                android:layout_weight="1"
-                                android:gravity="center_horizontal"
 
-                                android:layout_height="wrap_content">
-                                <ImageView
-                                    android:id="@+id/btn_bold"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="25dp"
-                                    android:src="@drawable/ic_bold"/>
-                            </LinearLayout>
-                            <LinearLayout
-                                android:id="@+id/layout_btn_italic"
-                                android:layout_width="0dp"
-                                android:layout_weight="1"
-                                android:gravity="center_horizontal"
-                                android:layout_height="wrap_content">
-                                <ImageView
-                                    android:id="@+id/btn_italic"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="25dp"
-                                    android:src="@drawable/ic_italic"/>
-                            </LinearLayout>
-                        </LinearLayout>
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
-                            android:layout_weight="1"
                             android:layout_marginBottom="@dimen/margin_bottom_edittext"
+                            android:layout_weight="1"
                             android:gravity="center_horizontal">
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Font : "/>
+                                android:text="Font : " />
+
                             <Spinner
                                 android:id="@+id/font_spinner"
                                 android:layout_width="wrap_content"
-                                android:gravity="center_horizontal"
-                                android:layout_height="wrap_content"/>
+                                android:layout_height="wrap_content"
+                                android:gravity="center_horizontal" />
+
                         </LinearLayout>
 
                     </LinearLayout>
@@ -629,9 +685,10 @@
 
         </RelativeLayout>
     </LinearLayout>
+
     <FrameLayout
         android:id="@+id/layout_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 </RelativeLayout>

@@ -7,7 +7,8 @@
         android:id="@+id/spinner_textview"
         android:layout_width="match_parent"
         android:layout_height="35dp"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:text="@string/spinner_text"/>
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="1dp"

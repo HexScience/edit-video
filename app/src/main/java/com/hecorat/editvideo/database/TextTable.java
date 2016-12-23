@@ -29,6 +29,7 @@ public class TextTable {
     String FONT_PATH = "FontPath";
     String FONT_COLOR = "FontColor";
     String BOX_COLOR = "BoxColor";
+    String FONT_ID = "FontId";
     DBHelper mDbHelper;
 
     public TextTable(Context context) {
@@ -53,7 +54,8 @@ public class TextTable {
                 SIZE + " text, " +
                 FONT_PATH + " text, " +
                 FONT_COLOR + " text, " +
-                BOX_COLOR + " text)";
+                BOX_COLOR + " text, " +
+                FONT_ID + " text)";
         sqLiteDatabase.execSQL(sql);
     }
 
@@ -81,6 +83,7 @@ public class TextTable {
         contentValues.put(FONT_PATH, text.fontPath);
         contentValues.put(FONT_COLOR, text.fontColor);
         contentValues.put(BOX_COLOR, text.boxColor);
+        contentValues.put(FONT_ID, text.fontId);
         sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
     }
 
@@ -115,6 +118,7 @@ public class TextTable {
                 text.fontPath = cursor.getString(cursor.getColumnIndex(FONT_PATH));
                 text.fontColor = cursor.getString(cursor.getColumnIndex(FONT_COLOR));
                 text.boxColor = cursor.getString(cursor.getColumnIndex(BOX_COLOR));
+                text.fontId = cursor.getString(cursor.getColumnIndex(FONT_ID));
                 list.add(text);
             }
         } finally {

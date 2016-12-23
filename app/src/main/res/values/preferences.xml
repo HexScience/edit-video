@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="pref_first_use_app">pref_first_use_app</string>
+    <string name="db_version">db_version</string>
 </resources>

@@ -62,6 +62,7 @@ public class FloatText extends ImageView {
     public int mColor;
     public int mBackgroundColor;
     public float size, sizeScale;
+    public int fontId;
 
     public static final int ROTATE_CONSTANT = 30;
     public static final int INIT_X = 300, INIT_Y = 300, INIT_SIZE = 60;
@@ -75,7 +76,8 @@ public class FloatText extends ImageView {
         sizeScale = size;
         this.text = text;
         mActivity = activity;
-        fontPath = mActivity.mFontPath.get(0);
+        fontId = 0;
+        fontPath = mActivity.mFontPath.get(fontId);
         mTypeface = Typeface.createFromFile(fontPath);
         paint = new Paint();
         textPaint = new TextPaint();
@@ -111,6 +113,7 @@ public class FloatText extends ImageView {
         rotation = Float.parseFloat(textObject.rotation);
 
         size = Float.parseFloat(textObject.size);
+        fontId = Integer.parseInt(textObject.fontId);
         fontPath = textObject.fontPath;
         mColor = Integer.parseInt(textObject.fontColor);
         mBackgroundColor = Integer.parseInt(textObject.boxColor);
@@ -139,7 +142,8 @@ public class FloatText extends ImageView {
         resetLayout();
     }
 
-    public void setFont(String fontPath){
+    public void setFont(String fontPath, int position){
+        this.fontId = position;
         this.fontPath = fontPath;
         mTypeface = Typeface.createFromFile(fontPath);
         resetLayout();
@@ -448,6 +452,7 @@ public class FloatText extends ImageView {
             mActivity.setBtnEditVisible(true);
             mActivity.setBtnDeleteVisible(true);
             mActivity.pausePreview();
+            mActivity.updateLayoutEditText();
         }
         invalidate();
         }

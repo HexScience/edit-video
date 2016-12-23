@@ -107,8 +107,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private LinearLayout mLayoutEditText;
     private EditText mEditText, mEdtColorHex;
     private Spinner mFontSpinner;
-    private ImageView mBtnBold, mBtnItalic, mBtnTextColor, mBtnTextBgrColor;
-    private LinearLayout mLayoutBtnBold, mLayoutBtnItalic;
+    private ImageView mBtnTextColor, mBtnTextBgrColor;
     private LinearLayout mLayoutColorPicker;
     private RelativeLayout mLayoutBtnTextColor, mLayoutBtnTextBgrColor;
     private Button mBtnCloseColorPicker;
@@ -127,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public ArrayList<ExtraTL> mTextList;
     public ArrayList<AudioTL> mAudioList;
     private ArrayList<ExtraTL> mListInLayoutImage, mListInLayoutText;
-    public ArrayList<String> mFontPath, mFontName;
+    public ArrayList<String> mFontPath;
     private AudioManager mAudioManager;
 
     public String mProjectName;
@@ -171,7 +170,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public int mLeftMarginTimeLine = Constants.MARGIN_LEFT_TIME_LINE;
     private boolean mScroll;
     private boolean mOpenLayoutAdd, mOpenLayoutEditText;
-    private boolean mStyleBold, mStyleItalic;
     private boolean mShowColorPicker, mChooseTextColor;
     private int mSelectedTL;
     private int mSeekTimeAudio;
@@ -252,10 +250,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutEditText = (LinearLayout) findViewById(R.id.layout_edit_text);
         mEditText = (EditText) findViewById(R.id.edittext_input);
         mFontSpinner = (Spinner) findViewById(R.id.font_spinner);
-        mBtnBold = (ImageView) findViewById(R.id.btn_bold);
-        mBtnItalic = (ImageView) findViewById(R.id.btn_italic);
-        mLayoutBtnBold = (LinearLayout) findViewById(R.id.layout_btn_bold);
-        mLayoutBtnItalic = (LinearLayout) findViewById(R.id.layout_btn_italic);
         mColorPicker = (ColorPickerView) findViewById(R.id.color_picker);
         mBtnTextColor = (ImageView) findViewById(R.id.btn_text_color);
         mBtnTextBgrColor = (ImageView) findViewById(R.id.btn_text_background_color);
@@ -308,8 +302,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mBtnAddMedia.setOnClickListener(onBtnAddMediaClick);
         mBtnAddText.setOnClickListener(onBtnAddTextClick);
         mBtnEditText.setOnClickListener(onBtnEditClick);
-        mLayoutBtnBold.setOnClickListener(onLayoutBtnBold);
-        mLayoutBtnItalic.setOnClickListener(onLayoutBtnItalic);
         mLayoutBtnTextColor.setOnClickListener(onLayoutBtnTextColorClick);
         mLayoutBtnTextBgrColor.setOnClickListener(onLayoutBtnTextBgrColorClick);
         mBtnCloseColorPicker.setOnClickListener(onBtnCloseColorPickerClick);
@@ -361,9 +353,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private class LoadFontTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
-            mFontPath = FontManager.getFontPaths();
-            mFontName = FontManager.getFontName();
-            mFontAdapter = new FontAdapter(mActivity, android.R.layout.simple_spinner_item, mFontName);
+            mFontPath = FontManager.getFontPaths(mActivity);
+            mFontAdapter = new FontAdapter(mActivity, android.R.layout.simple_spinner_item, mFontPath);
+            for (String font : mFontPath) {
+                log(font);
+            }
             return null;
         }
 
@@ -372,6 +366,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             super.onPostExecute(aVoid);
             mFontSpinner.setAdapter(mFontAdapter);
             mFontSpinner.setOnItemSelectedListener(onFontSelectedListener);
+            mFontSpinner.setPrompt("hello");
         }
     }
 
@@ -392,22 +387,21 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void initDatabase() {
-        boolean firstUse = Utils.getSharedPref(this)
-                .getBoolean(getString(R.string.pref_first_use_app), true);
-
+        int oldDbVersion = Utils.getSharedPref(this)
+                .getInt(getString(R.string.db_version), 0);
         mVideoTable = new VideoTable(this);
         mAudioTable = new AudioTable(this);
         mImageTable = new ImageTable(this);
         mTextTable = new TextTable(this);
         mProjectTable = new ProjectTable(this);
-        if (firstUse) {
+        if (oldDbVersion < Constants.DB_VERSION) {
             mProjectTable.dropTable();
             mVideoTable.dropTable();
             mImageTable.dropTable();
             mTextTable.dropTable();
             mAudioTable.dropTable();
             Utils.getSharedPref(this).edit()
-                    .putBoolean(getString(R.string.pref_first_use_app), false).apply();
+                    .putInt(getString(R.string.db_version), Constants.DB_VERSION).apply();
         }
         mProjectTable.createTable();
         mVideoTable.createTable();
@@ -778,65 +772,12 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         return resultColor;
     }
 
-    View.OnClickListener onLayoutBtnBold = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (mStyleBold) {
-                setBoldStyle(false);
-            } else {
-                setBoldStyle(true);
-            }
-        }
-    };
-
-    private void setBoldStyle(boolean bold) {
-        int color = bold ? Color.DKGRAY : Color.TRANSPARENT;
-        mBtnBold.setBackgroundColor(color);
-        mStyleBold = bold;
-        updateTextStyle();
-    }
-
-    private void updateTextStyle() {
-        FloatText floatText = mSelectedExtraTL.floatText;
-        if (mStyleBold) {
-            if (mStyleItalic) {
-                floatText.setStyle(Typeface.BOLD_ITALIC);
-            } else {
-                floatText.setStyle(Typeface.BOLD);
-            }
-        } else {
-            if (mStyleItalic) {
-                floatText.setStyle(Typeface.ITALIC);
-            } else {
-                floatText.setStyle(Typeface.NORMAL);
-            }
-        }
-    }
-
-    private void setItalicStyle(boolean italic) {
-        int color = italic ? Color.DKGRAY : Color.TRANSPARENT;
-        mBtnItalic.setBackgroundColor(color);
-        mStyleItalic = italic;
-        updateTextStyle();
-    }
-
-    View.OnClickListener onLayoutBtnItalic = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (mStyleItalic) {
-                setItalicStyle(false);
-            } else {
-                setItalicStyle(true);
-            }
-        }
-    };
-
     AdapterView.OnItemSelectedListener onFontSelectedListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             String font = mFontPath.get(position);
             if (mSelectedExtraTL != null) {
-                mSelectedExtraTL.floatText.setFont(font);
+                mSelectedExtraTL.floatText.setFont(font, position);
             }
             mFontAdapter.setSelectedItem(position);
         }
@@ -907,14 +848,22 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutEditText.setVisibility(visible);
         slideEditText(open);
         mOpenLayoutEditText = open;
-        if (open) {
-            mEditText.setText(mSelectedExtraTL.text);
-            FloatText floatText = mSelectedExtraTL.floatText;
-            mBtnTextColor.setBackground(new AlphaColorDrawable(floatText.mColor));
-            mBtnTextBgrColor.setBackground(new AlphaColorDrawable(floatText.mBackgroundColor));
-        } else {
+        if (!open) {
             showColorPicker(false, false);
+            hideStatusBar();
+        } else {
+            updateLayoutEditText();
         }
+    }
+
+    public void updateLayoutEditText() {
+        mEditText.setText(mSelectedExtraTL.text);
+        FloatText floatText = mSelectedExtraTL.floatText;
+        mBtnTextColor.setBackground(new AlphaColorDrawable(floatText.mColor));
+        mBtnTextBgrColor.setBackground(new AlphaColorDrawable(floatText.mBackgroundColor));
+
+        mFontAdapter.setSelectedItem(floatText.fontId);
+        mFontSpinner.setSelection(floatText.fontId);
     }
 
     private void slideEditText(boolean open) {
@@ -2735,6 +2684,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     floatText.drawBorder(true);
                     mSelectedExtraTL = mTextList.get(i);
                     mFoundText = true;
+                    updateLayoutEditText();
                 } else {
                     floatText.drawBorder(false);
                 }
@@ -2797,6 +2747,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mExtraTLControl.setVisibility(View.VISIBLE);
             mVideoTLControl.setVisibility(View.GONE);
             mAudioTLControl.setVisibility(View.GONE);
+            unSelectVideoTL();
+            mSelectedTL = TIMELINE_EXTRA;
         } else {
             mExtraTLControl.setVisibility(View.GONE);
             if (mSelectedExtraTL != null) {

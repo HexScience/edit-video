@@ -16,4 +16,5 @@
     <string name="positive_btn_text_create_project">Create Project</string>
     <string name="toast_file_not_exists_when_click_play">Some file is not exists, please remove it before playing</string>
     <string name="toast_file_not_exists_when_click_export">Some file is not exists, please remove it before exporting</string>
+    <string name="spinner_text">Aa Bb Cc</string>
 </resources>

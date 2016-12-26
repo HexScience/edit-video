@@ -1304,9 +1304,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         if (mTLPositionInMs == 0) {
             mPreviewStatus = BEGIN;
         }
-        if (mTLPositionInMs >= mMaxTimeLine) {
+        if (mTLPositionInMs >= mMaxTimeLine - 400) {
             mPreviewStatus = END;
         }
+
     }
 
     private void updateVideoView() {

@@ -124,13 +124,13 @@
                 android:background="#060606"
                 android:orientation="horizontal">
 
-                <com.hecorat.editvideo.preview.CustomVideoView
+                <com.hecorat.azplugin2.preview.CustomVideoView
                     android:id="@+id/video_view1"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_centerHorizontal="true" />
 
-                <com.hecorat.editvideo.preview.CustomVideoView
+                <com.hecorat.azplugin2.preview.CustomVideoView
                     android:id="@+id/video_view2"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -351,7 +351,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <com.hecorat.editvideo.timeline.CustomHorizontalScrollView
+            <com.hecorat.azplugin2.timeline.CustomHorizontalScrollView
                 android:id="@+id/scroll_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -464,7 +464,7 @@
                             android:background="@color/seperate_line_layer_color" />
                     </RelativeLayout>
                 </LinearLayout>
-            </com.hecorat.editvideo.timeline.CustomHorizontalScrollView>
+            </com.hecorat.azplugin2.timeline.CustomHorizontalScrollView>
 
             <LinearLayout
                 android:id="@+id/seekbar_indicator"
@@ -554,7 +554,7 @@
                                 </LinearLayout>
                             </LinearLayout>
 
-                            <com.hecorat.editvideo.addtext.ColorPickerView
+                            <com.hecorat.azplugin2.addtext.ColorPickerView
                                 android:id="@+id/color_picker"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"

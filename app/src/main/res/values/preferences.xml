@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="db_version">db_version</string>
+    <string name="pref_app_version_code">prefAppVersionCode</string>
+    <string name="pref_init_ffmpeg">PrefInitFFmpeg</string>
 </resources>

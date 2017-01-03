@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -28,7 +29,7 @@ import java.io.File;
 /**
  * Created by bkmsx on 31/10/2016.
  */
-public class ExtraTL extends ImageView {
+public class ExtraTL extends AppCompatImageView {
     public int width, height;
     public int durationImage;
     public int startInTimeLineMs, endInTimeLineMs;
@@ -167,7 +168,6 @@ public class ExtraTL extends ImageView {
         textObject.orderInLayout = orderInLayout + "";
         textObject.orderInList = orderInList + "";
 
-        textObject.isWaterMark = floatText.isWaterMark ? "1" : "0";
         textObject.x = floatText.x + "";
         textObject.y = floatText.y + "";
         textObject.scale = floatText.scaleValue + "";
@@ -248,7 +248,7 @@ public class ExtraTL extends ImageView {
             paint.setTextSize(35);
             canvas.drawText(text, 20, 50, paint);
         }
-        paint.setColor(getResources().getColor(R.color.border_timeline_color));
+        paint.setColor(ContextCompat.getColor(mActivity, R.color.border_timeline_color));
         canvas.drawRect(rectTop, paint);
         canvas.drawRect(rectBottom, paint);
         canvas.drawRect(rectLeft, paint);

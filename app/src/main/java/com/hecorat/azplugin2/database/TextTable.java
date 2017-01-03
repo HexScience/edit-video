@@ -21,7 +21,6 @@ public class TextTable {
     String IN_LAYOUT_IMAGE = "InLayoutImage";
     String ORDER_IN_LAYOUT = "OrderInLayout";
     String ORDER_IN_LIST = "OrderInList";
-    String IS_WATER_MARK = "IsWaterMark";
     String X = "x";
     String Y = "y";
     String SCALE = "Scale";
@@ -48,7 +47,6 @@ public class TextTable {
                 IN_LAYOUT_IMAGE + " text, " +
                 ORDER_IN_LAYOUT + " text, " +
                 ORDER_IN_LIST + " text, " +
-                IS_WATER_MARK + " text, " +
                 X + " text, " +
                 Y + " text, " +
                 SCALE + " text, " +
@@ -77,7 +75,6 @@ public class TextTable {
         contentValues.put(IN_LAYOUT_IMAGE, text.inLayoutImage);
         contentValues.put(ORDER_IN_LAYOUT, text.orderInLayout);
         contentValues.put(ORDER_IN_LIST, text.orderInList);
-        contentValues.put(IS_WATER_MARK, text.isWaterMark);
         contentValues.put(X, text.x);
         contentValues.put(Y, text.y);
         contentValues.put(SCALE, text.scale);
@@ -113,7 +110,6 @@ public class TextTable {
                 text.inLayoutImage = cursor.getString(cursor.getColumnIndex(IN_LAYOUT_IMAGE));
                 text.orderInLayout = cursor.getString(cursor.getColumnIndex(ORDER_IN_LAYOUT));
                 text.orderInList = cursor.getString(cursor.getColumnIndex(ORDER_IN_LIST));
-                text.isWaterMark = cursor.getString(cursor.getColumnIndex(IS_WATER_MARK));
                 text.x = cursor.getString(cursor.getColumnIndex(X));
                 text.y = cursor.getString(cursor.getColumnIndex(Y));
                 text.scale = cursor.getString(cursor.getColumnIndex(SCALE));

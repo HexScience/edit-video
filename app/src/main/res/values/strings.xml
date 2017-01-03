@@ -17,4 +17,6 @@
     <string name="toast_file_not_exists_when_click_play">Some file is not exists, please remove it before playing</string>
     <string name="toast_file_not_exists_when_click_export">Some file is not exists, please remove it before exporting</string>
     <string name="spinner_text">Aa Bb Cc</string>
+    <string name="dialog_ask_premium_title">Donate</string>
+    <string name="dialog_ask_premium_message">Please donate to remove watermark</string>
 </resources>

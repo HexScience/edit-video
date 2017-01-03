@@ -7,7 +7,7 @@ package com.hecorat.azplugin2.database;
 public class TextObject {
     public int id, projectId;
     public String text, left, right, inLayoutImage, orderInLayout, orderInList;
-    public String isWaterMark, x, y, scale, rotation, size, fontPath, fontColor, boxColor, fontId;
+    public String x, y, scale, rotation, size, fontPath, fontColor, boxColor, fontId;
 
     public TextObject(){}
 

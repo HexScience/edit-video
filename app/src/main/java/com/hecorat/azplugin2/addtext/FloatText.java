@@ -12,7 +12,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
 import android.os.Build;
-import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -20,7 +20,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.azplugin2.R;
@@ -33,7 +32,7 @@ import com.hecorat.azplugin2.timeline.ExtraTL;
  * Created by TienDam on 11/14/2016.
  */
 
-public class FloatText extends ImageView {
+public class FloatText extends AppCompatImageView {
     public Bitmap rotateBitmap, scaleBitmap;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
@@ -92,7 +91,6 @@ public class FloatText extends ImageView {
         textPaint.setTextSize(size);
         setText(text);
 
-
         borderTopLeft = new float[2];
         borderBottomRight = new float[2];
         borderBottomLeft = new float[2];
@@ -123,7 +121,6 @@ public class FloatText extends ImageView {
     }
 
     public void restoreState(TextObject textObject) {
-        isWaterMark = textObject.isWaterMark.equals("1");
         x = Float.parseFloat(textObject.x);
         y = Float.parseFloat(textObject.y);
         scaleValue = Float.parseFloat(textObject.scale);
@@ -448,7 +445,7 @@ public class FloatText extends ImageView {
                 case MotionEvent.ACTION_UP:
                     if (!isTouch){
                         if (touch == 3 && isWaterMark && drawBorder) {
-                            mActivity.removeWaterMark();
+                            mActivity.askDonate();
                         } else if (touch != 0) {
                             performClick();
                         } else {

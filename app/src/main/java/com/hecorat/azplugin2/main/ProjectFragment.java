@@ -150,7 +150,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
 
         mActivity.hideStatusBar();
     }
-
+    
     private void createNewProject(String name) {
         mActivity.setLayoutFragmentVisible(false);
         mActivity.mProjectName = name;

@@ -64,6 +64,8 @@ import com.hecorat.azplugin2.filemanager.FragmentAudioGallery;
 import com.hecorat.azplugin2.filemanager.FragmentImagesGallery;
 import com.hecorat.azplugin2.filemanager.FragmentVideosGallery;
 import com.hecorat.azplugin2.helper.Utils;
+import com.hecorat.azplugin2.interfaces.DialogClickListener;
+import com.hecorat.azplugin2.donate.DialogAskDonate;
 import com.hecorat.azplugin2.preview.CustomVideoView;
 import com.hecorat.azplugin2.timeline.AudioTL;
 import com.hecorat.azplugin2.timeline.AudioTLControl;
@@ -81,7 +83,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements VideoTLControl.OnControlTimeLineChanged,
         ExtraTLControl.OnExtraTimeLineControlChanged, AudioTLControl.OnAudioControlTimeLineChanged,
-        ColorPickerView.OnColorChangedListener {
+        ColorPickerView.OnColorChangedListener, DialogClickListener {
     private RelativeLayout mVideoViewLayout;
     private RelativeLayout mLayoutVideo, mLayoutImage, mLayoutText, mLayoutAudio;
     private RelativeLayout mTimeLineVideo, mTimeLineImage, mTimeLineText, mTimeLineAudio;
@@ -153,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public TextTable mTextTable;
     public ProjectTable mProjectTable;
     private GalleryPagerAdapter mGalleryPagerAdapter;
+    private FloatText mWaterMark;
 
     private int mDragCode = DRAG_VIDEO;
     private int mCountVideo = 0;
@@ -178,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public boolean mFoundImage, mFoundText;
     public int mProjectId;
     public boolean mOpenLayoutProject;
+    private boolean mIsVip;
 
     public static final int TIMELINE_VIDEO = 0;
     public static final int TIMELINE_EXTRA = 1;
@@ -340,6 +344,23 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         openLayoutProject();
         keepScreenOn();
+
+        mIsVip = Utils.getSharedPref(this).getBoolean(getString(R.string.pref_is_vip), false);
+    }
+
+    @Override
+    public void onPositiveClick(int dialogId) {
+        hideStatusBar();
+        switch (dialogId) {
+            case DialogClickListener.ASK_DONATE:
+                removeWaterMark();
+                break;
+        }
+    }
+
+    @Override
+    public void onNegativeClick(int dialogId) {
+        hideStatusBar();
     }
 
     private void initFontManager() {
@@ -1034,8 +1055,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void deleteProjectIfEmpty() {
         if (mVideoList.isEmpty() && mImageList.isEmpty()
-                && mTextList.isEmpty() && mAudioList.isEmpty()) {
-            mProjectTable.deleteProject(mProjectId);
+                 && mAudioList.isEmpty()) {
+            if (mIsVip && mTextList.isEmpty() || !mIsVip && mTextList.size() == 1) {
+                mProjectTable.deleteProject(mProjectId);
+            }
         }
     }
 
@@ -1529,6 +1552,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     public void restoreAllVideoTL(int projectId) {
         ArrayList<VideoObject> list = mVideoTable.getData(projectId);
+        log("List Video = " + list.size());
         if (list.size() < 1) {
             return;
         }
@@ -1583,6 +1607,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void setWaterMarkEndTime(int endTime){
+        if (mIsVip) {
+            return;
+        }
         mTextList.get(0).endInTimeLineMs = endTime;
     }
 
@@ -1631,9 +1658,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     public void saveTextObjects() {
         getTextOrder();
-        for (ExtraTL extraTL : mTextList) {
+        int i = 0;
+        if (!mIsVip) {
+            i = 1;
+        }
+       while (i < mTextList.size()) {
+            ExtraTL extraTL = mTextList.get(i);
             TextObject text = extraTL.getTextObject();
             mTextTable.insertValue(text);
+            i++;
         }
     }
 
@@ -1859,13 +1892,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void restoreAllTextTL(int projectId) {
+        addWaterMark();
         ArrayList<TextObject> listText = mTextTable.getData(projectId);
         for (TextObject textObject : listText) {
-            if (textObject.isWaterMark.equals("1")){
-                restoreWaterMark(textObject);
-            } else {
-                restoreTextTL(textObject);
-            }
+            restoreTextTL(textObject);
         }
     }
 
@@ -1894,7 +1924,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         extraTL.setOnLongClickListener(onExtraTimelineLongClick);
         extraTL.restoreTextTL(textObject);
 
-        mTextList.add(extraTL.orderInList, extraTL);
+        mTextList.add(extraTL);
         if (extraTL.inLayoutImage) {
             mLayoutImage.addView(extraTL);
             mListInLayoutImage.add(extraTL.orderInLayout, extraTL);
@@ -1913,23 +1943,34 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void addWaterMark() {
+        if (mIsVip) {
+            return;
+        }
         String text = "AZ Video Editor";
         int leftMargin = mLeftMarginTimeLine + mScrollView.getScrollX();
         ExtraTL extraTL = new ExtraTL(this, text, mTimeLineImageHeight, leftMargin, false);
         mTextList.add(extraTL);
 
-        FloatText floatText = new FloatText(this, text, true);
-        mLayoutFloatView.addView(floatText);
-        extraTL.floatText = floatText;
-        floatText.timeline = extraTL;
+        mWaterMark = new FloatText(this, text, true);
+        mLayoutFloatView.addView(mWaterMark);
+        extraTL.floatText = mWaterMark;
+        mWaterMark.timeline = extraTL;
 
-        int waterMarkX = mLayoutFloatView.getWidth() - floatText.width - 40;
-        int waterMarkY = mLayoutFloatView.getHeight() - floatText.height - 40;
-        floatText.setWaterMarkPosition(waterMarkX, waterMarkY);
+        int waterMarkX = mLayoutFloatView.getWidth() - mWaterMark.width - 40;
+        int waterMarkY = mLayoutFloatView.getHeight() - mWaterMark.height - 40;
+        mWaterMark.setWaterMarkPosition(waterMarkX, waterMarkY);
+    }
+
+    public void askDonate() {
+        DialogAskDonate.newInstance(this).show(getSupportFragmentManager().beginTransaction(), "ask donate");
     }
 
     public void removeWaterMark() {
-        Toast.makeText(this, "You can remove watermark soon", Toast.LENGTH_LONG).show();
+        mIsVip = true;
+        Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), true).apply();
+        mLayoutFloatView.removeView(mWaterMark);
+        mTextList.remove(mWaterMark.timeline);
+        Toast.makeText(this, "Watermark was removed", Toast.LENGTH_LONG).show();
     }
 
     private void addTextTL() {

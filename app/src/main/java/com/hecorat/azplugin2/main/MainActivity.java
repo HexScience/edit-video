@@ -1,8 +1,11 @@
 package com.hecorat.azplugin2.main;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.animation.ValueAnimator;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -59,6 +62,12 @@ import com.hecorat.azplugin2.database.TextObject;
 import com.hecorat.azplugin2.database.TextTable;
 import com.hecorat.azplugin2.database.VideoObject;
 import com.hecorat.azplugin2.database.VideoTable;
+import com.hecorat.azplugin2.donate.IabController;
+import com.hecorat.azplugin2.donate.util.IabHelper;
+import com.hecorat.azplugin2.donate.util.IabResult;
+import com.hecorat.azplugin2.donate.util.Inventory;
+import com.hecorat.azplugin2.donate.util.Purchase;
+import com.hecorat.azplugin2.donate.util.SkuDetails;
 import com.hecorat.azplugin2.export.ExportFragment;
 import com.hecorat.azplugin2.filemanager.FragmentAudioGallery;
 import com.hecorat.azplugin2.filemanager.FragmentImagesGallery;
@@ -156,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public ProjectTable mProjectTable;
     private GalleryPagerAdapter mGalleryPagerAdapter;
     private FloatText mWaterMark;
+    private IabController mIabController;
 
     private int mDragCode = DRAG_VIDEO;
     private int mCountVideo = 0;
@@ -345,7 +355,61 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         openLayoutProject();
         keepScreenOn();
 
-        mIsVip = Utils.getSharedPref(this).getBoolean(getString(R.string.pref_is_vip), false);
+        checkVip();
+    }
+
+    private void checkVip() {
+        mIabController = new IabController(this);
+    }
+
+    public void checkVipWithoutInternet() {
+        new CheckVipWithoutInternetTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private class CheckVipWithoutInternetTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            mIsVip = false;
+            String vipAccount = Utils.getSharedPref(mActivity).getString(getString(R.string.pref_last_account), null);
+            log(vipAccount+"");
+            if (vipAccount == null) {
+                log("not vip");
+                return null;
+            }
+            AccountManager accountManager = AccountManager.get(mActivity);
+            Account[] accounts = accountManager.getAccountsByType("com.google");
+            for (Account account : accounts) {
+                if (account.name.equals(vipAccount)) {
+                    mIsVip = Utils.getSharedPref(mActivity).getBoolean(getString(R.string.pref_is_vip), false);
+                    log("vip = " + mIsVip);
+                    return null;
+                }
+            }
+            return null;
+        }
+    }
+
+    public void onCheckVipCompleted(boolean isVip) {
+        mIsVip = isVip;
+        Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), isVip).apply();
+        if (isVip) {
+            saveLastAccount();
+        }
+    }
+
+    private void saveLastAccount() {
+        new SaveLastAccountTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private class SaveLastAccountTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            AccountManager accountManager = AccountManager.get(mActivity);
+            Account[] accounts = accountManager.getAccountsByType("com.google");
+            Utils.getSharedPref(mActivity).edit()
+                    .putString(getString(R.string.pref_last_account), accounts[0].name).apply();
+            return null;
+        }
     }
 
     @Override
@@ -353,9 +417,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         hideStatusBar();
         switch (dialogId) {
             case DialogClickListener.ASK_DONATE:
-                removeWaterMark();
+                startDonate();
                 break;
         }
+    }
+
+    private void startDonate() {
+        mIabController.buyItem();
     }
 
     @Override
@@ -2001,6 +2069,12 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mSelectedTL = TIMELINE_EXTRA;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mIabController.handleActivityResult(requestCode, resultCode, data);
+    }
+
     private void startAnimationAddText() {
         int[] indicatorCoord = new int[2];
         int[] layoutImageCoord = new int[2];
@@ -2072,7 +2146,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         return false;
     }
-
 
     public void saveAudioObjects() {
         getAudioOrder();

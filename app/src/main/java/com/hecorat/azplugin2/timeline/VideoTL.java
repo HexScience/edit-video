@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 /**
  * Created by bkmsx on 31/10/2016.
  */
-public class VideoTL extends ImageView {
+public class VideoTL extends AppCompatImageView {
     public Rect rectBackground, rectLeft, rectRight, rectTop, rectBottom;
     public Paint paint;
     public MediaMetadataRetriever retriever;
@@ -184,7 +185,6 @@ public class VideoTL extends ImageView {
         endInTimeLineMs = (right - MARGIN_LEFT_TIME_LINE) * Constants.SCALE_VALUE;
         invalidate();
     }
-
 
     public void updateTimeLineStatus() {
         startTimeMs = startPosition* Constants.SCALE_VALUE;

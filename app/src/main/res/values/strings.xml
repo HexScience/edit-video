@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">A Edit Video</string>
+    <string name="app_name">AZ Video Editor</string>
     <string name="video_tab_title">Videos</string>
     <string name="image_tab_title">Images</string>
     <string name="audio_tab_title">Audio</string>

@@ -15,3 +15,5 @@
 #-keepclassmembers class fqcn.of.javascript.interfaces.for.webview {
 #   public *;
 #}
+-keep public class com.semantive.waveformandroid.**
+-dontwarn java.lang.invoke.**

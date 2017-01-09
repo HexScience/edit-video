@@ -118,6 +118,13 @@ public class Utils {
         return tempFolder;
     }
 
+    public static void deleteTempFiles() {
+        File[] files = new File(Utils.getTempFolder()).listFiles();
+        for (File file : files) {
+            file.delete();
+        }
+    }
+
     public static String getResourceFolder(){
         String direct = Environment.getExternalStorageDirectory().toString();
         String resourceFolder = direct+"/"+ Constants.OUTPUT_FOLDER+"/"+Constants.RESOURCE_FOLDER;

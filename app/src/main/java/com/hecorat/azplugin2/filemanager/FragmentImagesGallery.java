@@ -99,6 +99,7 @@ public class FragmentImagesGallery extends Fragment {
             mIsSubFolder = true;
             mGridView.setOnItemClickListener(onImageClickListener);
             mActivity.mOpenImageSubFolder = true;
+            mActivity.setBtnUpLevelVisible(true);
             if (i==0){
                 mChooseSticker = true;
                 mImageAdapter = new ImageGalleryAdapter(mActivity, R.layout.image_gallery_layout, mListStiker);

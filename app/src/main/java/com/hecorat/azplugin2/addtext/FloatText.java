@@ -468,7 +468,7 @@ public class FloatText extends AppCompatImageView {
             if (!isWaterMark) {
                 mActivity.setExtraControlVisible(false);
                 mActivity.cancelEditText();
-                mActivity.setBtnDeleteVisible(false);
+                mActivity.slideExtraToolsOut(false);
             }
             mActivity.hideStatusBar();
         } else {
@@ -478,7 +478,9 @@ public class FloatText extends AppCompatImageView {
                 mActivity.restoreExtraControl(timeline);
                 mActivity.setBtnEditVisible(true);
                 mActivity.setBtnDeleteVisible(true);
+                mActivity.setBtnVolumeVisible(false);
                 mActivity.updateLayoutEditText();
+                mActivity.slideExtraToolsOut(true);
             }
             mActivity.setFloatTextVisible(timeline);
             mActivity.pausePreview();

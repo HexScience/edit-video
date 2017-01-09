@@ -12,9 +12,9 @@ public interface Constants {
     int MAX_VOLUME = 200;
 
     String OUTPUT_FOLDER = "AZ_Video_Editor";
-    String TEMP_FOLDER = "temp";
+    String TEMP_FOLDER = ".temp";
     String RESOURCE_FOLDER = ".resource";
-    String FONT_FOLDER = "fonts";
+    String FONT_FOLDER = ".fonts";
     String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr845N+56OFsJAZV60" +
             "BVWsf1Rh2f6Y/Pqv2J6Ss+b11k72OXtZmWhrwZ2y00jPWDYCMXNhcl8TIE4rSln0asN0sux6Tr" +
             "QvwQwDBudC6ovdg7h1a+yhkfJWy4qu9K21qzKe/O81mxX64kbjUQsjKgLvKj18rKL+7yybFr+w" +

@@ -19,4 +19,9 @@
     <string name="spinner_text">Aa Bb Cc</string>
     <string name="dialog_ask_premium_title">Donate</string>
     <string name="dialog_ask_premium_message">Please donate to remove watermark</string>
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="purchase_failed">Purchase failed</string>
+    <string name="purchase_success">Thank you for donate</string>
+    <string name="export_completed">Export Completed.</string>
+    <string name="exporting_msg">Exporting..</string>
 </resources>

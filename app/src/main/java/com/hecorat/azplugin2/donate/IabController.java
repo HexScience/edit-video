@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.hecorat.azplugin2.R;
 import com.hecorat.azplugin2.donate.util.IabHelper;
 import com.hecorat.azplugin2.donate.util.IabResult;
 import com.hecorat.azplugin2.donate.util.Inventory;
@@ -45,7 +46,7 @@ public class IabController {
 
     public void buyItem() {
         if (mSetupFailed) {
-            toast("No internet connection");
+            toast(mainActivity.getString(R.string.no_internet_connection));
             return;
         }
         try {
@@ -62,9 +63,9 @@ public class IabController {
         public void onIabPurchaseFinished(IabResult result, Purchase purchase)
         {
             if (result.isFailure()) {
-                toast("purchase failed");
+                toast(mainActivity.getString(R.string.purchase_failed));
             } else if (purchase.getSku().equals(Constants.SKU_DONATE)) {
-                toast("Purchase success");
+                toast(mainActivity.getString(R.string.purchase_success));
                 mainActivity.removeWaterMark();
             }
         }
@@ -90,15 +91,12 @@ public class IabController {
 
             if (result.isFailure()) {
                 // handle error here
-                toast("query failed");
             } else {
                 // does the user have the premium upgrade?
                 if (!inventory.hasPurchase(Constants.SKU_DONATE)) {
-                    toast("There no purchase");
                     mainActivity.onCheckVipCompleted(false);
                     return;
                 }
-                toast("purchase oke");
                 Purchase purchase = inventory.getPurchase(Constants.SKU_DONATE);
                 log(purchase.getSku());
                 log(purchase.getOriginalJson());

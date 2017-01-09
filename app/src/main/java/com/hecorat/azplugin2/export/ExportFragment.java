@@ -193,6 +193,7 @@ public class ExportFragment extends Fragment{
             mCircleProgressBar.setText(value+"%");
             mCircleProgressBar.setTextSize(70);
         }
+        NotificationHelper.updateNotification(mActivity, value, mVideoPath);
     }
 
     public void onExportCompleted() {
@@ -205,7 +206,7 @@ public class ExportFragment extends Fragment{
             setExportProgress(100);
             mLayoutAfterExport.setVisibility(View.VISIBLE);
             mTextViewTip.setVisibility(View.INVISIBLE);
-            NotificationHelper.notify(mActivity, "Export video is successful");
+            NotificationHelper.updateNotification(mActivity, 100, mVideoPath);
         }
     }
 }

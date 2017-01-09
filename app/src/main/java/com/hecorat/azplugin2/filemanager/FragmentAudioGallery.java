@@ -36,7 +36,8 @@ public class FragmentAudioGallery extends Fragment {
     public int mCountSubFolder;
     public boolean mIsSubFolder;
     public String mFolderName;
-    String[] pattern = {".mp3",".aac"};
+    String[] pattern = {".mp3", ".aac"};
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -61,9 +62,9 @@ public class FragmentAudioGallery extends Fragment {
         return view;
     }
 
-    private boolean matchFile(File file){
-        for (int i=0; i<pattern.length; i++) {
-            if (file.getName().endsWith(pattern[i])){
+    private boolean matchFile(File file) {
+        for (int i = 0; i < pattern.length; i++) {
+            if (file.getName().endsWith(pattern[i])) {
                 return true;
             }
         }
@@ -72,7 +73,7 @@ public class FragmentAudioGallery extends Fragment {
 
     public void backToMain() {
         mIsSubFolder = false;
-        if (mFolderAdapter == null){
+        if (mFolderAdapter == null) {
             mFolderAdapter = new AudioGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstAudio);
         }
         mGridView.setAdapter(mFolderAdapter);
@@ -84,15 +85,16 @@ public class FragmentAudioGallery extends Fragment {
     AdapterView.OnItemClickListener onFolderClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        mIsSubFolder = true;
-        mListAudio.clear();
-        mAudioAdapter = new AudioGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListAudio);
-        mGridView.setAdapter(mAudioAdapter);
-        mGridView.setOnItemClickListener(onAudioClickListener);
-        mActivity.mOpenAudioSubFolder = true;
-        mFolderName = new File(mListFolder.get(i)).getName();
-        mActivity.setFolderName(mFolderName);
-        new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
+            mIsSubFolder = true;
+            mListAudio.clear();
+            mAudioAdapter = new AudioGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListAudio);
+            mGridView.setAdapter(mAudioAdapter);
+            mGridView.setOnItemClickListener(onAudioClickListener);
+            mActivity.mOpenAudioSubFolder = true;
+            mActivity.setBtnUpLevelVisible(true);
+            mFolderName = new File(mListFolder.get(i)).getName();
+            mActivity.setFolderName(mFolderName);
+            new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
         }
     };
 
@@ -110,7 +112,7 @@ public class FragmentAudioGallery extends Fragment {
         protected Void doInBackground(Integer... value) {
             boolean subFolder = true;
             String folderPath = mListFolder.get(value[0]);
-            if (folderPath.equals(mStoragePath)){
+            if (folderPath.equals(mStoragePath)) {
                 subFolder = false;
             }
             loadAllAudio(new File(folderPath), mListAudio, subFolder);
@@ -124,9 +126,9 @@ public class FragmentAudioGallery extends Fragment {
         }
     }
 
-    private void loadAllAudio(File fileDirectory, ArrayList<String> listAudio, boolean subFolder){
+    private void loadAllAudio(File fileDirectory, ArrayList<String> listAudio, boolean subFolder) {
         File[] fileList = fileDirectory.listFiles();
-        for (int i=0; i<fileList.length; i++){
+        for (int i = 0; i < fileList.length; i++) {
             if (fileList[i].isDirectory()) {
                 if (subFolder) {
                     loadAllAudio(fileList[i], listAudio, true);
@@ -141,6 +143,7 @@ public class FragmentAudioGallery extends Fragment {
 
     private class AsyncTaskScanFolder extends AsyncTask<Void, Void, Void> {
         long start;
+
         @Override
         protected void onPreExecute() {
             start = System.currentTimeMillis();
@@ -150,10 +153,10 @@ public class FragmentAudioGallery extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            for (int i=0; i<mListFolder.size(); i++) {
+            for (int i = 0; i < mListFolder.size(); i++) {
                 boolean scanSubFolder = !mListFolder.get(i).equals(mStoragePath);
                 mCountSubFolder = 0;
-                if (!isAudioFolder(new File(mListFolder.get(i)), scanSubFolder)){
+                if (!isAudioFolder(new File(mListFolder.get(i)), scanSubFolder)) {
                     mListFolder.remove(i);
                     i--;
                 }
@@ -168,12 +171,12 @@ public class FragmentAudioGallery extends Fragment {
         }
     }
 
-    private void listFolderFrom(File fileDirectory){
+    private void listFolderFrom(File fileDirectory) {
         File[] listFile = fileDirectory.listFiles();
-        for (int i=0; i<listFile.length; i++) {
+        for (int i = 0; i < listFile.length; i++) {
             if (listFile[i].isDirectory()) {
                 String name = listFile[i].getName();
-                if (name.charAt(0) != '.'){
+                if (name.charAt(0) != '.') {
                     mListFolder.add(listFile[i].getAbsolutePath());
                 }
             }
@@ -181,12 +184,12 @@ public class FragmentAudioGallery extends Fragment {
     }
 
     private boolean isAudioFolder(File fileDirectory, boolean includeSubDir) {
-        if (mCountSubFolder>7) {
+        if (mCountSubFolder > 7) {
             return false;
         }
         boolean result = false;
         File[] fileList = fileDirectory.listFiles();
-        for (int i=0; i<fileList.length; i++){
+        for (int i = 0; i < fileList.length; i++) {
             if (fileList[i].isDirectory()) {
                 if (includeSubDir) {
                     result = isAudioFolder(fileList[i], true);

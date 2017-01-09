@@ -3,7 +3,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="video_view_height">240dp</dimen>
-    <dimen name="margin_bottom_toolbar">10dp</dimen>
+    <dimen name="margin_top_toolbar">10dp</dimen>
     <dimen name="layer_icon_dimension">20dp</dimen>
     <dimen name="main_toolbar_width">60dp</dimen>
     <dimen name="toolbar_icon_dimension">45dp</dimen>

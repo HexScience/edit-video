@@ -165,6 +165,8 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         command.add("yuva420p");
         command.add("-preset");
         command.add("ultrafast");
+        command.add("-video_track_timescale");
+        command.add("90000");
         command.add("-c:a");
         command.add("aac");
         command.add("-y");

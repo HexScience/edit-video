@@ -331,13 +331,16 @@ public class FloatImage extends ImageView {
             if (drawBorder) {
                 drawBorder(false);
                 mActivity.setExtraControlVisible(false);
-                mActivity.setBtnDeleteVisible(false);
+                mActivity.slideExtraToolsOut(false);
             } else {
                 drawBorder(true);
                 mActivity.setExtraControlVisible(true);
                 mActivity.restoreExtraControl(timeline);
                 mActivity.setFloatImageVisible(timeline);
                 mActivity.setBtnDeleteVisible(true);
+                mActivity.setBtnEditVisible(false);
+                mActivity.setBtnVolumeVisible(false);
+                mActivity.slideExtraToolsOut(true);
                 mActivity.pausePreview();
             }
             invalidate();

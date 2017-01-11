@@ -47,6 +47,7 @@ public class ExportFragment extends Fragment{
     public String mVideoPath;
 
     private boolean mStop;
+    public boolean mExporting;
 
     public static ExportFragment newInstance(MainActivity activity) {
         mActivity = activity;
@@ -145,12 +146,17 @@ public class ExportFragment extends Fragment{
     View.OnClickListener onBtnBackClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mActivity.setLayoutFragmentVisible(false);
-            mLayoutQuality.setVisibility(View.VISIBLE);
-            mLayoutProgress.setVisibility(View.GONE);
-            setFragmentInvisible();
+            backToEdit();
         }
     };
+
+    public void backToEdit() {
+        mActivity.setLayoutFragmentVisible(false);
+        mLayoutQuality.setVisibility(View.VISIBLE);
+        mLayoutProgress.setVisibility(View.GONE);
+        setFragmentInvisible();
+        mActivity.mOpenLayoutExport = false;
+    }
 
     private void setFragmentInvisible(){
         getView().setVisibility(View.GONE);
@@ -162,6 +168,7 @@ public class ExportFragment extends Fragment{
             mLayoutQuality.setVisibility(View.GONE);
             mLayoutProgress.setVisibility(View.VISIBLE);
             exportVideo();
+            mExporting = true;
         }
     };
 
@@ -193,15 +200,18 @@ public class ExportFragment extends Fragment{
             mCircleProgressBar.setText(value+"%");
             mCircleProgressBar.setTextSize(70);
         }
-        NotificationHelper.updateNotification(mActivity, value, mVideoPath);
+        if (mExporting) {
+            NotificationHelper.updateNotification(mActivity, value, mVideoPath);
+        }
     }
 
     public void onExportCompleted() {
         mBtnCancel.setVisibility(View.GONE);
-
+        mExporting = false;
         if (mStop) {
             setExportProgress(0);
             mBtnBackCancel.setVisibility(View.VISIBLE);
+            NotificationHelper.cancelNotification(mActivity);
         } else {
             setExportProgress(100);
             mLayoutAfterExport.setVisibility(View.VISIBLE);

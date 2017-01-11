@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "550591408799",
+    "firebase_url": "https://az-video-editor.firebaseio.com",
+    "project_id": "az-video-editor",
+    "storage_bucket": "az-video-editor.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:550591408799:android:269d2b47a8cd3ed7",
+        "android_client_info": {
+          "package_name": "com.hecorat.azplugin2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "550591408799-5jh0ggsu4ctqarh738nj01qla7qhq4qo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7g6Ys4Bp3tQYG3K0a9ubLhy9nUwqzsFg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -14,7 +14,7 @@
         <RelativeLayout
             android:id="@+id/videoview_layout"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="170dp"
             android:layout_marginTop="10dp"
             android:background="#060606"
             android:layout_gravity="center_horizontal"
@@ -25,10 +25,16 @@
                 android:layout_height="match_parent" />
         </RelativeLayout>
         <FrameLayout
-            android:id="@+id/layout_seekbar"
+            android:id="@+id/layout_pick_time_trim"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"/>
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"/>
+
+        <FrameLayout
+            android:id="@+id/layout_seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

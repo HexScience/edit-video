@@ -16,14 +16,14 @@ import com.hecorat.azplugin2.main.MainActivity;
  */
 
 public class NotificationHelper {
-
+    private static int notifyID = 1;
     public static void updateNotification(Context context, int progress, String videoPath) {
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        int notifyID = 1;
+
         NotificationCompat.Builder mNotifyBuilder = new NotificationCompat.Builder(context)
                 .setContentTitle(context.getString(R.string.exporting_msg))
-                .setSmallIcon(R.mipmap.icon_launcher)
+                .setSmallIcon(R.drawable.ic_export_notification)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setOngoing(true);
         if (progress < 100) {
@@ -44,5 +44,11 @@ public class NotificationHelper {
         }
 
         mNotificationManager.notify(notifyID, mNotifyBuilder.build());
+    }
+
+    public static void cancelNotification(Context context) {
+        NotificationManager mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancel(notifyID);
     }
 }

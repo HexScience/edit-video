@@ -191,6 +191,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public boolean mOpenLayoutProject;
     private boolean mIsVip;
     private boolean mOpenExtraTools;
+    public boolean mOpenLayoutTrimVideo;
+    public boolean mOpenLayoutExport;
 
     public static final int TIMELINE_VIDEO = 0;
     public static final int TIMELINE_EXTRA = 1;
@@ -575,6 +577,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void startThreadPreview() {
         mRunThread = true;
+        mThreadPreviewVideo = new Thread(runnablePreview);
         mThreadPreviewVideo.start();
         log(" Start");
     }
@@ -957,6 +960,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mTrimFragment = TrimFragment.newInstance(mActivity, mSelectedVideoTL);
         getSupportFragmentManager().beginTransaction().replace(R.id.layout_fragment, mTrimFragment).commit();
         setLayoutFragmentVisible(true);
+        mOpenLayoutTrimVideo = true;
+    }
+
+    public void closeLayoutTrimVideo() {
+        mTrimFragment.close();
     }
 
     public void setActiveVideoViewVisible(boolean visible) {
@@ -1185,6 +1193,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mExportFragment = ExportFragment.newInstance(mActivity);
         mActivity.getSupportFragmentManager().beginTransaction().replace(R.id.layout_fragment, mExportFragment).commit();
         setLayoutFragmentVisible(true);
+        mOpenLayoutExport = true;
     }
 
     @Override
@@ -1210,6 +1219,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 msg.what = MSG_CURRENT_POSITION;
                 mHandler.sendMessage(msg);
             }
+
+            mThreadPreviewVideo = null;
+            log("intterupt");
         }
     };
 
@@ -1718,7 +1730,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setBtnEditVisible(true);
         setBtnPlayVisible(true);
         setBtnVolumeVisible(true);
+        setBtnEditIcon(R.drawable.ic_cut_video);
         highlightSelectedVideoTL();
+        setLayoutExtraToolsVisible(true);
         mSelectedTL = TIMELINE_VIDEO;
     }
 
@@ -1883,6 +1897,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setBtnDeleteVisible(true);
         setBtnEditVisible(false);
         setBtnVolumeVisible(false);
+        setLayoutExtraToolsVisible(true);
         mSelectedTL = TIMELINE_EXTRA;
     }
 
@@ -2099,6 +2114,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         updateBtnExportVisible();
         setBtnDeleteVisible(true);
         setBtnVolumeVisible(false);
+        setBtnEditIcon(R.drawable.ic_edit_text);
+        slideExtraToolsIn(true);
         mSelectedTL = TIMELINE_EXTRA;
     }
 
@@ -2215,6 +2232,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mSelectedAudioTL = audioTL;
 
         updateBtnExportVisible();
+        setLayoutExtraToolsVisible(true);
         mSelectedTL = TIMELINE_AUDIO;
     }
 
@@ -2787,6 +2805,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     };
 
+    private void closeLayoutExport() {
+        mExportFragment.backToEdit();
+    }
+
     @Override
     public void onBackPressed() {
         hideStatusBar();
@@ -2797,6 +2819,20 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private boolean onBackClick() {
+        if (mExportFragment.mExporting) {
+            return true;
+        }
+
+        if (mOpenLayoutExport) {
+            closeLayoutExport();
+            return true;
+        }
+
+        if (mOpenLayoutTrimVideo) {
+            closeLayoutTrimVideo();
+            return true;
+        }
+
         if (mOpenLayoutAdd) {
             openLayoutAdd(false);
             return true;
@@ -3103,7 +3139,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void setVideoRatio() {
         ViewGroup.LayoutParams params = mVideoViewLayout.getLayoutParams();
-        int height = (int) (Utils.getScreenWidth() * 0.6);
+        int height = (int) (Utils.getScreenHeight() * 0.6);
         params.height = height;
         params.width = (int) (params.height * 1.77);
         mVideoViewLayout.setLayoutParams(params);

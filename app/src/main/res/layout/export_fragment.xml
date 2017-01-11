@@ -4,10 +4,10 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
     android:background="#232121">
     <android.support.v7.widget.CardView
-        android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_width="400dp"
         app:cardCornerRadius="10dp"
         android:layout_margin="10dp"
         android:layout_height="match_parent">
@@ -30,7 +30,7 @@
                     android:layout_marginStart="15dp"
                     android:layout_marginBottom="5dp"
                     android:textSize="@dimen/text_size_export"
-                    android:text="Name: "/>
+                    android:text="@string/edit_name_title"/>
                 <EditText
                     android:id="@+id/edt_output_name"
                     android:layout_width="match_parent"
@@ -52,21 +52,21 @@
                     android:layout_height="wrap_content"
                     android:tag="1080"
                     android:textSize="@dimen/text_size_export"
-                    android:text="Full HD (1080p)"/>
+                    android:text="@string/full_hd_quality"/>
                 <RadioButton
                     android:id="@+id/hd_radio"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:tag="720"
                     android:textSize="@dimen/text_size_export"
-                    android:text="HD (720p)"/>
+                    android:text="@string/hd_quality"/>
                 <RadioButton
                     android:id="@+id/sd_radio"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:tag="480"
                     android:textSize="@dimen/text_size_export"
-                    android:text="SD (480p)"/>
+                    android:text="@string/sd_quality"/>
             </RadioGroup>
             <LinearLayout
                 android:orientation="horizontal"
@@ -79,12 +79,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="30dp"
-                    android:text="Back" />
+                    android:text="@string/btn_back" />
                 <Button
                     android:id="@+id/btn_export"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Export" />
+                    android:text="@string/btn_export" />
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
@@ -113,13 +113,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="visible"
-                    android:text="Cancel"/>
+                    android:text="@string/cancel_btn"/>
                 <Button
                     android:id="@+id/btn_back_cancel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    android:text="Back"/>
+                    android:text="@string/btn_back"/>
             </LinearLayout>
 
             <LinearLayout
@@ -135,20 +135,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="15dp"
-                    android:text="Back"/>
+                    android:text="@string/btn_back"/>
 
                 <Button
                     android:id="@+id/btn_watch_video"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="15dp"
-                    android:text="Watch Video"/>
+                    android:text="@string/btn_watch_video"/>
 
                 <Button
                     android:id="@+id/btn_share"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Share"/>
+                    android:text="@string/btn_share"/>
             </LinearLayout>
             <TextView
                 android:id="@+id/textview_tip"
@@ -158,20 +158,8 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
                 android:gravity="center"
-                android:textSize="13dp"
-                android:text="*Tip: You can do others work. We will
-                 notify you when export completed."/>
+                android:textSize="13sp"
+                android:text="@string/tip_export"/>
         </LinearLayout>
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="This is for Ads"/>
     </android.support.v7.widget.CardView>
 </LinearLayout>

@@ -53,8 +53,12 @@ public class Utils {
         return bitmap;
     }
 
-    public static int getScreenWidth(){
+    public static int getScreenHeight(){
         return Resources.getSystem().getDisplayMetrics().heightPixels;
+    }
+
+    public static int getScreenWidth(){
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
     }
 
     public static final int dpToPixel(Context context, int dp) {
@@ -147,5 +151,15 @@ public class Utils {
 
     public static SharedPreferences getSharedPref(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    public static String timeToText(int second) {
+        String pattern = "mm:ss";
+        Date date = new Date(second%3600*1000);
+        String time = new SimpleDateFormat(pattern, Locale.getDefault()).format(date);
+        if (second>=3600){
+            time = second/3600+":"+time;
+        }
+        return time;
     }
 }

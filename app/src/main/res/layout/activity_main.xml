@@ -211,7 +211,7 @@
                             android:layout_width="50dp"
                             android:layout_height="50dp"
                             android:padding="10dp"
-                            android:src="@drawable/ic_up_level"
+                            android:src="@drawable/ic_back"
                             android:clickable="true"
                             android:visibility="gone"
                             android:background="@drawable/btn_touch_feedback_oval_nobackground"/>

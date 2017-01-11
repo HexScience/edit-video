@@ -69,7 +69,7 @@ public class VideoTL extends AppCompatImageView {
         hasAudio = true;
         videoHolder = new VideoHolder();
         mBackgroundColor = ContextCompat.getColor(mActivity, R.color.background_timeline);
-        mBorderColor = mBackgroundColor;
+        mBorderColor = ContextCompat.getColor(mActivity, R.color.border_video_timeline);
         defaultBitmap = Utils.createDefaultBitmap();
 
         isExists = new File(videoPath).exists();
@@ -133,7 +133,7 @@ public class VideoTL extends AppCompatImageView {
 
     public void setNormalTL(){
         isHighLight = false;
-        mBorderColor = ContextCompat.getColor(mActivity, R.color.background_timeline);
+        mBorderColor = ContextCompat.getColor(mActivity, R.color.border_video_timeline);
         invalidate();
     }
 

@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -69,7 +70,7 @@ import com.hecorat.azplugin2.filemanager.FragmentImagesGallery;
 import com.hecorat.azplugin2.filemanager.FragmentVideosGallery;
 import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.interfaces.DialogClickListener;
-import com.hecorat.azplugin2.donate.DialogAskDonate;
+import com.hecorat.azplugin2.dialogfragment.DialogConfirm;
 import com.hecorat.azplugin2.preview.CustomVideoView;
 import com.hecorat.azplugin2.timeline.AudioTL;
 import com.hecorat.azplugin2.timeline.AudioTLControl;
@@ -359,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         checkVip();
     }
 
-    public void slideExtraToolsOut(boolean out) {
+    public void slideExtraToolsIn(boolean out) {
         if (!out && !mOpenExtraTools) {
             return;
         }
@@ -368,6 +369,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         TranslateAnimation animation = out ? new TranslateAnimation(-distance, 0, 0, 0)
                                             : new TranslateAnimation(0, -distance, 0, 0);
         animation.setDuration(200);
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
         mLayoutExtraTools.startAnimation(animation);
     }
 
@@ -423,7 +425,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void onCheckVipCompleted(boolean isVip) {
-        mIsVip = true;
+        mIsVip = isVip;
         Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), isVip).apply();
         if (isVip) {
             saveLastAccount();
@@ -451,6 +453,18 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         switch (dialogId) {
             case DialogClickListener.ASK_DONATE:
                 startDonate();
+                break;
+            case DialogClickListener.DELETE_VIDEO:
+                deleteVideo();
+                updateBtnExportVisible();
+                break;
+            case DialogClickListener.DELETE_EXTRA:
+                deleteExtraTimeline();
+                updateBtnExportVisible();
+                break;
+            case DialogClickListener.DELETE_AUDIO:
+                deleteAudioTimeLine();
+                updateBtnExportVisible();
                 break;
         }
     }
@@ -939,10 +953,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     };
 
     private void openLayoutTrimVideo() {
-        setLayoutFragmentVisible(true);
         setActiveVideoViewVisible(false);
         mTrimFragment = TrimFragment.newInstance(mActivity, mSelectedVideoTL);
         getSupportFragmentManager().beginTransaction().replace(R.id.layout_fragment, mTrimFragment).commit();
+        setLayoutFragmentVisible(true);
     }
 
     public void setActiveVideoViewVisible(boolean visible) {
@@ -1021,13 +1035,16 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View v) {
             if (mSelectedTL == TIMELINE_VIDEO) {
-                deleteVideo();
+                DialogConfirm.newInstance(mActivity, DialogClickListener.DELETE_VIDEO)
+                        .show(mActivity.getSupportFragmentManager().beginTransaction(), "delete video");
             } else if (mSelectedTL == TIMELINE_EXTRA) {
-                deleteExtraTimeline();
+                DialogConfirm.newInstance(mActivity, DialogClickListener.DELETE_EXTRA)
+                        .show(mActivity.getSupportFragmentManager().beginTransaction(), "delete extra");
             } else {
-                deleteAudioTimeLine();
+                DialogConfirm.newInstance(mActivity, DialogClickListener.DELETE_AUDIO)
+                        .show(mActivity.getSupportFragmentManager().beginTransaction(), "delete audio");
             }
-            updateBtnExportVisible();
+
         }
     };
 
@@ -1058,8 +1075,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private void deleteVideo() {
         mVideoList.remove(mSelectedVideoTL);
         mLayoutVideo.removeView(mSelectedVideoTL);
-        invisibleVideoControl();
-        setBtnEditVisible(false);
+        slideExtraToolsIn(false);
         mCountVideo--;
         mCurrentVideoId--;
         if (mCountVideo > 0) {
@@ -2046,7 +2062,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void askDonate() {
-        DialogAskDonate.newInstance(this).show(getSupportFragmentManager().beginTransaction(), "ask donate");
+        DialogConfirm.newInstance(this, DialogClickListener.ASK_DONATE)
+                .show(getSupportFragmentManager().beginTransaction(), "ask donate");
     }
 
     public void removeWaterMark() {
@@ -2058,7 +2075,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void addTextTL() {
-        String text = "Lai Trung Tien";
+        String text = "Text here";
         int leftMargin = mLeftMarginTimeLine + mScrollView.getScrollX();
         ExtraTL extraTL = new ExtraTL(this, text, mTimeLineImageHeight, leftMargin, false);
         extraTL.setOnClickListener(onExtraTimeLineClick);
@@ -2309,9 +2326,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             if (mOpenLayoutAdd) {
                 openLayoutAdd(false);
             } else {
+                slideLayoutAddOut();
                 setLayoutExtraToolsVisible(false);
                 hideAllFloatNControlers();
-                slideLayoutAddOut();
                 pausePreview();
             }
         }
@@ -2321,7 +2338,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         openLayoutAdd(true);
         int distance = Utils.dpToPixel(this, 60);
         TranslateAnimation animation = new TranslateAnimation(-distance, 0, 0, 0);
-        animation.setDuration(200);
+        animation.setDuration(0);
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
         mLayoutAdd.startAnimation(animation);
     }
 
@@ -2624,7 +2642,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         public void onClick(View view) {
             mSelectedAudioTL = (AudioTL) view;
             setAudioControlVisible(true);
-            slideExtraToolsOut(true);
+            openLayoutAdd(false);
+            slideExtraToolsIn(true);
             mAudioTLControl.restoreTimeLineStatus(mSelectedAudioTL);
             mSelectedTL = TIMELINE_AUDIO;
             setBtnDeleteVisible(true);
@@ -2632,9 +2651,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             setBtnEditVisible(false);
             setFloatImageVisible(null);
             setFloatTextVisible(null);
-            if (mSelectedVideoTL != null) {
-                mSelectedVideoTL.setNormalTL();
-            }
+            unhighlightVideoTL();
             pausePreview();
         }
     };
@@ -2813,7 +2830,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             pausePreview();
             mSelectedExtraTL = (ExtraTL) view;
             setExtraControlVisible(true);
-            slideExtraToolsOut(true);
+            openLayoutAdd(false);
+            slideExtraToolsIn(true);
             mExtraTLControl.restoreTimeLineStatus(mSelectedExtraTL);
             reAddExtraControl();
             scrollTo(mSelectedExtraTL.startInTimeLineMs);
@@ -2828,12 +2846,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 setFloatImageVisible(null);
                 setFloatTextVisible(mSelectedExtraTL);
                 setBtnEditVisible(true);
+                setBtnEditIcon(R.drawable.ic_edit_text);
             }
             setBtnDeleteVisible(true);
             setBtnVolumeVisible(false);
-            if (mSelectedVideoTL != null) {
-                mSelectedVideoTL.setNormalTL();
-            }
+            unhighlightVideoTL();
         }
     };
 
@@ -2871,6 +2888,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     public void setFloatTextVisible(float x, float y) {
         mFoundText = false;
+        unhighlightVideoTL();
         for (int i = 0; i < mTextList.size(); i++) {
             FloatText floatText = mTextList.get(i).floatText;
             if (floatText.getVisibility() == View.VISIBLE) {
@@ -2889,21 +2907,28 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             if (!mFoundImage) {
                 setExtraControlVisible(false);
                 cancelEditText();
-                slideExtraToolsOut(false);
+                slideExtraToolsIn(false);
             }
         } else {
             FloatText floatText = mSelectedExtraTL.floatText;
             if (floatText != null && floatText.isWaterMark) {
                 mExtraTLControl.setVisibility(View.GONE);
-                slideExtraToolsOut(false);
+                slideExtraToolsIn(false);
                 return;
             }
             setExtraControlVisible(true);
             restoreExtraControl(mSelectedExtraTL);
             setBtnDeleteVisible(true);
             setBtnEditVisible(true);
+            setBtnEditIcon(R.drawable.ic_edit_text);
             setBtnVolumeVisible(false);
-            slideExtraToolsOut(true);
+            slideExtraToolsIn(true);
+        }
+    }
+
+    public void unhighlightVideoTL() {
+        if (mSelectedVideoTL != null) {
+            mSelectedVideoTL.setNormalTL();
         }
     }
 
@@ -2936,7 +2961,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         if (!mFoundImage) {
             if (!mFoundText) {
                 setExtraControlVisible(false);
-                slideExtraToolsOut(false);
+                slideExtraToolsIn(false);
             }
         } else {
             setExtraControlVisible(true);
@@ -2944,8 +2969,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             setBtnDeleteVisible(true);
             setBtnEditVisible(false);
             setBtnVolumeVisible(false);
-            slideExtraToolsOut(true);
+            slideExtraToolsIn(true);
         }
+        unhighlightVideoTL();
     }
 
     public void setExtraControlVisible(boolean visible) {
@@ -2988,6 +3014,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 selectVideoTL();
                 setExtraControlVisible(false);
                 setAudioControlVisible(false);
+                openLayoutAdd(false);
                 pausePreview();
             }
         }
@@ -3003,9 +3030,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setBtnDeleteVisible(true);
         setBtnVolumeVisible(true);
         setBtnEditVisible(true);
+        setBtnEditIcon(R.drawable.ic_cut_video);
         setFloatTextVisible(null);
         setFloatImageVisible(null);
-        slideExtraToolsOut(true);
+        slideExtraToolsIn(true);
     }
 
     private void highlightSelectedVideoTL() {
@@ -3021,7 +3049,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void unSelectVideoTL() {
         mSelectedTL = UNSELECT;
-        slideExtraToolsOut(false);
+        slideExtraToolsIn(false);
         if (mSelectedVideoTL == null) {
             return;
         }
@@ -3053,10 +3081,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     @Override
     public void invisibleVideoControl() {
-        setVideoControlVisible(false);
-        setBtnDeleteVisible(false);
-        setBtnExportVisible(true);
-        setBtnVolumeVisible(false);
+
     }
 
     private int getLeftMargin(int position) {
@@ -3070,6 +3095,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
         timeLine.setLeftMargin(leftMargin);
         return leftMargin;
+    }
+
+    public void setBtnEditIcon(int icon) {
+        mBtnEditText.setImageResource(icon);
     }
 
     private void setVideoRatio() {
@@ -3114,7 +3143,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     @Override
     public void invisibleExtraControl() {
         setExtraControlVisible(false);
-        slideExtraToolsOut(false);
+        slideExtraToolsIn(false);
         if (mSelectedExtraTL == null) {
             return;
         }
@@ -3131,7 +3160,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     @Override
     public void invisibleAudioControl() {
         setAudioControlVisible(false);
-        slideExtraToolsOut(false);
+        slideExtraToolsIn(false);
     }
 
     private void setVideoControlVisible(boolean visible) {

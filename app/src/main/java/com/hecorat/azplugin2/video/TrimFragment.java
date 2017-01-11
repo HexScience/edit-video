@@ -29,7 +29,7 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
     RelativeLayout mLayoutVideoView;
     LinearLayout mLayoutFragment;
     RangeSeekBar mRangeSeekBar;
-    Button mBtnOk;
+    Button mBtnOk, mBtnCancel;
 
     int startTime, endTime;
     static String mVideoPath;
@@ -51,14 +51,26 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
         mLayoutVideoView = (RelativeLayout) view.findViewById(R.id.videoview_layout);
         mLayoutFragment = (LinearLayout) view.findViewById(R.id.layout_fragment);
         mBtnOk = (Button) view.findViewById(R.id.btn_ok);
+        mBtnCancel = (Button) view.findViewById(R.id.btn_cancel);
 
         mBtnOk.setOnClickListener(onBtnOkClick);
+        mBtnCancel.setOnClickListener(onBtnCancelClick);
         setLayoutTrimVideo();
         mVideoView.setVideoPath(mVideoPath);
         int seekTime = Math.max(10, mVideoTL.startTimeMs);
         mVideoView.seekTo(seekTime);
         return view;
     }
+
+    View.OnClickListener onBtnCancelClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mVideoView.setVisibility(View.GONE);
+            mActivity.setActiveVideoViewVisible(true);
+            mActivity.setLayoutFragmentVisible(false);
+            setInvisible();
+        }
+    };
 
     public void setInitPosition(int start, int end){
         startTime = start;

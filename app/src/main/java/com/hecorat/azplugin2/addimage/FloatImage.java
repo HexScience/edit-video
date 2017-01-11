@@ -331,7 +331,7 @@ public class FloatImage extends ImageView {
             if (drawBorder) {
                 drawBorder(false);
                 mActivity.setExtraControlVisible(false);
-                mActivity.slideExtraToolsOut(false);
+                mActivity.slideExtraToolsIn(false);
             } else {
                 drawBorder(true);
                 mActivity.setExtraControlVisible(true);
@@ -340,7 +340,8 @@ public class FloatImage extends ImageView {
                 mActivity.setBtnDeleteVisible(true);
                 mActivity.setBtnEditVisible(false);
                 mActivity.setBtnVolumeVisible(false);
-                mActivity.slideExtraToolsOut(true);
+                mActivity.slideExtraToolsIn(true);
+                mActivity.unhighlightVideoTL();
                 mActivity.pausePreview();
             }
             invalidate();

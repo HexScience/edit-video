@@ -17,8 +17,10 @@ import com.bumptech.glide.Glide;
 import com.hecorat.azplugin2.R;
 import com.hecorat.azplugin2.database.ProjectObject;
 import com.hecorat.azplugin2.database.ProjectTable;
+import com.hecorat.azplugin2.dialogfragment.DialogConfirm;
 import com.hecorat.azplugin2.helper.NameDialog;
 import com.hecorat.azplugin2.helper.Utils;
+import com.hecorat.azplugin2.interfaces.DialogClickListener;
 
 import java.util.ArrayList;
 
@@ -26,7 +28,7 @@ import java.util.ArrayList;
  * Created by Bkmsx on 12/12/2016.
  */
 
-public class ProjectFragment extends Fragment implements NameDialog.DialogClickListener {
+public class ProjectFragment extends Fragment implements NameDialog.DialogClickListener, DialogClickListener {
     static MainActivity mActivity;
     public ImageView mBtnAddProject;
     public LinearLayout mLayoutScrollView;
@@ -126,6 +128,21 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     };
 
     @Override
+    public void onPositiveClick(int dialogId) {
+        mActivity.hideStatusBar();
+        switch (dialogId) {
+            case DialogClickListener.DELETE_PROJECT:
+                deleteProject();
+                break;
+        }
+    }
+
+    @Override
+    public void onNegativeClick(int dialogId) {
+        mActivity.hideStatusBar();
+    }
+
+    @Override
     public void onPositiveClick(String name, int type) {
         switch (type) {
             case NameDialog.CREATE_PROJECT:
@@ -209,14 +226,19 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     View.OnClickListener onBtnDeleteClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mProjectTable.deleteProject(mSelectProjectId);
-            mActivity.deleteAllObjects(mSelectProjectId);
-            mLayoutScrollView.removeView(mPreviousSelectProject);
-
-            mLayoutButton.setVisibility(View.INVISIBLE);
-
+            DialogConfirm.newInstance(ProjectFragment.this, DialogClickListener.DELETE_PROJECT)
+                    .show(mActivity.getSupportFragmentManager().beginTransaction(), "delete project");
         }
     };
+
+    private void deleteProject() {
+        mProjectTable.deleteProject(mSelectProjectId);
+        mActivity.deleteAllObjects(mSelectProjectId);
+        mLayoutScrollView.removeView(mPreviousSelectProject);
+
+        mLayoutButton.setVisibility(View.INVISIBLE);
+
+    }
 
     private void log(String msg) {
         Log.e("Project Fragment", msg);

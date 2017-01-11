@@ -18,10 +18,18 @@
     <string name="toast_file_not_exists_when_click_export">Some file is not exists, please remove it before exporting</string>
     <string name="spinner_text">Aa Bb Cc</string>
     <string name="dialog_ask_premium_title">Donate</string>
-    <string name="dialog_ask_premium_message">Please donate to remove watermark</string>
+    <string name="dialog_ask_premium_message">Please donate to remove watermark.</string>
     <string name="no_internet_connection">No internet connection</string>
     <string name="purchase_failed">Purchase failed</string>
     <string name="purchase_success">Thank you for donate</string>
     <string name="export_completed">Export Completed.</string>
     <string name="exporting_msg">Exporting..</string>
+    <string name="dialog_title_delete_video">Delete Video</string>
+    <string name="dialog_msg_delete_video">Do you want to delete this video?</string>
+    <string name="dialog_title_delete_extra">Remove File</string>
+    <string name="dialog_msg_delete_extra">Do you want to remove this file?</string>
+    <string name="dialog_title_delete_audio">Delete Audio</string>
+    <string name="dialog_msg_delete_audio">Do you want to delete this audio?</string>
+    <string name="dialog_title_delete_project">Delete Project</string>
+    <string name="dialog_msg_delete_project">Do you want to delete this project?</string>
 </resources>

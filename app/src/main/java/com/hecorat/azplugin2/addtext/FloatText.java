@@ -468,7 +468,7 @@ public class FloatText extends AppCompatImageView {
             if (!isWaterMark) {
                 mActivity.setExtraControlVisible(false);
                 mActivity.cancelEditText();
-                mActivity.slideExtraToolsOut(false);
+                mActivity.slideExtraToolsIn(false);
             }
             mActivity.hideStatusBar();
         } else {
@@ -477,11 +477,15 @@ public class FloatText extends AppCompatImageView {
                 mActivity.setExtraControlVisible(true);
                 mActivity.restoreExtraControl(timeline);
                 mActivity.setBtnEditVisible(true);
+                mActivity.setBtnEditIcon(R.drawable.ic_edit_text);
                 mActivity.setBtnDeleteVisible(true);
                 mActivity.setBtnVolumeVisible(false);
                 mActivity.updateLayoutEditText();
-                mActivity.slideExtraToolsOut(true);
+                mActivity.slideExtraToolsIn(true);
+            } else {
+                mActivity.slideExtraToolsIn(false);
             }
+            mActivity.unhighlightVideoTL();
             mActivity.setFloatTextVisible(timeline);
             mActivity.pausePreview();
         }

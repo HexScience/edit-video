@@ -19,4 +19,6 @@
     <color name="wave_sound_color">#c2db85</color>
     <color name="border_video_timeline">#53745c</color>
     <color name="text_min_max_color">#FCF586</color>
+    <color name="edit_text_bgr_color">#332c46</color>
+    <color name="init_bgr_float_text">#0040ae6c</color>
 </resources>

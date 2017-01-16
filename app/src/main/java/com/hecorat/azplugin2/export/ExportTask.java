@@ -22,18 +22,18 @@ import java.util.LinkedList;
  * Created by TienDam on 11/22/2016.
  */
 
-public class ExportTask extends AsyncTask<Void, Void, Void> {
-    ArrayList<VideoTL> mListVideo;
-    ArrayList<ExtraTL> mListImage, mListText;
-    ArrayList<AudioTL> mListAudio;
-    MainActivity mActivity;
-    String mName;
+class ExportTask extends AsyncTask<Void, Void, Void> {
+    private ArrayList<VideoTL> mListVideo;
+    private ArrayList<ExtraTL> mListImage, mListText;
+    private ArrayList<AudioTL> mListAudio;
+    private MainActivity mActivity;
+    private String mName;
 
-    long startTime;
-    int mVideoDuration;
-    float mQuality;
+    private long startTime;
+    private int mVideoDuration;
+    private float mQuality;
 
-    public ExportTask(MainActivity context, ArrayList<VideoTL> listVideo, ArrayList<ExtraTL> listImage,
+    ExportTask(MainActivity context, ArrayList<VideoTL> listVideo, ArrayList<ExtraTL> listImage,
                       ArrayList<ExtraTL> listText, ArrayList<AudioTL> listAudio, String name, float quality) {
         mActivity = context;
         mListVideo = listVideo;
@@ -52,6 +52,8 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
             VideoHolder videoHolder = mListVideo.get(i).updateVideoHolder();
             mVideoDuration += videoHolder.duration;
         }
+
+        mActivity.setWaterMarkEndTime(mVideoDuration * 1000 + 500);
 
         for (int i=0; i<mListAudio.size(); i++){
             mListAudio.get(i).updateAudioHolder();
@@ -136,7 +138,7 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         for (int i=0; i<mListVideo.size(); i++){
             VideoHolder video = mListVideo.get(i).videoHolder;
             command.add("-ss");
-            command.add(video.startTimeMs +"");
+            command.add(video.startTimeSecond +"");
             command.add("-t");
             command.add(video.duration+"");
             command.add("-i");
@@ -164,11 +166,21 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
         command.add("-format");
         command.add("yuva420p");
         command.add("-preset");
-        command.add("ultrafast");
+        command.add("fast");
         command.add("-video_track_timescale");
-        command.add("90000");
+        command.add("90k");
+        command.add("-b:v");
+        command.add("2000k");
+        command.add("-c:v");
+        command.add("libx264");
+        command.add("-bufsize");
+        command.add("64k");
         command.add("-c:a");
         command.add("aac");
+        command.add("-bsf");
+        command.add("aac_adtstoasc");
+        command.add("-strict");
+        command.add("-2");
         command.add("-y");
         command.add(output);
         return command;

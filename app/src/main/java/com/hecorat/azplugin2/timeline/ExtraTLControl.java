@@ -6,10 +6,11 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.provider.Settings;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.azplugin2.main.MainActivity;
@@ -17,7 +18,7 @@ import com.hecorat.azplugin2.main.MainActivity;
 /**
  * Created by bkmsx on 01/11/2016.
  */
-public class ExtraTLControl extends ImageView {
+public class ExtraTLControl extends AppCompatImageView {
 
     public static final int THUMB_WIDTH = 30, LINE_HEIGHT=4, ROUND = 10;
     public int width, height;
@@ -104,7 +105,7 @@ public class ExtraTLControl extends ImageView {
     }
 
     OnTouchListener onTouchListener = new OnTouchListener() {
-        float oldX, oldY, moveX, moveY;
+        float oldX, oldY, moveX;
         float epsX = 100;
         float epsY = 20;
         int touch = 0;
@@ -112,7 +113,7 @@ public class ExtraTLControl extends ImageView {
         int TOUCH_RIGHT = 2;
         int TOUCH_CENTER = 3;
         int leftPosition, rightPosition;
-
+        long startTimeTouch;
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
 
@@ -121,6 +122,7 @@ public class ExtraTLControl extends ImageView {
                     log("extra control -  down");
                     mActivity.mScrollView.scroll = false;
                     updateLayoutMatchParent(left, right);
+                    startTimeTouch = System.currentTimeMillis();
 
                     oldX = motionEvent.getX()+left-THUMB_WIDTH;
                     oldY = motionEvent.getY();
@@ -153,6 +155,13 @@ public class ExtraTLControl extends ImageView {
                         rightPosition = right + (int) moveX;
                         if (rightPosition < left + 10) {
                             rightPosition = left + 10;
+                        }
+                    }
+
+                    if (touch == TOUCH_CENTER) {
+                        long timeTouch = System.currentTimeMillis() - startTimeTouch;
+                        if (timeTouch > 100) {
+                            mActivity.startDragExtraTL(ExtraTLControl.this);
                         }
                     }
                     updateLayoutMatchParent(leftPosition, rightPosition);

@@ -32,7 +32,7 @@ import at.grabner.circleprogress.TextMode;
  */
 
 public class ExportFragment extends Fragment{
-    static MainActivity mActivity;
+    MainActivity mActivity;
 
     public Button mBtnBack, mBtnExport;
     public CircleProgressView mCircleProgressBar;
@@ -50,8 +50,9 @@ public class ExportFragment extends Fragment{
     public boolean mExporting;
 
     public static ExportFragment newInstance(MainActivity activity) {
-        mActivity = activity;
-        return new ExportFragment();
+        ExportFragment exportFragment = new ExportFragment();
+        exportFragment.mActivity = activity;
+        return exportFragment;
     }
     @Nullable
     @Override
@@ -194,6 +195,9 @@ public class ExportFragment extends Fragment{
             }
             mCircleProgressBar.setTextSize(50);
         } else if (value==100){
+            mCircleProgressBar.setText("Completing..");
+            mCircleProgressBar.setTextSize(50);
+        } else if (value == 101) {
             mCircleProgressBar.setText("Completed!");
             mCircleProgressBar.setTextSize(50);
         } else {
@@ -213,10 +217,10 @@ public class ExportFragment extends Fragment{
             mBtnBackCancel.setVisibility(View.VISIBLE);
             NotificationHelper.cancelNotification(mActivity);
         } else {
-            setExportProgress(100);
+            setExportProgress(101);
             mLayoutAfterExport.setVisibility(View.VISIBLE);
             mTextViewTip.setVisibility(View.INVISIBLE);
-            NotificationHelper.updateNotification(mActivity, 100, mVideoPath);
+            NotificationHelper.updateNotification(mActivity, 101, mVideoPath);
         }
     }
 }

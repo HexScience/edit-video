@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import com.hecorat.azplugin2.R;
-import com.hecorat.azplugin2.main.MainActivity;
 
 /**
  * Created by Bkmsx on 12/8/2016.
@@ -23,26 +22,30 @@ public class NotificationHelper {
 
         NotificationCompat.Builder mNotifyBuilder = new NotificationCompat.Builder(context)
                 .setContentTitle(context.getString(R.string.exporting_msg))
-                .setSmallIcon(R.drawable.ic_export_notification)
+                .setSmallIcon(R.drawable.ic_notification_exporting)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setOngoing(true);
         if (progress < 100) {
             mNotifyBuilder.setProgress(100, progress, false)
                     .setContentText(progress + " %");
+        } else if (progress == 100) {
+            mNotifyBuilder.setProgress(100, progress, true)
+                    .setContentTitle("")
+                    .setContentText("Completing..");
         } else {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(Uri.parse(videoPath), "video/mp4");
             PendingIntent pendingIntent = PendingIntent
                     .getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
             mNotifyBuilder.setProgress(0, 0, false)
+                    .setSmallIcon(R.drawable.ic_notification_exporting_6)
                     .setContentTitle(context.getString(R.string.app_name))
                     .setContentText(context.getString(R.string.export_completed))
-                    .setVibrate(new long[]{0l, 500l})
+                    .setVibrate(new long[]{0L, 500L})
                     .setOngoing(false)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
         }
-
         mNotificationManager.notify(notifyID, mNotifyBuilder.build());
     }
 

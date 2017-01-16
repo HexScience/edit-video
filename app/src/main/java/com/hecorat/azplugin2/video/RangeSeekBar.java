@@ -1,5 +1,6 @@
 package com.hecorat.azplugin2.video;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -11,11 +12,11 @@ import android.graphics.RectF;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.azplugin2.R;
@@ -25,7 +26,7 @@ import com.hecorat.azplugin2.main.MainActivity;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class RangeSeekBar extends ImageView {
+public class RangeSeekBar extends AppCompatImageView {
 	private MainActivity mActivity;
 	private Paint paint = new Paint();
 	private RelativeLayout.LayoutParams params;
@@ -56,6 +57,10 @@ public class RangeSeekBar extends ImageView {
 
 	private final static int THUMB_LEFT = 1, THUMB_RIGHT = 2, MID_BAR = 3, NO_ACTION = 0;
 	public static final int BITMAP_NUMBER = 12;
+
+	RangeSeekBar(Context context) {
+		super(context);
+	}
 
 	public RangeSeekBar(MainActivity activity, int width, int height, String videoPath) {
 		super(activity);

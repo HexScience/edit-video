@@ -41,5 +41,6 @@
     <string name="full_hd_quality">Full HD (1080p)</string>
     <string name="hd_quality">HD (720p)</string>
     <string name="sd_quality">SD (480p)</string>
+    <string name="color_picker_opacity_title">Opacity</string>
     <string name="tip_export">*Tip: You should not change to other apps while exporting for good export performance</string>
 </resources>

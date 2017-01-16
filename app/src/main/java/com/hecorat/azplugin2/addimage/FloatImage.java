@@ -12,11 +12,11 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Build;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.azplugin2.R;
@@ -28,15 +28,17 @@ import com.hecorat.azplugin2.timeline.ExtraTL;
  * Created by TienDam on 11/14/2016.
  */
 
-public class FloatImage extends ImageView {
+public class FloatImage extends AppCompatImageView {
     public Bitmap mainBitmap, rotateBitmap, scaleBitmap;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
-    public Rect rectBorder;
+    public Rect rectBorder, rectBound;
     public MainActivity mActivity;
     public ExtraTL timeline;
     public Point initScalePoint, initCenterPoint, initRotatePoint,
             initTopRightPoint, initBottomLeftPoint, initTopLeftPoint, initBottomRightPoint;
+    private Matrix matrix;
+    private DashPathEffect dashPathEffect;
 
     public int width, height;
     public float x, y, xExport, yExport,
@@ -52,6 +54,8 @@ public class FloatImage extends ImageView {
     public static final int MAX_DIMENSION = 300;
     public static final int ROTATE_CONSTANT = 30;
     public static final int INIT_X = 300, INIT_Y = 300;
+
+    FloatImage(Context context) {super(context);}
 
     public FloatImage(Context context, Bitmap bitmap) {
         super(context);
@@ -91,6 +95,9 @@ public class FloatImage extends ImageView {
         setOnClickListener(onClickListener);
         rectBorder = new Rect(0, 0, (int)widthScale, (int)heightScale);
         drawBorder = true;
+
+        matrix = new Matrix();
+        dashPathEffect = new DashPathEffect(new float[] {8,6}, 0);
     }
 
     public void restoreState(ImageObject image) {
@@ -215,7 +222,8 @@ public class FloatImage extends ImageView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Matrix matrix = new Matrix();
+
+        matrix.reset();
 
         matrix.postTranslate(x, y);
 
@@ -237,13 +245,13 @@ public class FloatImage extends ImageView {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(3);
         paint.setColor(Color.CYAN);
-        paint.setPathEffect(new DashPathEffect(new float[] {8,6}, 0));
+        paint.setPathEffect(dashPathEffect);
 
         canvas.save();
         // befor N canvas apply matrix from leftside of screen
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
             matrix.postTranslate(mActivity.mVideoViewLeft, 0);
-            Rect rectBound = canvas.getClipBounds();
+            canvas.getClipBounds(rectBound);
             canvas.clipRect(rectBound.left, rectBound.top,
                     rectBound.right + mActivity.mVideoViewLeft, rectBound.bottom, Region.Op.REPLACE);
         }
@@ -328,6 +336,7 @@ public class FloatImage extends ImageView {
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            mActivity.hideStatusBar();
             if (drawBorder) {
                 drawBorder(false);
                 mActivity.setExtraControlVisible(false);

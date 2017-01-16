@@ -587,11 +587,9 @@ public class ColorPickerView extends View {
 			update = moveTrackersIfNeeded(event);
 
 			break;
-
 		}
 
 		if(update){
-
 			if(mListener != null){
 				mListener.onColorChanged(Color.HSVToColor(mAlpha, new float[]{mHue, mSat, mVal}));
 			}

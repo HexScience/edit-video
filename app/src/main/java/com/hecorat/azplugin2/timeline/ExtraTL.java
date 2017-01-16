@@ -10,7 +10,6 @@ import android.graphics.Rect;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.azplugin2.R;
@@ -53,6 +52,10 @@ public class ExtraTL extends AppCompatImageView {
     public String imagePath;
     public ImageHolder imageHolder;
     public TextHolder textHolder;
+
+    ExtraTL(Context context) {
+        super(context);
+    }
 
     public ExtraTL(Context context, String pathOrText, int height, int leftMargin, boolean isImage) {
         super(context);
@@ -125,7 +128,7 @@ public class ExtraTL extends AppCompatImageView {
 
     public String convertToHexColor(int color) {
         String resultColor = "";
-        String s = String.format("%08X", (0xFFFFFFFF & color));
+        String s = String.format("%08X", color);
         resultColor += s.substring(2) + "@0x" + s.substring(0, 2);
         return resultColor;
     }

@@ -93,7 +93,7 @@ public class FragmentVideosGallery extends Fragment {
             mGridView.setOnItemClickListener(onVideoClickListener);
             mActivity.mOpenVideoSubFolder = true;
             mActivity.setBtnUpLevelVisible(true);
-            mFolderName = new File(mListFolder.get(i)).getName();
+            mFolderName += " / " + new File(mListFolder.get(i)).getName();
             mActivity.setFolderName(mFolderName);
             new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
         }
@@ -157,7 +157,7 @@ public class FragmentVideosGallery extends Fragment {
         protected Void doInBackground(Void... voids) {
 
             for (int i=0; i<mListFolder.size(); i++) {
-                boolean scanSubFolder = mListFolder.get(i).equals(mStoragePath)? false:true;
+                boolean scanSubFolder = !mListFolder.get(i).equals(mStoragePath);
                 mCountSubFolder = 0;
                 if (!isVideoFolder(new File(mListFolder.get(i)), scanSubFolder)){
                     mListFolder.remove(i);

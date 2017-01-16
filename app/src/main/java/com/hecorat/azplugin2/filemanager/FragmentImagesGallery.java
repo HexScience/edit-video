@@ -112,7 +112,7 @@ public class FragmentImagesGallery extends Fragment {
             mListImage.clear();
             mImageAdapter = new ImageGalleryAdapter(getContext(), R.layout.image_gallery_layout, mListImage);
             mGridView.setAdapter(mImageAdapter);
-            mFolderName = new File(mListFolder.get(i)).getName();
+            mFolderName += " / " + new File(mListFolder.get(i)).getName();
             mActivity.setFolderName(mFolderName);
             new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
         }

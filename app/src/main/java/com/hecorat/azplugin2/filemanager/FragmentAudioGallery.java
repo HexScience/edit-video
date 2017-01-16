@@ -92,7 +92,7 @@ public class FragmentAudioGallery extends Fragment {
             mGridView.setOnItemClickListener(onAudioClickListener);
             mActivity.mOpenAudioSubFolder = true;
             mActivity.setBtnUpLevelVisible(true);
-            mFolderName = new File(mListFolder.get(i)).getName();
+            mFolderName += " / " + new File(mListFolder.get(i)).getName();
             mActivity.setFolderName(mFolderName);
             new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
         }

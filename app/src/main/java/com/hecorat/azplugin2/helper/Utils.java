@@ -53,12 +53,12 @@ public class Utils {
         return bitmap;
     }
 
-    public static int getScreenHeight(){
-        return Resources.getSystem().getDisplayMetrics().heightPixels;
-    }
-
     public static int getScreenWidth(){
         return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight(){
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
     public static final int dpToPixel(Context context, int dp) {

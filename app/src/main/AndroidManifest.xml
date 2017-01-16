@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme">
         <activity android:name="com.hecorat.azplugin2.main.MainActivity"
             android:theme="@style/MainActivityTheme"
-            android:configChanges="keyboardHidden|orientation">
+            android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

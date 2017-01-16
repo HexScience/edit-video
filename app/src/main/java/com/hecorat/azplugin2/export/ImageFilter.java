@@ -8,9 +8,9 @@ import java.util.ArrayList;
  * Created by TienDam on 11/22/2016.
  */
 
-public class ImageFilter {
+class ImageFilter {
 
-    public static String getFilter(String input, String output, ArrayList<ExtraTL> listImage, int order){
+    static String getFilter(String input, String output, ArrayList<ExtraTL> listImage, int order){
         String filter="";
         for (int i=0; i<listImage.size(); i++){
             ImageHolder image = listImage.get(i).imageHolder;
@@ -24,16 +24,14 @@ public class ImageFilter {
     }
 
     private static String prepareImage(ImageHolder image, int index){
-        String filter = "["+index+":v]scale="+image.width+":"
+        return "["+index+":v]scale="+image.width+":"
                     +image.height+",rotate="+image.rotate+":c=none:ow=rotw("+image.rotate
                     +"):oh=roth("+image.rotate+")[ov"+index+"];";
-        return filter;
     }
 
     private static String addImage(String input, String output, ImageHolder image, int index){
-        String filter= input+"[ov"+index+"]overlay="+image.x
+        return input+"[ov"+index+"]overlay="+image.x
                     +":"+image.y+":enable='between=(t,"+image.startInTimeLineMs +","
                     +image.endInTimeLineMs +")'"+output;
-        return filter;
     }
 }

@@ -18,8 +18,8 @@ import com.hecorat.azplugin2.R;
  */
 
 public class NameDialog extends DialogFragment {
-    static Context mContext;
-    static String mInitText;
+    Context mContext;
+    String mInitText;
 
     static int mType;
 
@@ -31,10 +31,11 @@ public class NameDialog extends DialogFragment {
     public static final int RENAME = 1;
 
     public static NameDialog newInstance(Context context, int type, String initText) {
-        mContext = context;
+        NameDialog nameDialog = new NameDialog();
+        nameDialog.mContext = context;
         mType = type;
-        mInitText = initText;
-        return new NameDialog();
+        nameDialog.mInitText = initText;
+        return nameDialog;
     }
     @NonNull
     @Override

@@ -8,8 +8,8 @@ import java.util.ArrayList;
  * Created by TienDam on 11/23/2016.
  */
 
-public class AudioFilter {
-    public static String getFilter(float videoVolume, String output, ArrayList<AudioTL> listAudio, int order){
+class AudioFilter {
+    static String getFilter(float videoVolume, String output, ArrayList<AudioTL> listAudio, int order){
         String filter ="";
         String in = "[a0]";
         filter += setVolume(videoVolume, 0, false);

@@ -104,13 +104,14 @@ public class AudioTLControl extends ImageView {
         int TOUCH_RIGHT = 2;
         int TOUCH_CENTER = 3;
         int startPosition, endPosition;
-
+        long startTimeTouch;
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mActivity.mScrollView.scroll = false;
+                    startTimeTouch = System.currentTimeMillis();
                     updateLayoutMatchParent(left, right);
                     oldX = motionEvent.getX() + left - THUMB_WIDTH;
                     oldY = motionEvent.getY() ;
@@ -150,6 +151,13 @@ public class AudioTLControl extends ImageView {
                         }
                         if (endPosition < left + 10) {
                             endPosition = left + 10;
+                        }
+                    }
+
+                    if (touch == TOUCH_CENTER) {
+                        long timeTouch = System.currentTimeMillis() - startTimeTouch;
+                        if (timeTouch > 100) {
+                            mActivity.startDragAudioTL(AudioTLControl.this);
                         }
                     }
 

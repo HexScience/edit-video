@@ -20,15 +20,16 @@ import com.hecorat.azplugin2.main.MainActivity;
  */
 
 public class VolumeEditor extends DialogFragment {
-    static MainActivity mActivity;
+    MainActivity mActivity;
     SeekBar mSeekBar;
     TextView mTextView;
     static int mVolume;
 
     public static VolumeEditor newInstance(MainActivity activity, int volume) {
-        mActivity = activity;
+        VolumeEditor volumeEditor = new VolumeEditor();
+        volumeEditor.mActivity = activity;
         mVolume = volume;
-        return new VolumeEditor();
+        return volumeEditor;
     }
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

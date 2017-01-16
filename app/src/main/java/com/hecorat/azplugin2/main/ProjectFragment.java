@@ -1,5 +1,6 @@
 package com.hecorat.azplugin2.main;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
  */
 
 public class ProjectFragment extends Fragment implements NameDialog.DialogClickListener, DialogClickListener {
-    static MainActivity mActivity;
+    MainActivity mActivity;
     public ImageView mBtnAddProject;
     public LinearLayout mLayoutScrollView;
     public View mPreviousSelectProject, mSelectProject;
@@ -45,8 +46,22 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     public String mSelectProjectName;
 
     public static ProjectFragment newInstance(MainActivity activity) {
-        mActivity = activity;
-        return new ProjectFragment();
+        ProjectFragment projectFragment = new ProjectFragment();
+        projectFragment.mActivity = activity;
+        projectFragment.initFragmentArguments();
+        return projectFragment;
+    }
+
+    private void initFragmentArguments() {
+        mProjectTable = mActivity.mProjectTable;
+        log("initFragmentArguments");
+        new LoadProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        log("onViewCreated");
     }
 
     @Nullable
@@ -69,11 +84,21 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
 
         mLayoutButton = (LinearLayout) view.findViewById(R.id.layout_button);
 
-        mProjectTable = mActivity.mProjectTable;
-
-        new LoadProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        log("onCreateView");
 
         return view;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        log("onCreate");
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        log("onAttach");
     }
 
     private class LoadProjectTask extends AsyncTask<Void, Void, Void> {
@@ -102,18 +127,18 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
 
     private void addProjectsToLayoutScrollView() {
         for (ProjectObject project : mProjectList) {
-            View view = LayoutInflater.from(mActivity).inflate(R.layout.project_item, null);
+            View view = LayoutInflater.from(getContext()).inflate(R.layout.project_item, null);
             view.setTag(project);
             view.setOnClickListener(onProjectItemClick);
 
             ImageView imageView = (ImageView) view.findViewById(R.id.image_view);
-            Glide.with(mActivity).load(project.firstVideo).into(imageView);
+            Glide.with(getContext()).load(project.firstVideo).into(imageView);
 
             TextView nameProject = (TextView) view.findViewById(R.id.name_project);
             nameProject.setText(project.name);
 
             mLayoutScrollView.addView(view);
-            ((LinearLayout.LayoutParams) view.getLayoutParams()).rightMargin = Utils.dpToPixel(mActivity, 10);
+            ((LinearLayout.LayoutParams) view.getLayoutParams()).rightMargin = Utils.dpToPixel(getContext(), 10);
         }
     }
 

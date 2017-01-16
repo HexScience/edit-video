@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.azplugin2.R;
@@ -54,6 +53,10 @@ public class VideoTL extends AppCompatImageView {
     public int orderInList;
     public int projectId;
     public boolean isExists;
+
+    VideoTL(Context context) {
+        super(context);
+    }
 
     public VideoTL(Context context, String videoPath, int height) {
         super(context);
@@ -195,7 +198,7 @@ public class VideoTL extends AppCompatImageView {
 
     public VideoHolder updateVideoHolder(){
         videoHolder.videoPath = videoPath;
-        videoHolder.startTimeMs = startTimeMs /1000f;
+        videoHolder.startTimeSecond = startTimeMs /1000f;
         videoHolder.duration = (endTimeMs - startTimeMs)/1000f;
         videoHolder.volume = volume;
         return videoHolder;

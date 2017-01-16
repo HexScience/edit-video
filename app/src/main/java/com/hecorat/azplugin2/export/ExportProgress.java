@@ -4,13 +4,13 @@ import android.os.AsyncTask;
 
 import com.hecorat.azplugin2.main.MainActivity;
 
-public class ExportProgress extends AsyncTask<Void, Integer, Void> {
+class ExportProgress extends AsyncTask<Void, Integer, Void> {
 	private MainActivity mActivity;
 	private ExportFragment mExportFragment;
 
 	private int mVideoDuration; //seconds
 
-	public ExportProgress(MainActivity activity, int durationSecond) {
+	ExportProgress(MainActivity activity, int durationSecond) {
 		mActivity = activity;
 		mExportFragment = mActivity.mExportFragment;
 		mVideoDuration = durationSecond;
@@ -25,9 +25,9 @@ public class ExportProgress extends AsyncTask<Void, Integer, Void> {
 	@Override
 	protected Void doInBackground(Void... params) {
 		int duration = mVideoDuration;
-		int total = 0;
+		int total;
 
-		while (total < duration) {
+		while (true) {
 			String line = FFmpeg.getInstance(mActivity).getLineLog();
 			if (line != null) {
 				int start = line.indexOf("time=");

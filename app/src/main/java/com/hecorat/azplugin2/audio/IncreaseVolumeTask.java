@@ -18,11 +18,11 @@ import java.util.LinkedList;
  */
 
 public class IncreaseVolumeTask extends AsyncTask<Void, Void, Void> {
-    MainActivity mActivity;
-    VideoTL videoTL;
-    AudioTL audioTL;
-    boolean isVideo;
-    ProgressDialog progressDialog;
+    private MainActivity mActivity;
+    private VideoTL videoTL;
+    private AudioTL audioTL;
+    private boolean isVideo;
+    private ProgressDialog progressDialog;
     public IncreaseVolumeTask (MainActivity activity, VideoTL videoTL){
         mActivity = activity;
         this.videoTL = videoTL;

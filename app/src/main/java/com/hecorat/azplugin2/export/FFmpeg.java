@@ -24,23 +24,23 @@ public class FFmpeg {
     private static final String CPU_ARMEABI_V7A = "armeabi-v7a";
     private static final String CPU_ARMEABI_V7A_NEON = "armeabi-v7a-neon";
     private static final String FFMPEG = "ffmpeg";
-    public static String mFfmpegPath;
-    public static String mAllLog;
-    public static String mLineLog;
-    public static FFmpeg sFFmpeg;
+    private static String mFfmpegPath;
+    private static String mAllLog;
+    private static String mLineLog;
+    private static FFmpeg sFFmpeg;
 
     private boolean mStop;
 
-    public static FFmpeg getInstance(Context context){
-        if (sFFmpeg == null){
+    public static FFmpeg getInstance(Context context) {
+        if (sFFmpeg == null) {
             sFFmpeg = new FFmpeg();
             initFFMPEG(context);
         }
         return sFFmpeg;
     }
 
-    public boolean performGetVideoInfo(String inputVideo, String outputFile){
-        LinkedList<String> command = new LinkedList<String>();
+    public boolean performGetVideoInfo(String inputVideo, String outputFile) {
+        LinkedList<String> command = new LinkedList<>();
 
         command.add(mFfmpegPath);
         command.add("-i");
@@ -51,20 +51,20 @@ public class FFmpeg {
         return value;
     }
 
-    public String getLineLog() {
+    String getLineLog() {
         return mLineLog;
     }
 
-    public void stop() {
+    void stop() {
         mStop = true;
     }
 
     public boolean executeFFmpegCommand(LinkedList<String> command) {
         mStop = false;
         command.add(0, mFfmpegPath);
-        Process ffmpegProcess = null;
+        Process ffmpegProcess;
         ProcessBuilder procBuilder = new ProcessBuilder(command);
-        mAllLog="";
+        mAllLog = "";
         try {
             ffmpegProcess = procBuilder.redirectErrorStream(true).start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -81,13 +81,13 @@ public class FFmpeg {
             e.printStackTrace();
             return false;
         }
-        if (ffmpegProcess != null) {
-            ffmpegProcess.destroy();
-        }
+
+        ffmpegProcess.destroy();
+
         return true;
     }
 
-    public static boolean initFFMPEG(Context ctx) {
+    private static boolean initFFMPEG(Context ctx) {
         System.out.println("cpu info: " + getCpuInfo());
         try {
             InputStream ffmpegInputStream = ctx.getAssets().open(
@@ -109,7 +109,7 @@ public class FFmpeg {
             destinationOS.close();
 
             try {
-                String[] args = { "/system/bin/chmod", "755", mFfmpegPath };
+                String[] args = {"/system/bin/chmod", "755", mFfmpegPath};
                 Process process = new ProcessBuilder(args).start();
                 try {
                     process.waitFor();
@@ -131,7 +131,7 @@ public class FFmpeg {
     }
 
     @SuppressWarnings("deprecation")
-    public static String getCpuInfo() {
+    private static String getCpuInfo() {
         if (Build.CPU_ABI.equals(CPU_X86)
                 || Build.CPU_ABI.equals(CPU_ARMEABI_V7A)
                 || Build.CPU_ABI.equals(CPU_ARMEABI_V7A_NEON)) {

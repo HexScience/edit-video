@@ -17,12 +17,13 @@ import com.hecorat.azplugin2.interfaces.DialogClickListener;
  */
 
 public class DialogConfirm extends DialogFragment {
-    static DialogClickListener mCallback;
-    static int mType;
+    DialogClickListener mCallback;
+    int mType;
     public static DialogConfirm newInstance(DialogClickListener listener, int type){
-        mCallback = listener;
-        mType = type;
-        return new DialogConfirm();
+        DialogConfirm dialogConfirm = new DialogConfirm();
+        dialogConfirm.mCallback = listener;
+        dialogConfirm.mType = type;
+        return dialogConfirm;
     }
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

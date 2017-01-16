@@ -1,5 +1,6 @@
 package com.hecorat.azplugin2.addtext;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -12,6 +13,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -36,7 +38,7 @@ public class FloatText extends AppCompatImageView {
     public Bitmap rotateBitmap, scaleBitmap;
     public Paint paint;
     public RelativeLayout.LayoutParams params;
-    public Rect rectBorder, rectBackground;
+    public Rect rectBorder, rectBackground, rectBound;
     public MainActivity mActivity;
     public ExtraTL timeline;
     public Point initBorderBottomRight, initCenterPoint, initBorderTopLeft, initBorderTopRight, initBorderBottomLeft,
@@ -46,6 +48,9 @@ public class FloatText extends AppCompatImageView {
     public Rect bound;
     public Typeface mTypeface;
     public String fontPath;
+    private Matrix matrix;
+    private StaticLayout textLayout;
+    private DashPathEffect dashPathEffect;
 
     public int width, height;
     public float x, y, xExport, yExport,
@@ -64,10 +69,13 @@ public class FloatText extends AppCompatImageView {
     public float size, sizeScale;
     public int fontId;
     public boolean isWaterMark;
+    private boolean firstTime;
 
     public static final int ROTATE_CONSTANT = 30;
     public static final int INIT_X = 300, INIT_Y = 300, INIT_SIZE = 60;
     public static final int PADDING = 30;
+
+    FloatText(Context context) {super(context);}
 
     public FloatText(MainActivity activity, String text, boolean isWaterMark) {
         super(activity);
@@ -117,7 +125,11 @@ public class FloatText extends AppCompatImageView {
         setOnTouchListener(onTouchListener);
         setOnClickListener(onClickListener);
 
-        mBackgroundColor = Color.TRANSPARENT;
+        mBackgroundColor = ContextCompat.getColor(mActivity, R.color.init_bgr_float_text);
+
+        matrix = new Matrix();
+        dashPathEffect = new DashPathEffect(new float[] {8,6}, 0);
+        firstTime = true;
     }
 
     public void restoreState(TextObject textObject) {
@@ -136,14 +148,22 @@ public class FloatText extends AppCompatImageView {
         resetLayout();
     }
 
+    private void invalidateText() {
+        textPaint.setColor(mColor);
+        int width = getWidth() - getPaddingLeft() - getPaddingRight();
+        textLayout = new StaticLayout(text, textPaint, width,
+                Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
+        invalidate();
+    }
+
     public void setTextBgrColor(int color){
         mBackgroundColor = color;
-        invalidate();
+        invalidateText();
     }
 
     public void setTextColor(int color){
         mColor = color;
-        invalidate();
+        invalidateText();
     }
 
     public void setText(String text){
@@ -204,7 +224,7 @@ public class FloatText extends AppCompatImageView {
         initTopRightPoint = new Point(width, 0);
         initTopLeftPoint = new Point(0, 0);
         initBottomRightPoint = new Point(width, height);
-        invalidate();
+        invalidateText();
     }
 
     public void drawBorder(boolean draw){
@@ -212,7 +232,7 @@ public class FloatText extends AppCompatImageView {
         if (draw) {
             bringToFront();
         }
-        invalidate();
+        invalidateText();
     }
 
     private void setFullLayout(){
@@ -221,7 +241,7 @@ public class FloatText extends AppCompatImageView {
         params.topMargin = 0;
         params.leftMargin = 0;
         setLayoutParams(params);
-        invalidate();
+        invalidateText();
         isCompact = false;
     }
 
@@ -270,19 +290,19 @@ public class FloatText extends AppCompatImageView {
             widthScale = scaleValue*width;
         }
         sizeScale = size*scaleValue;
-        invalidate();
+        invalidateText();
     }
 
     public void moveText(float moveX, float moveY) {
         x += moveX;
         y += moveY;
-        invalidate();
+        invalidateText();
     }
 
     public void setWaterMarkPosition(float x, float y) {
         this.x = x;
         this.y = y;
-        invalidate();
+        invalidateText();
     }
 
     @Override
@@ -292,7 +312,8 @@ public class FloatText extends AppCompatImageView {
 
         initBorderPoints();
 
-        Matrix matrix = new Matrix();
+        matrix.reset();
+
         matrix.postTranslate(x, y);
 
         matrix.mapPoints(centerPoint);
@@ -306,19 +327,22 @@ public class FloatText extends AppCompatImageView {
         // befor N canvas apply matrix from leftside of screen
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
             matrix.postTranslate(mActivity.mVideoViewLeft, 0);
-            Rect rectBound = canvas.getClipBounds();
+            canvas.getClipBounds(rectBound);
             canvas.clipRect(rectBound.left, rectBound.top,
                     rectBound.right + mActivity.mVideoViewLeft, rectBound.bottom, Region.Op.REPLACE);
         }
 
         canvas.setMatrix(matrix);
 
-        textPaint.setColor(mColor);
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(mBackgroundColor);
         canvas.drawRect(rectBackground, paint);
-        StaticLayout textLayout = new StaticLayout(text, textPaint,canvas.getWidth(),
-                Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false);
+
+        if (firstTime) {
+            invalidateText();
+            firstTime = false;
+        }
+
         textLayout.draw(canvas);
 
         if (!drawBorder) {
@@ -328,7 +352,7 @@ public class FloatText extends AppCompatImageView {
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.MAGENTA);
         paint.setStrokeWidth(3);
-        paint.setPathEffect(new DashPathEffect(new float[] {8,6}, 0));
+        paint.setPathEffect(dashPathEffect);
         canvas.drawRect(rectBorder, paint);
         canvas.restore();
 
@@ -436,7 +460,7 @@ public class FloatText extends AppCompatImageView {
                     if (touch == 3) {
                         currentAngle = getAngle(motionEvent.getX(), motionEvent.getY());
                         rotation += (currentAngle-startAngle);
-                        invalidate();
+                        invalidateText();
                         startAngle = currentAngle;
                     }
                     oldX = motionEvent.getX();
@@ -463,6 +487,7 @@ public class FloatText extends AppCompatImageView {
     OnClickListener onClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
+            mActivity.hideStatusBar();
         if (drawBorder) {
             drawBorder(false);
             if (!isWaterMark) {
@@ -470,7 +495,7 @@ public class FloatText extends AppCompatImageView {
                 mActivity.cancelEditText();
                 mActivity.slideExtraToolsIn(false);
             }
-            mActivity.hideStatusBar();
+
         } else {
             drawBorder(true);
             if (!isWaterMark) {
@@ -489,7 +514,7 @@ public class FloatText extends AppCompatImageView {
             mActivity.setFloatTextVisible(timeline);
             mActivity.pausePreview();
         }
-        invalidate();
+        invalidateText();
         }
     };
     private void log(String msg){

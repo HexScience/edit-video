@@ -12,17 +12,17 @@ import java.util.ArrayList;
  */
 
 public class VideoTable {
-    String TABLE_NAME = "Video";
-    String ID = "Id";
-    String PROJECT_ID = "ProjectId";
-    String PATH = "Path";
-    String START_TIME = "StartTime";
-    String END_TIME = "EndTime";
-    String LEFT = "Left";
-    String ORDER = "_Order";
-    String VOLUME = "Volume";
-    String VOLUME_PREVIEW = "VolumePreview";
-    DBHelper mDbHelper;
+    private String TABLE_NAME = "Video";
+    private String ID = "Id";
+    private String PROJECT_ID = "ProjectId";
+    private String PATH = "Path";
+    private String START_TIME = "StartTime";
+    private String END_TIME = "EndTime";
+    private String LEFT = "Left";
+    private String ORDER = "_Order";
+    private String VOLUME = "Volume";
+    private String VOLUME_PREVIEW = "VolumePreview";
+    private DBHelper mDbHelper;
 
     public VideoTable(Context context) {
         mDbHelper = new DBHelper(context);

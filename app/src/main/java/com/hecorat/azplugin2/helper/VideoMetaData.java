@@ -15,16 +15,17 @@ import java.io.InputStreamReader;
  * Created by bkmsx on 21/09/2016.
  */
 public class VideoMetaData {
-    public boolean videoFirst, hasAudio;
-    public String codecVideo, tbnVideo, bitrateVideo, framerateVideo, width, height;
-    public String bitrateAudio, sampleAudio, codecAudio, audioChannels;
-    static String fileString;
-    public static final int VIDEO_CODEC = 0;
-    public static final int VIDEO_TBN = 1;
-    public static final int AUDIO_CODEC = 2;
-    public static final int WIDTH = 3;
-    public static final int HEIGHT = 4;
-    public static final int VIDEO_FIRST = 5;
+    public boolean hasAudio;
+    private boolean videoFirst;
+    private String codecVideo, tbnVideo, bitrateVideo, framerateVideo, width, height;
+    private  String bitrateAudio, sampleAudio, codecAudio, audioChannels;
+    private static String fileString;
+    private static final int VIDEO_CODEC = 0;
+    private static final int VIDEO_TBN = 1;
+    private static final int AUDIO_CODEC = 2;
+    private static final int WIDTH = 3;
+    private static final int HEIGHT = 4;
+    private static final int VIDEO_FIRST = 5;
 
 
     public static VideoMetaData getMetaData(Context context, String videoPath){
@@ -35,9 +36,8 @@ public class VideoMetaData {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        VideoMetaData videoMetaData = getTrack();
-//        logData(videoMetaData);
-        return videoMetaData;
+
+        return getTrack();
     }
 
     public boolean cmp(VideoMetaData metaData, int property) {
@@ -59,7 +59,7 @@ public class VideoMetaData {
         }
     }
 
-    public static VideoMetaData getTrack() {
+    private static VideoMetaData getTrack() {
         VideoMetaData videoMetaData = new VideoMetaData();
 
         String track0String = fileString.substring(fileString.indexOf("Stream"));
@@ -69,7 +69,7 @@ public class VideoMetaData {
         String track0LC = track0.toLowerCase();
 
         String track1String = track0String.substring(track0End);
-        String track1, track1LC = "";
+        String track1, track1LC;
         String trackVideo, trackAudio = "";
 
         int track1Start = track1String.indexOf("Stream");
@@ -128,7 +128,7 @@ public class VideoMetaData {
             return videoMetaData;
         }
 
-        String[] audioCharac = trackAudio.split(",");
+        String[] audioCharacs = trackAudio.split(",");
 
         int audioIndex = trackAudio.indexOf("audio")+7;
         int audioEndIndex = trackAudio.indexOf(" ", audioIndex);
@@ -138,15 +138,14 @@ public class VideoMetaData {
         int audioChannelsEnd = trackAudio.indexOf(",", audioChannelsIndex);
         videoMetaData.audioChannels = trackAudio.substring(audioChannelsIndex, audioChannelsEnd);
 
-        for (int i=0; i<audioCharac.length; i++) {
-//            log(audioCharac[i]);
-            if (audioCharac[i].indexOf("hz")>0){
-                int hz = audioCharac[i].indexOf("hz");
-                videoMetaData.sampleAudio = audioCharac[i].substring(1, hz-1);
+        for (String audioCharac : audioCharacs) {
+            if (audioCharac.indexOf("hz")>0){
+                int hz = audioCharac.indexOf("hz");
+                videoMetaData.sampleAudio = audioCharac.substring(1, hz-1);
             }
-            if (audioCharac[i].indexOf("kb/s")>0){
-                int kbs = audioCharac[i].indexOf("kb/s");
-                videoMetaData.bitrateAudio = audioCharac[i].substring(1, kbs -1);
+            if (audioCharac.indexOf("kb/s")>0){
+                int kbs = audioCharac.indexOf("kb/s");
+                videoMetaData.bitrateAudio = audioCharac.substring(1, kbs -1);
             }
         }
 
@@ -172,10 +171,10 @@ public class VideoMetaData {
         Log.e("Text Analize", msg);
     }
 
-    public static String convertStreamToString(InputStream is) throws Exception {
+    private static String convertStreamToString(InputStream is) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
-        String line = null;
+        String line;
         while ((line = reader.readLine()) != null) {
             sb.append(line).append("\n");
         }
@@ -183,7 +182,7 @@ public class VideoMetaData {
         return sb.toString();
     }
 
-    public static String getStringFromFile (String filePath) throws Exception {
+    private static String getStringFromFile (String filePath) throws Exception {
         File fl = new File(filePath);
         FileInputStream fin = new FileInputStream(fl);
         String ret = convertStreamToString(fin);

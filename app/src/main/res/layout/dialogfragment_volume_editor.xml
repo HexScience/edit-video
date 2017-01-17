@@ -11,6 +11,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="30dp"
+            android:contentDescription="@null"
             android:src="@drawable/ic_volume"/>
         <SeekBar
             android:id="@+id/seekbar_volume"
@@ -24,7 +25,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:textSize="15sp"
-            android:text="100%"/>
+            android:text="@string/volume_value"/>
     </LinearLayout>
 
 </LinearLayout>

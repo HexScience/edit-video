@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -36,7 +37,7 @@ public class FragmentAudioGallery extends Fragment {
     public int mCountSubFolder;
     public boolean mIsSubFolder;
     public String mFolderName;
-    String[] pattern = {".mp3", ".aac"};
+    String[] patterns = {".mp3", ".aac"};
 
     @Nullable
     @Override
@@ -63,8 +64,8 @@ public class FragmentAudioGallery extends Fragment {
     }
 
     private boolean matchFile(File file) {
-        for (int i = 0; i < pattern.length; i++) {
-            if (file.getName().endsWith(pattern[i])) {
+        for (String pattern : patterns) {
+            if (file.getName().endsWith(pattern)) {
                 return true;
             }
         }
@@ -128,14 +129,14 @@ public class FragmentAudioGallery extends Fragment {
 
     private void loadAllAudio(File fileDirectory, ArrayList<String> listAudio, boolean subFolder) {
         File[] fileList = fileDirectory.listFiles();
-        for (int i = 0; i < fileList.length; i++) {
-            if (fileList[i].isDirectory()) {
+        for (File file : fileList) {
+            if (file.isDirectory()) {
                 if (subFolder) {
-                    loadAllAudio(fileList[i], listAudio, true);
+                    loadAllAudio(file, listAudio, true);
                 }
             } else {
-                if (matchFile(fileList[i])) {
-                    listAudio.add(fileList[i].getAbsolutePath());
+                if (matchFile(file)) {
+                    listAudio.add(file.getAbsolutePath());
                 }
             }
         }
@@ -173,11 +174,11 @@ public class FragmentAudioGallery extends Fragment {
 
     private void listFolderFrom(File fileDirectory) {
         File[] listFile = fileDirectory.listFiles();
-        for (int i = 0; i < listFile.length; i++) {
-            if (listFile[i].isDirectory()) {
-                String name = listFile[i].getName();
+        for (File file : listFile) {
+            if (file.isDirectory()) {
+                String name = file.getName();
                 if (name.charAt(0) != '.') {
-                    mListFolder.add(listFile[i].getAbsolutePath());
+                    mListFolder.add(file.getAbsolutePath());
                 }
             }
         }
@@ -189,14 +190,14 @@ public class FragmentAudioGallery extends Fragment {
         }
         boolean result = false;
         File[] fileList = fileDirectory.listFiles();
-        for (int i = 0; i < fileList.length; i++) {
-            if (fileList[i].isDirectory()) {
+        for (File file : fileList) {
+            if (file.isDirectory()) {
                 if (includeSubDir) {
-                    result = isAudioFolder(fileList[i], true);
+                    result = isAudioFolder(file, true);
                 }
             } else {
-                if (matchFile(fileList[i])) {
-                    mListFirstAudio.add(fileList[i].getAbsolutePath());
+                if (matchFile(file)) {
+                    mListFirstAudio.add(file.getAbsolutePath());
                     result = true;
                 }
             }
@@ -210,24 +211,32 @@ public class FragmentAudioGallery extends Fragment {
 
     private class AudioGalleryAdapter extends ArrayAdapter<String> {
 
-        public AudioGalleryAdapter(Context context, int resource, ArrayList<String> objects) {
+        private AudioGalleryAdapter(Context context, int resource, ArrayList<String> objects) {
             super(context, resource, objects);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.folder_gallery_layout, null);
-            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
-            TextView textView = (TextView) convertView.findViewById(R.id.text_view);
-            ImageView iconFolder = (ImageView) convertView.findViewById(R.id.icon_folder);
-            iconFolder.setVisibility(View.GONE);
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+            ViewHolder viewHolder;
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.folder_gallery_layout, null);
+                viewHolder = new ViewHolder();
+                viewHolder.imageView = (ImageView) convertView.findViewById(R.id.image_view);
+                viewHolder.textView = (TextView) convertView.findViewById(R.id.text_view);
+                viewHolder.iconFolder = (ImageView) convertView.findViewById(R.id.icon_folder);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+            viewHolder.iconFolder.setVisibility(View.GONE);
             String name;
             if (mIsSubFolder) {
                 name = new File(mListAudio.get(position)).getName();
             } else {
                 name = new File(mListFolder.get(position)).getName();
             }
-            textView.setText(name);
+            viewHolder.textView.setText(name);
             int iconId;
             if (name.endsWith(".mp3")) {
                 iconId = R.drawable.ic_mp3;
@@ -236,8 +245,13 @@ public class FragmentAudioGallery extends Fragment {
             } else {
                 iconId = R.drawable.ic_audio_folder;
             }
-            imageView.setImageResource(iconId);
+            viewHolder.imageView.setImageResource(iconId);
             return convertView;
+        }
+
+        class ViewHolder {
+            ImageView imageView, iconFolder;
+            TextView textView;
         }
 
         @Override

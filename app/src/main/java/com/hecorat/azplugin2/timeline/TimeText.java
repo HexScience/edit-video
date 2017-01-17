@@ -5,13 +5,7 @@ import android.support.v7.widget.AppCompatTextView;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-
 import com.hecorat.azplugin2.helper.Utils;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * Created by TienDam on 11/28/2016.

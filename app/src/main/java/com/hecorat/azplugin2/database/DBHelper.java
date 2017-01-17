@@ -10,7 +10,7 @@ import android.util.Log;
  */
 
 public class DBHelper extends SQLiteOpenHelper {
-    public static final String DB_NAME = "VideoEditorDB";
+    private static final String DB_NAME = "VideoEditorDB";
 
 
     public DBHelper (Context context) {

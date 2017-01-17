@@ -6,10 +6,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.azplugin2.main.Constants;
@@ -17,7 +17,7 @@ import com.hecorat.azplugin2.main.Constants;
 /**
  * Created by bkmsx on 01/11/2016.
  */
-public class VideoTLControl extends ImageView {
+public class VideoTLControl extends AppCompatImageView {
     public int width, height;
     public static final int THUMB_WIDTH = 30;
     public static final int LINE_HEIGHT = 4;
@@ -29,6 +29,8 @@ public class VideoTLControl extends ImageView {
     public Paint paint;
     public RelativeLayout.LayoutParams params;
     public OnControlTimeLineChanged mOnControlTimeLineChanged;
+
+    VideoTLControl(Context context) {super(context);}
 
     public VideoTLControl(Context context, int widthTimeLine, int heightTimeLine, int left) {
         super(context);
@@ -101,7 +103,7 @@ public class VideoTLControl extends ImageView {
     }
 
     OnTouchListener onTouchListener = new OnTouchListener() {
-        float oldX, oldY, moveX, moveY;
+        float oldX, oldY, moveX;
         float epsX = 100;
         float epsY = 20;
         int touch = 0;

@@ -61,7 +61,7 @@ public class Utils {
         return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
-    public static final int dpToPixel(Context context, int dp) {
+    public static int dpToPixel(Context context, int dp) {
         float density = context.getResources().getDisplayMetrics().density;
         return (int) (dp*density);
     }
@@ -76,8 +76,8 @@ public class Utils {
             e.printStackTrace();
         }
         ArrayList<String> arrayList = new ArrayList<>();
-        for (int i=0; i<fileList.length; i++){
-            arrayList.add(directory+"/"+fileList[i]);
+        for (String fileName : fileList){
+            arrayList.add(directory+"/"+fileName);
         }
         return arrayList;
     }
@@ -99,6 +99,7 @@ public class Utils {
             out.flush();
             out.close();
         } catch (Exception e) {
+            
         }
     }
 

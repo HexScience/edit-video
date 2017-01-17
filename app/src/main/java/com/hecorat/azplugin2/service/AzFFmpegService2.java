@@ -110,7 +110,7 @@ public class AzFFmpegService2 extends Service {
                     end);
             result.putInt(RESULT, success ? RESULT_OK : RESULT_ERROR);
             return result;
-        };
+        }
 
         @Override
         public Bundle concatVideo(String inputFile, String outputFile) {
@@ -118,7 +118,7 @@ public class AzFFmpegService2 extends Service {
             boolean success = performConcatVideo(inputFile, outputFile);
             result.putInt(RESULT, success ? RESULT_OK : RESULT_ERROR);
             return result;
-        };
+        }
 
         @Override
         public String getLineLog() {
@@ -229,7 +229,7 @@ public class AzFFmpegService2 extends Service {
 
     public boolean performGetVideoInfo(String inputVideo, String outputFile){
         Log.e("Az Plugin: ", "Get to Az plugin");
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
 
         command.add(mFfmpegPath);
         command.add("-i");
@@ -241,7 +241,7 @@ public class AzFFmpegService2 extends Service {
     }
 
     public boolean performResizeVideo(String inputVideo, String outputVideo, int width, int height){
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
         String filter = "scale="+width+":"+height+",setsar=1:1";
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(inputVideo);
@@ -267,15 +267,14 @@ public class AzFFmpegService2 extends Service {
         command.add("-y");
         command.add(outputVideo);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     public boolean performAddTextToVideo(String inputVideo, String[] inputText,
                                          int numberTexts, String outputFile, String[] textFonts,
                                          int[] textSizes, String[] textColors, String[] backgrounds,
                                          float[] starts, float[] ends, float[] x, float[] y) {
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
         String filter = "";
         for (int i = 0; i < numberTexts; i++) {
             if (i == 0) {
@@ -310,13 +309,12 @@ public class AzFFmpegService2 extends Service {
         command.add("-y");
         command.add(outputFile);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     public boolean performMergeAudioVideoWithVolume(String inputVideo,
                                                     String inputAudio, String outputFile, boolean isRepeat, float volume) {
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
         String filter = "[1:a] volume=" + volume + "[out]";
 
         command.add(mFfmpegPath);
@@ -342,14 +340,13 @@ public class AzFFmpegService2 extends Service {
         command.add("-y");
         command.add(outputFile);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     public boolean performAdjustVolume(String inputVideo, String outputVideo,
                                        float volume) {
         String volumeValue = "volume=" + volume;
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
         command.add(mFfmpegPath);
         command.add("-i");
         command.add(inputVideo);
@@ -360,18 +357,17 @@ public class AzFFmpegService2 extends Service {
         command.add("-y");
         command.add(outputVideo);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     public boolean performAddImageToVideo(String inputVideo,
                                           String[] inputImages, int numberImages, String outputFile,
                                           float[] x, float[] y, int[] width, int[] height, float[] rotation,
                                           float[] startTime, float[] endTime) {
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
         String filter = "";
-        String overlay = "";
-        String out = "";
+        String overlay;
+        String out;
         for (int i = 0; i < numberImages; i++) {
             overlay = "[" + (i + 1) + ":v]rotate=" + rotation[i]
                     + ":c=none,scale=" + width[i] + ":" + height[i]
@@ -405,13 +401,12 @@ public class AzFFmpegService2 extends Service {
         command.add("-y");
         command.add(outputFile);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     public boolean performCompressFileSize(String inputFile, String outputFile,
                                            int videoWidth, int videoHeight, double birate) {
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
         int height = videoHeight;
         int width = videoWidth;
         if (videoHeight % 2 == 1) {
@@ -437,13 +432,12 @@ public class AzFFmpegService2 extends Service {
         command.add("-y");
         command.add(outputFile);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     public boolean performMergeAudioVideo(String inputVideo, String inputAudio,
                                           String outputFile, boolean isRepeat) {
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
         command.add(mFfmpegPath);
         command.add("-i");
         command.add(inputVideo);
@@ -465,13 +459,12 @@ public class AzFFmpegService2 extends Service {
         command.add("-y");
         command.add(outputFile);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     public boolean performLoopAudio(String inputText, String outputFile,
                                     String duration) {
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
 
         command.add(mFfmpegPath);
         command.add("-f");
@@ -485,13 +478,12 @@ public class AzFFmpegService2 extends Service {
         command.add("-y");
         command.add(outputFile);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     public boolean performConvertToAAC(String inputFile, String outputFile,
                                        String start, String end, boolean isAAC) {
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
         String codec = isAAC ? "copy" : "aac";
         command.add(mFfmpegPath);
         command.add("-i");
@@ -509,14 +501,13 @@ public class AzFFmpegService2 extends Service {
         command.add("-y");
         command.add(outputFile);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     private boolean performTrimVideo(String inputFile, String outputFile,
                                      String begin, String end) {
 
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
 
         command.add(mFfmpegPath);
         command.add("-i");
@@ -531,14 +522,13 @@ public class AzFFmpegService2 extends Service {
         command.add("-copyts");
         command.add(outputFile);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     private Boolean performCropVideo(String input, String output, int width,
                                      int height, int x, int y, int quality) {
         String filter = "crop=" + width + ":" + height + ":" + x + ":" + y;
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
 
         command.add(mFfmpegPath);
         command.add("-i");
@@ -558,12 +548,11 @@ public class AzFFmpegService2 extends Service {
         command.add(quality + "");
         command.add(output);
 
-        boolean result = executeFFmpegCommand(command);
-        return result;
+        return executeFFmpegCommand(command);
     }
 
     private boolean performConcatVideo(String inputFile, String outputFile) {
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
 
         command.add(mFfmpegPath);
         command.add("-f");
@@ -575,8 +564,7 @@ public class AzFFmpegService2 extends Service {
         command.add("-y");
         command.add(outputFile);
 
-        boolean value = executeFFmpegCommand(command);
-        return value;
+        return executeFFmpegCommand(command);
     }
 
     private boolean performConvertVideoToGif(String inputFile,
@@ -590,7 +578,7 @@ public class AzFFmpegService2 extends Service {
         String durationInSeconds = String
                 .valueOf(((float) (duration / 10)) / 100f);
 
-        LinkedList<String> command = new LinkedList<String>();
+        LinkedList<String> command = new LinkedList<>();
 
         command.add(mFfmpegPath);
         command.add("-v");
@@ -611,7 +599,7 @@ public class AzFFmpegService2 extends Service {
 
         filter = "fps=" + fps + ",scale=" + scale
                 + ":-1:flags=lanczos [x]; [x][1:v] paletteuse";
-        command = new LinkedList<String>();
+        command = new LinkedList<>();
         command.add(mFfmpegPath);
         command.add("-v");
         command.add("warning");
@@ -632,13 +620,12 @@ public class AzFFmpegService2 extends Service {
         boolean result = executeFFmpegCommand(command);
         new File(palette).delete();
         return result;
-
     }
 
     public static boolean executeFFmpegCommand(LinkedList<String> command) {
         // Execute ffmpeg
 
-        Process ffmpegProcess = null;
+        Process ffmpegProcess;
         ProcessBuilder procBuilder = new ProcessBuilder(command);
         mAllLog = "";
         try {
@@ -657,12 +644,9 @@ public class AzFFmpegService2 extends Service {
             e.printStackTrace();
             return false;
         }
-        if (ffmpegProcess != null) {
-            ffmpegProcess.destroy();
-        }
 
+        ffmpegProcess.destroy();
         return true;
-
     }
 
     public static void writeToFile(File fileTxt, String data) {
@@ -743,14 +727,11 @@ public class AzFFmpegService2 extends Service {
             try {
                 PackageInfo packageInfo = getApplication().getPackageManager()
                         .getPackageInfo(getApplication().getPackageName(), 0);
-
                 sharedPrefs
                         .edit()
                         .putInt(getString(R.string.pref_app_version_code),
-                                packageInfo.versionCode).commit();
-            } catch (NotFoundException e) {
-                e.printStackTrace();
-            } catch (NameNotFoundException e) {
+                                packageInfo.versionCode).apply();
+            } catch (NotFoundException | NameNotFoundException e) {
                 e.printStackTrace();
             }
 
@@ -768,7 +749,7 @@ public class AzFFmpegService2 extends Service {
                     sharedPrefs
                             .edit()
                             .putInt(getString(R.string.pref_app_version_code),
-                                    newVersionCode).commit();
+                                    newVersionCode).apply();
 
                 }
             } catch (NameNotFoundException e) {

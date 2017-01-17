@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.provider.Settings;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -33,6 +32,8 @@ public class ExtraTLControl extends AppCompatImageView {
     public MainActivity mActivity;
 
     public int MARGIN_LEFT_TIME_LINE;
+
+    ExtraTLControl(Context context) {super(context);}
 
     public ExtraTLControl(Context context, int leftMargin, int widthTimeLine, int heightTimeLine) {
         super(context);

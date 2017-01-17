@@ -23,7 +23,7 @@
                 android:layout_width="@dimen/project_item_width"
                 android:layout_height="@dimen/project_item_height"
                 android:background="@drawable/bgr_project_item_normal"
-
+                android:contentDescription="@null"
                 android:padding="2dp"
                 android:scaleType="fitXY" />
         </android.support.v7.widget.CardView>

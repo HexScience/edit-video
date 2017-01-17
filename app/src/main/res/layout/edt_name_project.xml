@@ -4,6 +4,8 @@
     android:layout_height="match_parent">
     <EditText
         android:id="@+id/edt_name_project"
+        android:labelFor="@+id/edt_name_project"
+        android:inputType="text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"

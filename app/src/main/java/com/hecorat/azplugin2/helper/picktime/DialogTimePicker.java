@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +19,6 @@ public class DialogTimePicker extends DialogFragment {
 	public TimeData timeData, timeDataDuration;
 	public NumberPicker pickHours, pickMinutes, pickSeconds;
 	public Context mActivity;
-	public boolean mIsMin;
 	private OnDialogTimePickerListener mCallback;
 
 	public static DialogTimePicker newInstance(Context activity, TimeData timeData,
@@ -31,6 +31,7 @@ public class DialogTimePicker extends DialogFragment {
 		return f;
 	}
 
+	@NonNull
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -113,7 +114,7 @@ public class DialogTimePicker extends DialogFragment {
 		}
 	}
 	
-	public interface OnDialogTimePickerListener {
+	interface OnDialogTimePickerListener {
 		void onTimePickerChanged();
 	}
 }

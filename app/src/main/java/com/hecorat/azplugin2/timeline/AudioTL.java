@@ -8,6 +8,7 @@ import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 /**
  * Created by bkmsx on 05/11/2016.
  */
-public class AudioTL extends ImageView {
+public class AudioTL extends AppCompatImageView {
     public int min, max;
     public int left, right;
     public int width, height;
@@ -58,6 +59,8 @@ public class AudioTL extends ImageView {
 
     public static final int SPACE = 1;
     public static final float MIN_LIMIT = 0.85f;
+
+    AudioTL(Context context) {super(context);}
 
     public AudioTL(Context context, String audioPath, int height, int leftMargin) {
         super(context);

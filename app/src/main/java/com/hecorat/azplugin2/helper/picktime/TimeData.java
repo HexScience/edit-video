@@ -1,18 +1,17 @@
 package com.hecorat.azplugin2.helper.picktime;
 
-import android.text.format.Time;
-
-public class TimeData extends Time {
+class TimeData {
 	public String format = "";
-	public int milisecs = 0;
+	int milisecs = 0;
+	int second, minute, hour;
 
 	public TimeData(){}
 
-	public TimeData(int timeMs) {
+	TimeData(int timeMs) {
 		setMsec(timeMs);
 	}
 
-	public void setMsec(int msecs) {
+	void setMsec(int msecs) {
 		milisecs = msecs;
 		second = msecs / 1000;
 		minute = second / 60;
@@ -22,7 +21,7 @@ public class TimeData extends Time {
 		setFormat();
 	}
 
-	public void setTime(int hours, int minutes, int seconds) {
+	void setTime(int hours, int minutes, int seconds) {
 		hour = hours;
 		minute = minutes;
 		second = seconds;
@@ -30,7 +29,7 @@ public class TimeData extends Time {
 		setFormat();
 	}
 
-	public void setFormat() {
+	private void setFormat() {
 		String duration = "";
 		if (hour > 0) {
 			if (hour < 10) {

@@ -109,7 +109,10 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
     };
 
     private void setInvisible(){
-        getView().setVisibility(View.GONE);
+        View view = getView();
+        if (view != null) {
+            view.setVisibility(View.GONE);
+        }
     }
 
     @Override

@@ -19,8 +19,7 @@ import java.util.List;
  */
 
 public class FontAdapter extends ArrayAdapter<String> {
-    public static final String TAG = "FontAdapter";
-    int selected;
+    private int selected;
 
     public FontAdapter(Context context, int resource, List<String> objects) {
         super(context, resource, objects);
@@ -34,7 +33,7 @@ public class FontAdapter extends ArrayAdapter<String> {
 
     @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
         TextView textView = (TextView) view.findViewById(android.R.id.text1);
         textView.setText(getContext().getString(R.string.spinner_text));
@@ -46,7 +45,7 @@ public class FontAdapter extends ArrayAdapter<String> {
 
     @NonNull
     @Override
-    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+    public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.spinner_item, null);
         TextView textView = (TextView) view.findViewById(R.id.spinner_textview);
         if (position == selected) {

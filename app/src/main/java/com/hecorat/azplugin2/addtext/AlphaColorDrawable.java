@@ -21,12 +21,13 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
 /**
- * This drawable that draws a simple white and gray chessboard pattern.
- * It's pattern you will often see as a background behind a
+ * This drawable that draws a simple white and gray chessboard patterns.
+ * It's patterns you will often see as a background behind a
  * partly transparent image in many applications.
  * @author Daniel Nilsson
  */
@@ -43,7 +44,7 @@ public class AlphaColorDrawable extends Drawable {
 	private int numRectanglesVertical;
 
 	/**
-	 * Bitmap in which the pattern will be cahched.
+	 * Bitmap in which the patterns will be cahched.
 	 */
 	private Bitmap mBitmap;
 
@@ -61,7 +62,7 @@ public class AlphaColorDrawable extends Drawable {
 
 	@Override
 	public int getOpacity() {
-		return 0;
+		return PixelFormat.UNKNOWN;
 	}
 
 	@Override
@@ -88,7 +89,7 @@ public class AlphaColorDrawable extends Drawable {
 	}
 
 	/**
-	 * This will generate a bitmap with the pattern
+	 * This will generate a bitmap with the patterns
 	 * as big as the rectangle we were allow to draw on.
 	 * We do this to chache the bitmap so we don't need to
 	 * recreate it each time draw() is called since it

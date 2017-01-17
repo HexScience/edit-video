@@ -135,7 +135,7 @@ public class ColorPickerView extends View {
 	private Point mStartTouchPoint = null;
 
 	public interface OnColorChangedListener {
-		public void onColorChanged(int color);
+		void onColorChanged(int color);
 	}
 
 	public ColorPickerView(Context context){
@@ -324,7 +324,7 @@ public class ColorPickerView extends View {
 
 		canvas.drawRect(rect, mAlphaPaint);
 
-		if(mAlphaSliderText != null && mAlphaSliderText!= ""){
+		if(mAlphaSliderText != null && !mAlphaSliderText.equals("")){
 			canvas.drawText(mAlphaSliderText, rect.centerX(), rect.centerY() + 4 * mDensity, mAlphaTextPaint);
 		}
 
@@ -646,8 +646,8 @@ public class ColorPickerView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-		int width = 0;
-		int height = 0;
+		int width;
+		int height;
 		
 		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
 		int heightMode = MeasureSpec.getMode(heightMeasureSpec);

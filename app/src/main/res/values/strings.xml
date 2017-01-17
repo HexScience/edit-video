@@ -43,4 +43,14 @@
     <string name="sd_quality">SD (480p)</string>
     <string name="color_picker_opacity_title">Opacity</string>
     <string name="tip_export">*Tip: You should not change to other apps while exporting for good export performance</string>
+    <string name="font_title">Font : </string>
+    <string name="text_background_title">Background</string>
+    <string name="text_color_title">Text Color</string>
+    <string name="hash_tag">#</string>
+    <string name="colon">:</string>
+    <string name="volume_value">100%</string>
+    <string name="new_project">New Project</string>
+    <string name="btn_open_project">Open</string>
+    <string name="btn_delete_project">Delete</string>
+    <string name="btn_rename_project">Rename</string>
 </resources>

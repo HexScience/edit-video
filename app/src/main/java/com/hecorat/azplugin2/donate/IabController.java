@@ -20,9 +20,9 @@ import java.util.ArrayList;
  */
 
 public class IabController {
-    MainActivity mainActivity;
-    IabHelper mIabHelper;
-    boolean mSetupFailed;
+    private MainActivity mainActivity;
+    private IabHelper mIabHelper;
+    private boolean mSetupFailed;
 
     public IabController(MainActivity activity) {
         mainActivity = activity;
@@ -58,7 +58,7 @@ public class IabController {
         }
     }
 
-    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
+    private IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
             = new IabHelper.OnIabPurchaseFinishedListener() {
         public void onIabPurchaseFinished(IabResult result, Purchase purchase)
         {
@@ -84,7 +84,7 @@ public class IabController {
         }
     }
 
-    IabHelper.QueryInventoryFinishedListener mGotInventoryListener
+    private IabHelper.QueryInventoryFinishedListener mGotInventoryListener
             = new IabHelper.QueryInventoryFinishedListener() {
         public void onQueryInventoryFinished(IabResult result,
                                              Inventory inventory) {
@@ -117,7 +117,7 @@ public class IabController {
         }
     }
 
-    IabHelper.QueryInventoryFinishedListener
+    private IabHelper.QueryInventoryFinishedListener
             mQueryFinishedListener = new IabHelper.QueryInventoryFinishedListener() {
         public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
             if (result.isFailure()) {

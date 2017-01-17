@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class FontManager {
 
-    public static final String FONT_FOLDER = "font";
+    private static final String FONT_FOLDER = "font";
 
     public static ArrayList<String> getFontPaths(Context context){
         ArrayList<String> listFontPath = new ArrayList<>();

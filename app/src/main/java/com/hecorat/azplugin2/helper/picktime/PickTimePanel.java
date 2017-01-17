@@ -56,11 +56,11 @@ public class PickTimePanel extends LinearLayout implements View.OnClickListener,
     public void onClick(View v) {
         if (v.equals(textMin)) {
             DialogTimePicker.newInstance(getContext(), timeDataMin, timeDataMax, this)
-                    .show(activity.getSupportFragmentManager().beginTransaction(), "pick time min");
+                    .show(activity.getSupportFragmentManager(), "pick time min");
         }
         else if (v.equals(textMax)) {
             DialogTimePicker.newInstance(getContext(), timeDataMax, timeDataDuration, this)
-                    .show(activity.getSupportFragmentManager().beginTransaction(), "pick time min");
+                    .show(activity.getSupportFragmentManager(), "pick time min");
         }
     }
 

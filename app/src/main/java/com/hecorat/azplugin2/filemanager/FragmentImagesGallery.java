@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -42,7 +43,7 @@ public class FragmentImagesGallery extends Fragment {
     public ArrayList<String> mListFolder, mListStiker;
     public ArrayList<String> mListFirstImage, mListImage;
     public String mFolderName;
-    public String[] pattern = {".png", "jpg"};
+    public String[] patterns = {".png", "jpg"};
     public static final String STICKER_FOLDER = "sticker";
     public static final String STICKER_FOLDER_NAME = "Stickers";
     public static final String ASSETS_PATH = "file:///android_asset/";
@@ -74,8 +75,8 @@ public class FragmentImagesGallery extends Fragment {
     }
 
     private boolean matchFile(File file){
-        for (int i=0; i<pattern.length; i++) {
-            if (file.getName().endsWith(pattern[i])){
+        for (String pattern : patterns) {
+            if (file.getName().endsWith(pattern)){
                 return true;
             }
         }
@@ -156,14 +157,14 @@ public class FragmentImagesGallery extends Fragment {
 
     private void loadAllImage(File fileDirectory, ArrayList<String> listImage, boolean subFolder){
         File[] fileList = fileDirectory.listFiles();
-        for (int i=0; i<fileList.length; i++){
-            if (fileList[i].isDirectory()) {
+        for (File file : fileList){
+            if (file.isDirectory()) {
                 if (subFolder) {
-                    loadAllImage(fileList[i], listImage, true);
+                    loadAllImage(file, listImage, true);
                 }
             } else {
-                if (matchFile(fileList[i])) {
-                    listImage.add(fileList[i].getAbsolutePath());
+                if (matchFile(file)) {
+                    listImage.add(file.getAbsolutePath());
                 }
             }
         }
@@ -201,11 +202,11 @@ public class FragmentImagesGallery extends Fragment {
 
     private void listFolderFrom(File fileDirectory){
         File[] listFile = fileDirectory.listFiles();
-        for (int i=0; i<listFile.length; i++) {
-            if (listFile[i].isDirectory()) {
-                String name = listFile[i].getName();
+        for (File file : listFile) {
+            if (file.isDirectory()) {
+                String name = file.getName();
                 if (name.charAt(0) != '.'){
-                    mListFolder.add(listFile[i].getAbsolutePath());
+                    mListFolder.add(file.getAbsolutePath());
                 }
             }
         }
@@ -217,14 +218,14 @@ public class FragmentImagesGallery extends Fragment {
         }
         boolean result = false;
         File[] fileList = fileDirectory.listFiles();
-        for (int i=0; i<fileList.length; i++){
-            if (fileList[i].isDirectory()) {
+        for (File file : fileList){
+            if (file.isDirectory()) {
                 if (includeSubDir) {
-                    result = isImageFolder(fileList[i], true);
+                    result = isImageFolder(file, true);
                 }
             } else {
-                if (matchFile(fileList[i])) {
-                    mListFirstImage.add(fileList[i].getAbsolutePath());
+                if (matchFile(file)) {
+                    mListFirstImage.add(file.getAbsolutePath());
                     result = true;
                 }
             }
@@ -238,12 +239,13 @@ public class FragmentImagesGallery extends Fragment {
 
     private class ImageGalleryAdapter extends ArrayAdapter<String> {
 
-        public ImageGalleryAdapter(Context context, int resource, ArrayList<String> list) {
+        private ImageGalleryAdapter(Context context, int resource, ArrayList<String> list) {
             super(context, resource, list);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             if (!mIsSubFolder){
                 return getFolderLayout(position);
             } else if (mChooseSticker){

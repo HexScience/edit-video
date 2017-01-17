@@ -21,7 +21,7 @@ public class NameDialog extends DialogFragment {
     Context mContext;
     String mInitText;
 
-    static int mType;
+    int mType;
 
     EditText mEdtName;
 
@@ -33,7 +33,7 @@ public class NameDialog extends DialogFragment {
     public static NameDialog newInstance(Context context, int type, String initText) {
         NameDialog nameDialog = new NameDialog();
         nameDialog.mContext = context;
-        mType = type;
+        nameDialog.mType = type;
         nameDialog.mInitText = initText;
         return nameDialog;
     }

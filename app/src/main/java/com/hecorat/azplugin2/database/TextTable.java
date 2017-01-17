@@ -12,25 +12,25 @@ import java.util.ArrayList;
  */
 
 public class TextTable {
-    String TABLE_NAME = "Text";
-    String ID = "Id";
-    String PROJECT_ID = "ProjectId";
-    String TEXT = "Text";
-    String LEFT = "Left";
-    String RIGHT = "Right";
-    String IN_LAYOUT_IMAGE = "InLayoutImage";
-    String ORDER_IN_LAYOUT = "OrderInLayout";
-    String ORDER_IN_LIST = "OrderInList";
-    String X = "x";
-    String Y = "y";
-    String SCALE = "Scale";
-    String ROTATION = "Rotation";
-    String SIZE = "Size";
-    String FONT_PATH = "FontPath";
-    String FONT_COLOR = "FontColor";
-    String BOX_COLOR = "BoxColor";
-    String FONT_ID = "FontId";
-    DBHelper mDbHelper;
+    private String TABLE_NAME = "Text";
+    private String ID = "Id";
+    private String PROJECT_ID = "ProjectId";
+    private String TEXT = "Text";
+    private String LEFT = "Left";
+    private String RIGHT = "Right";
+    private String IN_LAYOUT_IMAGE = "InLayoutImage";
+    private String ORDER_IN_LAYOUT = "OrderInLayout";
+    private String ORDER_IN_LIST = "OrderInList";
+    private String X = "x";
+    private String Y = "y";
+    private String SCALE = "Scale";
+    private String ROTATION = "Rotation";
+    private String SIZE = "Size";
+    private String FONT_PATH = "FontPath";
+    private String FONT_COLOR = "FontColor";
+    private String BOX_COLOR = "BoxColor";
+    private String FONT_ID = "FontId";
+    private DBHelper mDbHelper;
 
     public TextTable(Context context) {
         mDbHelper = new DBHelper(context);

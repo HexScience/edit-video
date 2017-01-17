@@ -121,13 +121,13 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         public void onClick(View view) {
             NameDialog dialog = NameDialog.newInstance(mActivity, NameDialog.RENAME, mSelectProjectName);
             dialog.setOnClickListener(ProjectFragment.this);
-            dialog.show(mActivity.getSupportFragmentManager().beginTransaction(), "rename");
+            dialog.show(mActivity.getSupportFragmentManager(), "rename");
         }
     };
 
     private void addProjectsToLayoutScrollView() {
         for (ProjectObject project : mProjectList) {
-            View view = LayoutInflater.from(getContext()).inflate(R.layout.project_item, null);
+            View view = LayoutInflater.from(mActivity).inflate(R.layout.project_item, null);
             view.setTag(project);
             view.setOnClickListener(onProjectItemClick);
 
@@ -148,7 +148,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
             String nameProject = "Project_"+(mCountVideo+1);
             NameDialog dialog = NameDialog.newInstance(mActivity, NameDialog.CREATE_PROJECT, nameProject);
             dialog.setOnClickListener(ProjectFragment.this);
-            dialog.show(mActivity.getSupportFragmentManager().beginTransaction(), "name project");
+            dialog.show(mActivity.getSupportFragmentManager(), "name project");
         }
     };
 
@@ -252,7 +252,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         @Override
         public void onClick(View view) {
             DialogConfirm.newInstance(ProjectFragment.this, DialogClickListener.DELETE_PROJECT)
-                    .show(mActivity.getSupportFragmentManager().beginTransaction(), "delete project");
+                    .show(mActivity.getSupportFragmentManager(), "delete project");
         }
     };
 

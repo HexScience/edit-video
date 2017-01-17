@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private EditText mEditText, mEdtColorHex;
     private Spinner mFontSpinner;
     private ImageView mBtnTextColor, mBtnTextBgrColor;
-    private LinearLayout mLayoutColorPicker;
+    private RelativeLayout mLayoutColorPicker;
     private RelativeLayout mLayoutBtnTextColor, mLayoutBtnTextBgrColor;
     private Button mBtnCloseColorPicker;
     private ImageView mIndicatorTextColor, mIndicatorTextBgr;
@@ -274,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mEdtColorHex = (EditText) findViewById(R.id.edt_color_hex);
         mLayoutBtnTextColor = (RelativeLayout) findViewById(R.id.layout_btn_text_color);
         mLayoutBtnTextBgrColor = (RelativeLayout) findViewById(R.id.layout_btn_text_bgr_color);
-        mLayoutColorPicker = (LinearLayout) findViewById(R.id.layout_color_picker);
+        mLayoutColorPicker = (RelativeLayout) findViewById(R.id.layout_color_picker);
         mBtnCloseColorPicker = (Button) findViewById(R.id.btn_close_colorpicker);
         mIndicatorTextColor = (ImageView) findViewById(R.id.indicator_textcolor);
         mIndicatorTextBgr = (ImageView) findViewById(R.id.indicator_textbackground);
@@ -367,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         initDatabase();
 
         openLayoutProject();
+
         keepScreenOn();
 
         checkVip();

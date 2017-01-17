@@ -1,9 +1,11 @@
 package com.hecorat.azplugin2.filemanager;
 
 import android.content.Context;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -36,7 +38,7 @@ public class FragmentVideosGallery extends Fragment {
 
     public boolean mIsSubFolder;
     public String mFolderName;
-    public String[] pattern = {".mp4"};
+    public String[] patterns = {".mp4"};
     public int mCountSubFolder;
 
     @Nullable
@@ -64,8 +66,8 @@ public class FragmentVideosGallery extends Fragment {
     }
 
     private boolean matchFile(File file){
-        for (int i=0; i<pattern.length; i++) {
-            if (file.getName().endsWith(pattern[i])){
+        for (String pattern : patterns) {
+            if (file.getName().endsWith(pattern)){
                 return true;
             }
         }
@@ -132,14 +134,14 @@ public class FragmentVideosGallery extends Fragment {
 
     private void loadAllVideo(File fileDirectory, ArrayList<String> listVideo, boolean subFolder){
         File[] fileList = fileDirectory.listFiles();
-        for (int i=0; i<fileList.length; i++){
-            if (fileList[i].isDirectory()) {
+        for (File file : fileList){
+            if (file.isDirectory()) {
                 if (subFolder) {
-                    loadAllVideo(fileList[i], listVideo, true);
+                    loadAllVideo(file, listVideo, true);
                 }
             } else {
-                if (matchFile(fileList[i])) {
-                    listVideo.add(fileList[i].getAbsolutePath());
+                if (matchFile(file)) {
+                    listVideo.add(file.getAbsolutePath());
                 }
             }
         }
@@ -176,11 +178,11 @@ public class FragmentVideosGallery extends Fragment {
 
     private void listFolderFrom(File fileDirectory){
         File[] listFile = fileDirectory.listFiles();
-        for (int i=0; i<listFile.length; i++) {
-            if (listFile[i].isDirectory()) {
-                String name = listFile[i].getName();
+        for (File file : listFile) {
+            if (file.isDirectory()) {
+                String name = file.getName();
                 if (name.charAt(0) != '.'){
-                    mListFolder.add(listFile[i].getAbsolutePath());
+                    mListFolder.add(file.getAbsolutePath());
                 }
             }
         }
@@ -192,14 +194,14 @@ public class FragmentVideosGallery extends Fragment {
         }
         boolean result = false;
         File[] fileList = fileDirectory.listFiles();
-        for (int i=0; i<fileList.length; i++){
-            if (fileList[i].isDirectory()) {
+        for (File file : fileList){
+            if (file.isDirectory()) {
                 if (includeSubDir) {
-                    result = isVideoFolder(fileList[i], true);
+                    result = isVideoFolder(file, true);
                 }
             } else {
-                if (matchFile(fileList[i])) {
-                    mListFirstVideo.add(fileList[i].getAbsolutePath());
+                if (matchFile(file)) {
+                    mListFirstVideo.add(file.getAbsolutePath());
                     result = true;
                 }
             }
@@ -213,17 +215,26 @@ public class FragmentVideosGallery extends Fragment {
 
     private class VideoGalleryAdapter extends ArrayAdapter<String> {
 
-        public VideoGalleryAdapter(Context context, int resource, ArrayList<String> objects) {
+        private VideoGalleryAdapter(Context context, int resource, ArrayList<String> objects) {
             super(context, resource, objects);
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             String videoPath = getItem(position);
-            convertView = LayoutInflater.from(mActivity).inflate(R.layout.folder_gallery_layout, null);
-            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
-            TextView textView = (TextView) convertView.findViewById(R.id.text_view);
-            ImageView iconFolder = (ImageView) convertView.findViewById(R.id.icon_folder);
+            ViewHolder viewHolder;
+            if (convertView == null) {
+                viewHolder = new ViewHolder();
+                convertView = LayoutInflater.from(mActivity).inflate(R.layout.folder_gallery_layout, null);
+                viewHolder.imageView = (ImageView) convertView.findViewById(R.id.image_view);
+                viewHolder.textView = (TextView) convertView.findViewById(R.id.text_view);
+                viewHolder.iconFolder = (ImageView) convertView.findViewById(R.id.icon_folder);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+
             String name;
             int iconId ;
             if (mIsSubFolder) {
@@ -233,10 +244,15 @@ public class FragmentVideosGallery extends Fragment {
                 name = new File(mListFolder.get(position)).getName();
                 iconId = R.drawable.ic_folder;
             }
-            iconFolder.setImageResource(iconId);
-            textView.setText(name);
-            Glide.with(getContext()).load(videoPath).centerCrop().into(imageView);
+            viewHolder.iconFolder.setImageResource(iconId);
+            viewHolder.textView.setText(name);
+            Glide.with(getContext()).load(videoPath).centerCrop().into(viewHolder.imageView);
             return convertView;
+        }
+
+        class ViewHolder {
+            ImageView imageView, iconFolder;
+            TextView textView;
         }
 
         @Override

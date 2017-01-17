@@ -1,7 +1,5 @@
 package com.hecorat.azplugin2.export;
 
-import android.media.MediaMetadataRetriever;
-
 import com.hecorat.azplugin2.timeline.VideoTL;
 
 import java.util.ArrayList;

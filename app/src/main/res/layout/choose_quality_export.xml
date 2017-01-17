@@ -16,9 +16,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="Name: "/>
+                android:text="@string/edit_name_title"/>
             <EditText
                 android:id="@+id/edt_output_name"
+                android:labelFor="@+id/edt_output_name"
+                android:inputType="text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
@@ -37,19 +39,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:tag="1080"
-                android:text="Full HD (1080p)"/>
+                android:text="@string/full_hd_quality"/>
             <RadioButton
                 android:id="@+id/hd_radio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:tag="720"
-                android:text="HD (720p)"/>
+                android:text="@string/hd_quality"/>
             <RadioButton
                 android:id="@+id/sd_radio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:tag="480"
-                android:text="SD (480p)"/>
+                android:text="@string/sd_quality"/>
         </RadioGroup>
     </LinearLayout>
 </RelativeLayout>

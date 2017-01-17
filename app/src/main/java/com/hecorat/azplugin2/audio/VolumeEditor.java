@@ -40,7 +40,8 @@ public class VolumeEditor extends DialogFragment {
         mSeekBar.setMax(Constants.MAX_VOLUME);
         mSeekBar.setProgress(mVolume);
         mSeekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
-        mTextView.setText(mVolume+"%");
+        String text = mVolume + "%";
+        mTextView.setText(text);
         builder.setView(view);
         builder.setTitle(R.string.volume_editor_title);
         builder.setPositiveButton(R.string.ok_btn, new DialogInterface.OnClickListener() {
@@ -57,13 +58,15 @@ public class VolumeEditor extends DialogFragment {
         });
         builder.setOnKeyListener(onKeyListener);
         Dialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false);
         return dialog;
     }
 
     SeekBar.OnSeekBarChangeListener onSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            mTextView.setText(progress+"%");
+            String text = progress + "%";
+            mTextView.setText(text);
             mVolume = progress;
         }
 

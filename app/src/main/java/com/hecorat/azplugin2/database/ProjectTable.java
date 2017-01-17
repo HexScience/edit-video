@@ -13,12 +13,12 @@ import java.util.ArrayList;
  */
 
 public class ProjectTable {
-    String TABLE_NAME = "Project";
-    String ID = "Id";
+    private String TABLE_NAME = "Project";
+    private String ID = "Id";
     public static final String NAME = "Name";
-    public static final String DATA = "Data";
+    private static final String DATA = "Data";
     public static final String FIRST_VIDEO = "FirstVideo";
-    DBHelper mDbHelper;
+    private DBHelper mDbHelper;
 
     public ProjectTable(Context context) {
         mDbHelper = new DBHelper(context);

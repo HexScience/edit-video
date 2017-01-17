@@ -160,7 +160,10 @@ public class ExportFragment extends Fragment{
     }
 
     private void setFragmentInvisible(){
-        getView().setVisibility(View.GONE);
+        View view = getView();
+        if (view != null) {
+            view.setVisibility(View.GONE);
+        }
     }
 
     View.OnClickListener onBtnExportClick = new View.OnClickListener() {

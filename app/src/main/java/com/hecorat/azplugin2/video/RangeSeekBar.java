@@ -29,7 +29,6 @@ import java.util.Locale;
 public class RangeSeekBar extends AppCompatImageView {
 	private MainActivity mActivity;
 	private Paint paint = new Paint();
-	private RelativeLayout.LayoutParams params;
 	private RectF rectThumb1, rectThumb2;
 	private RectF rectGreyLeft, rectGreyRight;
 	private Path arrowPath;
@@ -96,7 +95,7 @@ public class RangeSeekBar extends AppCompatImageView {
 		minValue = 0; //miliS
 		maxValue = durationVideo; //miliS
 		arrowHaftHeight = height / 4;
-		params = new RelativeLayout.LayoutParams(width, this.height + top);
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, this.height + top);
 		setLayoutParams(params);
 		currentValue = minValue;
 		updateSeekBar();
@@ -319,7 +318,7 @@ public class RangeSeekBar extends AppCompatImageView {
 		}
 	}
 
-	public interface OnSeekBarChangedListener {
+	interface OnSeekBarChangedListener {
 		void seekVideoTo(int value);
 		void updateSelectedTime(int min, int max);
 	}

@@ -12,20 +12,20 @@ import java.util.ArrayList;
  */
 
 public class ImageTable {
-    String TABLE_NAME = "Image";
-    String ID = "Id";
-    String PROJECT_ID = "ProjectId";
-    String PATH = "Path";
-    String LEFT = "Left";
-    String RIGHT = "Right";
-    String IN_LAYOUT_IMAGE = "InLayoutImage";
-    String ORDER_IN_LAYOUT = "OrderInLayout";
-    String ORDER_IN_LIST = "OrderInList";
-    String X = "x";
-    String Y = "y";
-    String SCALE = "Scale";
-    String ROTATION = "Rotation";
-    DBHelper mDbHelper;
+    private String TABLE_NAME = "Image";
+    private String ID = "Id";
+    private String PROJECT_ID = "ProjectId";
+    private String PATH = "Path";
+    private String LEFT = "Left";
+    private String RIGHT = "Right";
+    private String IN_LAYOUT_IMAGE = "InLayoutImage";
+    private String ORDER_IN_LAYOUT = "OrderInLayout";
+    private String ORDER_IN_LIST = "OrderInList";
+    private String X = "x";
+    private String Y = "y";
+    private String SCALE = "Scale";
+    private String ROTATION = "Rotation";
+    private DBHelper mDbHelper;
 
     public ImageTable(Context context) {
         mDbHelper = new DBHelper(context);

@@ -66,7 +66,6 @@ public class IncreaseVolumeTask extends AsyncTask<Void, Void, Void> {
             input = audioTL.audioPath;
             volume = audioTL.volume;
             name = new File(input).getName();
-            String extension = input.substring(input.length()-4);
             output = Utils.getTempFolder()+"/"+name.substring(0, name.length()-4)+"_temp.aac";
             audioTL.audioPreview = output;
         }

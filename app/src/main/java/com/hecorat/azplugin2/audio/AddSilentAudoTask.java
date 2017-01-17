@@ -16,10 +16,10 @@ import java.util.LinkedList;
  */
 
 public class AddSilentAudoTask extends AsyncTask<Void, Void, Void>{
-    Context context;
-    boolean inRestore;
-    VideoTL videoTL;
-    ArrayList<VideoTL> listVideo;
+    private Context context;
+    private boolean inRestore;
+    private VideoTL videoTL;
+    private ArrayList<VideoTL> listVideo;
     public AddSilentAudoTask(Context context, VideoTL videoTL){
         this.context = context;
         this.videoTL = videoTL;

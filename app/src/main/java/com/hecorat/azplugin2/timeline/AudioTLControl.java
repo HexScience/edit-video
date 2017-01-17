@@ -6,10 +6,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.azplugin2.main.MainActivity;
@@ -17,7 +17,7 @@ import com.hecorat.azplugin2.main.MainActivity;
 /**
  * Created by bkmsx on 01/11/2016.
  */
-public class AudioTLControl extends ImageView {
+public class AudioTLControl extends AppCompatImageView {
     public RectF thumbLeft, thumbRight;
     public Rect lineAbove, lineBelow;
     public int min, max;
@@ -30,6 +30,8 @@ public class AudioTLControl extends ImageView {
     public MainActivity mActivity;
 
     public int MARGIN_LEFT_TIME_LINE;
+
+    AudioTLControl(Context context) {super(context);}
 
     public AudioTLControl(Context context, int left, int right, int height) {
         super(context);

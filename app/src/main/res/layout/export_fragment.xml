@@ -33,6 +33,8 @@
                     android:text="@string/edit_name_title"/>
                 <EditText
                     android:id="@+id/edt_output_name"
+                    android:labelFor="@+id/edt_output_name"
+                    android:inputType="text"
                     android:layout_width="match_parent"
                     android:layout_height="30dp"
                     android:layout_marginStart="15dp"

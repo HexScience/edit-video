@@ -8,8 +8,9 @@ import java.util.ArrayList;
  * Created by TienDam on 11/23/2016.
  */
 
-public class TextFilter {
-    public static String getFilter(String input, String output,
+
+class TextFilter {
+    static String getFilter(String input, String output,
                                    ArrayList<ExtraTL> listText){
         String filter="";
         for (int i=0; i<listText.size(); i++){

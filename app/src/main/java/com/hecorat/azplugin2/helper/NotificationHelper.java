@@ -25,14 +25,7 @@ public class NotificationHelper {
                 .setSmallIcon(R.drawable.ic_notification_exporting)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setOngoing(true);
-        if (progress < 100) {
-            mNotifyBuilder.setProgress(100, progress, false)
-                    .setContentText(progress + " %");
-        } else if (progress == 100) {
-            mNotifyBuilder.setProgress(100, progress, true)
-                    .setContentTitle("")
-                    .setContentText("Completing..");
-        } else {
+        if (progress == -1){
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(Uri.parse(videoPath), "video/mp4");
             PendingIntent pendingIntent = PendingIntent
@@ -45,6 +38,13 @@ public class NotificationHelper {
                     .setOngoing(false)
                     .setContentIntent(pendingIntent)
                     .setAutoCancel(true);
+        } else if (progress < 100) {
+            mNotifyBuilder.setProgress(100, progress, false)
+                    .setContentText(progress + " %");
+        } else {
+            mNotifyBuilder.setProgress(100, 100, true)
+                    .setContentTitle("")
+                    .setContentText("Completing..");
         }
         mNotificationManager.notify(notifyID, mNotifyBuilder.build());
     }

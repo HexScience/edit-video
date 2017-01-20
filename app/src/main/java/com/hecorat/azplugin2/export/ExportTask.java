@@ -6,7 +6,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.hecorat.azplugin2.R;
+import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.Utils;
+import com.hecorat.azplugin2.main.Constants;
 import com.hecorat.azplugin2.main.MainActivity;
 import com.hecorat.azplugin2.timeline.AudioTL;
 import com.hecorat.azplugin2.timeline.ExtraTL;
@@ -19,7 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
- * Created by TienDam on 11/22/2016.
+ * Created by bkmsx on 11/22/2016.
  */
 
 class ExportTask extends AsyncTask<Void, Void, Void> {
@@ -30,7 +32,7 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
     private String mName;
 
     private long startTime;
-    private int mVideoDuration;
+    private int mVideoDurationSec;
     private float mQuality;
 
     ExportTask(MainActivity context, ArrayList<VideoTL> listVideo, ArrayList<ExtraTL> listImage,
@@ -47,13 +49,18 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
 
     private void updateAllList(){
         float layoutScale = mActivity.getLayoutVideoScale(mQuality);
-        mVideoDuration = 0;
+        AnalyticsHelper.getInstance()
+                .sendCustomDimension(mActivity, Constants.DIMENSION_OUTPUT_QUALITY, (int)mQuality + "");
+        mVideoDurationSec = 0;
         for (int i=0; i<mListVideo.size(); i++){
             VideoHolder videoHolder = mListVideo.get(i).updateVideoHolder();
-            mVideoDuration += videoHolder.duration;
+            mVideoDurationSec += videoHolder.durationSec;
         }
 
-        mActivity.setWaterMarkEndTime(mVideoDuration * 1000 + 500);
+        AnalyticsHelper.getInstance()
+                .sendCustomDimension(mActivity, Constants.DIMENSION_OUTPUT_DURATION, mVideoDurationSec + "");
+
+        mActivity.setWaterMarkEndTime(mVideoDurationSec * 1000 + 500);
 
         for (int i=0; i<mListAudio.size(); i++){
             mListAudio.get(i).updateAudioHolder();
@@ -140,7 +147,7 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
             command.add("-ss");
             command.add(video.startTimeSecond +"");
             command.add("-t");
-            command.add(video.duration+"");
+            command.add(video.durationSec +"");
             command.add("-i");
             command.add(video.videoPath);
         }
@@ -149,7 +156,7 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
             command.add("-ss");
             command.add(audio.startTimeMs +"");
             command.add("-t");
-            command.add(audio.duration+"");
+            command.add(audio.durationSec +"");
             command.add("-i");
             command.add(audio.audioPath);
         }
@@ -191,7 +198,7 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         super.onPreExecute();
         log("Start get info");
         startTime = System.currentTimeMillis();
-        new ExportProgress(mActivity, mVideoDuration).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new ExportProgress(mActivity, mVideoDurationSec).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override

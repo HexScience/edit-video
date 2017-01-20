@@ -10,12 +10,12 @@ import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.hecorat.azplugin2.R;
 import com.hecorat.azplugin2.database.AudioObject;
 import com.hecorat.azplugin2.export.AudioHolder;
+import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.main.Constants;
 import com.hecorat.azplugin2.main.MainActivity;
 import com.semantive.waveformandroid.waveform.soundfile.CheapSoundFile;
@@ -141,8 +141,10 @@ public class AudioTL extends AppCompatImageView {
         audioHolder.audioPath = audioPath;
         audioHolder.startTimeMs = startTimeMs /1000f;
         audioHolder.startInTimeLineMs = startInTimelineMs /1000f;
-        audioHolder.duration = (endInTimelineMs - startInTimelineMs)/1000f;
+        audioHolder.durationSec = (endInTimelineMs - startInTimelineMs)/1000f;
         audioHolder.volume = volume;
+        AnalyticsHelper.getInstance()
+                .sendCustomDimension(mActivity, Constants.DIMENSION_AUDIO_DURATION, (int)audioHolder.durationSec + "");
     }
 
     public void seekTimeLine(int left, int right){
@@ -225,6 +227,9 @@ public class AudioTL extends AppCompatImageView {
     }
 
     protected float getScaledHeight(int x) {
+        if (x >= frameGains.length) {
+            return 0f;
+        }
         float value = (frameGains[x] - minGain) / range;
         if (value < 0.0)
             value = 0.0f;
@@ -235,7 +240,7 @@ public class AudioTL extends AppCompatImageView {
 
     public void initSoundWave() {
         frameGains = soundFile.getFrameGains();
-        step = (float) soundFile.getNumFrames() / width;
+        step = (float) soundFile.getNumFrames() * 20 / duration;
 
         ArrayList<Float> listFrameGain = new ArrayList<>();
         for (float gain : frameGains) {

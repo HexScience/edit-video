@@ -197,17 +197,18 @@ public class RangeSeekBar extends AppCompatImageView {
 	};
 
 	public void updateTime(boolean seekMin) {
-		minSelectedValue = (left - leftLimit) * (maxValue - minValue) / (rightLimit - leftLimit) + minValue;
-		maxSelectedValue = (right - leftLimit) * (maxValue - minValue) / (rightLimit - leftLimit) + minValue;
+		minSelectedValue = (int)((double)(left - leftLimit) / (rightLimit - leftLimit) * (maxValue - minValue) + minValue);
+		maxSelectedValue = (int)((double)(right - leftLimit) / (rightLimit - leftLimit) * (maxValue - minValue) + minValue);
 		int seekValue = seekMin ? minSelectedValue : maxSelectedValue;
 		setCurrentValue(seekValue);
+		log("maxSelectedValue = " + maxSelectedValue);
 		onSeekBarChangedListener.seekVideoTo(seekValue);
 		onSeekBarChangedListener.updateSelectedTime(minSelectedValue, maxSelectedValue);
 	}
 
 	public void setSelectedValue(int min, int max) {
-		left = (min - minValue) * (rightLimit - leftLimit) / (maxValue - minValue) + leftLimit;
-		right = (max - minValue) * (rightLimit - leftLimit) / (maxValue - minValue) + leftLimit;
+		left = (int)((double)(min - minValue) / (maxValue - minValue) * (rightLimit - leftLimit) + leftLimit);
+		right = (int)((double)(max - minValue) / (maxValue - minValue) * (rightLimit - leftLimit) + leftLimit);
 		updateSeekBar();
 	}
 
@@ -259,7 +260,6 @@ public class RangeSeekBar extends AppCompatImageView {
 		canvas.drawRoundRect(rectThumb2, roundRadius, roundRadius, paint);
 		paint.setColor(Color.DKGRAY);
 		canvas.drawPath(arrowPath, paint);
-
 
 		paint.setStyle(Style.FILL);
 		paint.setColor(Color.WHITE);

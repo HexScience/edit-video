@@ -9,5 +9,5 @@ public class ImageHolder {
     public int width, height;
     public float x, y;
     public float rotate;
-    public float startInTimeLineMs, endInTimeLineMs;
+    public float startInTimeLineSec, endInTimeLineSec;
 }

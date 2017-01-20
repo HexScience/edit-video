@@ -10,6 +10,6 @@ public class TextHolder {
     public float size, x, y;
     public int width, height;
     public float rotate;
-    public float startInTimeLine, endInTimeLine;
+    public float startInTimeLineSec, endInTimeLineSec;
     public float padding;
 }

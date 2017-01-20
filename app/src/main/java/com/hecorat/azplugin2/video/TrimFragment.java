@@ -71,6 +71,7 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
     @Override
     public void onPickTimeCompleted(int minMs, int maxMs) {
         setSeekbarPosition(minMs, maxMs);
+        mPickTimePanel.setTextValues(minMs, maxMs);
     }
 
     View.OnClickListener onBtnCancelClick = new View.OnClickListener() {
@@ -132,7 +133,6 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
         ViewGroup.LayoutParams layoutParams = mLayoutFragment.getLayoutParams();
         layoutParams.height = (int) layoutHeight;
 
-
         float videoLayoutHeight = layoutHeight*0.55f;
         float videoLayoutWidth = videoLayoutHeight*16/9;
         ViewGroup.LayoutParams videoLayoutParams = mLayoutVideoView.getLayoutParams();
@@ -145,6 +145,8 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
         mRangeSeekBar = new RangeSeekBar(mActivity, (int)layoutWidth, 100, mVideoPath);
         mLayoutSeekbar.addView(mRangeSeekBar);
         setSeekbarPosition(mVideoTL.startTimeMs, mVideoTL.endTimeMs);
+        log("mVideoTL.startTimeMs = " + mVideoTL.startTimeMs);
+        log("mVideoTL.endTimeMs = " + mVideoTL.endTimeMs);
 
         mPickTimePanel = new PickTimePanel(mActivity, this, mVideoTL.durationVideo);
         mLayoutPickTime.addView(mPickTimePanel);

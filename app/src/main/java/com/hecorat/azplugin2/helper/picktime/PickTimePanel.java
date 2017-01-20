@@ -10,7 +10,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hecorat.azplugin2.R;
+import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.Utils;
+import com.hecorat.azplugin2.main.Constants;
 
 /**
  * Created by bkmsx on 1/11/2017.
@@ -62,6 +64,8 @@ public class PickTimePanel extends LinearLayout implements View.OnClickListener,
             DialogTimePicker.newInstance(getContext(), timeDataMax, timeDataDuration, this)
                     .show(activity.getSupportFragmentManager(), "pick time min");
         }
+        AnalyticsHelper.getInstance()
+                .send(activity, Constants.CATEGORY_VIDEO, Constants.ACTION_PICK_TIME_VIDEO);
     }
 
     public void setTextValues(int minMs, int maxMs) {

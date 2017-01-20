@@ -20,8 +20,10 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.hecorat.azplugin2.R;
+import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.NotificationHelper;
 import com.hecorat.azplugin2.helper.Utils;
+import com.hecorat.azplugin2.main.Constants;
 import com.hecorat.azplugin2.main.MainActivity;
 
 import at.grabner.circleprogress.CircleProgressView;
@@ -94,6 +96,9 @@ public class ExportFragment extends Fragment{
         public void onClick(View view) {
             FFmpeg.getInstance(mActivity).stop();
             mStop = true;
+
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_EXPORT, Constants.ACTION_CANCEL_EXPORT);
         }
     };
 
@@ -102,6 +107,8 @@ public class ExportFragment extends Fragment{
         public void onClick(View view) {
             MediaScannerConnection.scanFile(mActivity, new String[] { mVideoPath }, null,
                     onScanCompletedListener);
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_EXPORT, Constants.ACTION_SHARE_VIDEO);
         }
     };
 
@@ -126,10 +133,12 @@ public class ExportFragment extends Fragment{
     View.OnClickListener onBtnWatchVideoClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(Uri.parse(mVideoPath), "video/mp4");
             mActivity.startActivity(intent);
+
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_EXPORT, Constants.ACTION_WATCH_VIDEO);
         }
     };
 
@@ -197,15 +206,17 @@ public class ExportFragment extends Fragment{
                 mCircleProgressBar.setText("Preparing..");
             }
             mCircleProgressBar.setTextSize(50);
-        } else if (value==100){
-            mCircleProgressBar.setText("Completing..");
-            mCircleProgressBar.setTextSize(50);
-        } else if (value == 101) {
+        } else if (value == -1) {
             mCircleProgressBar.setText("Completed!");
             mCircleProgressBar.setTextSize(50);
-        } else {
+            mCircleProgressBar.setValue(100);
+        } else if (value < 100){
             mCircleProgressBar.setText(value+"%");
             mCircleProgressBar.setTextSize(70);
+
+        } else {
+            mCircleProgressBar.setText("Completing..");
+            mCircleProgressBar.setTextSize(50);
         }
         if (mExporting) {
             NotificationHelper.updateNotification(mActivity, value, mVideoPath);
@@ -220,10 +231,10 @@ public class ExportFragment extends Fragment{
             mBtnBackCancel.setVisibility(View.VISIBLE);
             NotificationHelper.cancelNotification(mActivity);
         } else {
-            setExportProgress(101);
+            setExportProgress(-1);
             mLayoutAfterExport.setVisibility(View.VISIBLE);
             mTextViewTip.setVisibility(View.INVISIBLE);
-            NotificationHelper.updateNotification(mActivity, 101, mVideoPath);
+            NotificationHelper.updateNotification(mActivity, -1, mVideoPath);
         }
     }
 }

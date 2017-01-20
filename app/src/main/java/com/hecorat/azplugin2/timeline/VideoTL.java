@@ -199,7 +199,7 @@ public class VideoTL extends AppCompatImageView {
     public VideoHolder updateVideoHolder(){
         videoHolder.videoPath = videoPath;
         videoHolder.startTimeSecond = startTimeMs /1000f;
-        videoHolder.duration = (endTimeMs - startTimeMs)/1000f;
+        videoHolder.durationSec = (endTimeMs - startTimeMs)/1000f;
         videoHolder.volume = volume;
         return videoHolder;
     }

@@ -24,7 +24,7 @@ class TextFilter {
                     +",colorkey=000000:0.01:1[textPath];"+
                     "[textPath]rotate="+text.rotate+":c=none:ow=rotw("+text.rotate+")"+
                     ":oh=roth("+text.rotate+")[ov];"+ in+"[ov]overlay=x="+text.x+":y="
-                    +text.y+":shortest=1:enable='between(t,"+text.startInTimeLine+","+text.endInTimeLine+")'"+out;
+                    +text.y+":shortest=1:enable='between(t,"+text.startInTimeLineSec +","+text.endInTimeLineSec +")'"+out;
         }
         return filter;
     }

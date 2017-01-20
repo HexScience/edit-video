@@ -8,8 +8,8 @@ android {
         applicationId "com.hecorat.azplugin2"
         minSdkVersion 21
         targetSdkVersion 22
-        versionCode 9
-        versionName "2.0"
+        versionCode 10
+        versionName "2.0-beta"
     }
     buildTypes {
         release {
@@ -29,6 +29,8 @@ dependencies {
     compile 'com.clough.android.androiddbviewer:androiddbviewer:1.0.0'
     compile 'com.github.Semantive:waveform-android:v1.2'
     compile 'com.android.support:percent:25.1.0'
+
+    compile 'com.google.android.gms:play-services-analytics:10.0.1'
 
     compile 'com.google.firebase:firebase-core:10.0.1'
     compile 'com.google.firebase:firebase-crash:10.0.1'

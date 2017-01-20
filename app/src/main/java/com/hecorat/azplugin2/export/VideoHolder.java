@@ -6,6 +6,6 @@ package com.hecorat.azplugin2.export;
 
 public class VideoHolder {
     public String videoPath;
-    public float startTimeSecond, duration;
+    public float startTimeSecond, durationSec;
     public float volume;
 }

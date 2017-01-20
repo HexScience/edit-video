@@ -46,13 +46,14 @@ public class DialogConfirm extends DialogFragment {
                 mCallback.onPositiveClick(mType);
             }
         });
-
-        builder.setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                mCallback.onNegativeClick(mType);
-            }
-        });
+        if (mType != DialogClickListener.ASK_DONATE) {
+            builder.setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mCallback.onNegativeClick(mType);
+                }
+            });
+        }
 
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -73,10 +74,15 @@ public class DialogConfirm extends DialogFragment {
                 dialogData.titleId = R.string.dialog_title_delete_video;
                 dialogData.messageId = R.string.dialog_msg_delete_video;
                 break;
-            case DialogClickListener.DELETE_EXTRA:
+            case DialogClickListener.DELETE_IMAGE:
                 dialogData.iconId = R.drawable.ic_delete;
-                dialogData.titleId = R.string.dialog_title_delete_extra;
-                dialogData.messageId = R.string.dialog_msg_delete_extra;
+                dialogData.titleId = R.string.dialog_title_delete_image;
+                dialogData.messageId = R.string.dialog_msg_delete_image;
+                break;
+            case DialogClickListener.DELETE_TEXT:
+                dialogData.iconId = R.drawable.ic_delete;
+                dialogData.titleId = R.string.dialog_title_delete_text;
+                dialogData.messageId = R.string.dialog_msg_delete_text;
                 break;
             case DialogClickListener.DELETE_AUDIO:
                 dialogData.iconId = R.drawable.ic_delete;

@@ -19,6 +19,7 @@ import com.hecorat.azplugin2.R;
 import com.hecorat.azplugin2.database.ProjectObject;
 import com.hecorat.azplugin2.database.ProjectTable;
 import com.hecorat.azplugin2.dialogfragment.DialogConfirm;
+import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.NameDialog;
 import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.interfaces.DialogClickListener;
@@ -41,7 +42,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     public ArrayList<ProjectObject> mProjectList;
 
     public int mSelectProjectId;
-    private int mCountVideo;
+    private int mMaxIndex;
 
     public String mSelectProjectName;
 
@@ -105,7 +106,6 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         @Override
         protected Void doInBackground(Void... voids) {
             mProjectList = mProjectTable.getData();
-            mCountVideo = mProjectList.size();
             return null;
         }
 
@@ -145,12 +145,31 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     View.OnClickListener onBtnAddProjectClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            String nameProject = "Project_"+(mCountVideo+1);
+            findMaxIndex();
+            String nameProject = "Project_"+(mMaxIndex +1);
             NameDialog dialog = NameDialog.newInstance(mActivity, NameDialog.CREATE_PROJECT, nameProject);
             dialog.setOnClickListener(ProjectFragment.this);
             dialog.show(mActivity.getSupportFragmentManager(), "name project");
         }
     };
+
+    private void findMaxIndex() {
+        for (ProjectObject project : mProjectList) {
+            String name = project.name;
+            String[] listString = name.split("_");
+            if (listString.length > 0) {
+                String indexString = listString[listString.length - 1];
+                try {
+                    int index = Integer.parseInt(indexString);
+                    if (mMaxIndex < index) {
+                        mMaxIndex = index;
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.print(e + "");
+                }
+            }
+        }
+    }
 
     @Override
     public void onPositiveClick(int dialogId) {
@@ -190,6 +209,8 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         TextView nameProject = (TextView) mSelectProject.findViewById(R.id.name_project);
         nameProject.setText(name);
 
+        AnalyticsHelper.getInstance()
+                .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_RENAME_PROJECT);
         mActivity.hideStatusBar();
     }
     
@@ -202,6 +223,10 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         mActivity.resetActivity();
         mActivity.hideStatusBar();
         mActivity.addWaterMark();
+        setLayoutProjectInvisible();
+
+        AnalyticsHelper.getInstance()
+                .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_NEW_PROJECT);
     }
 
     @Override
@@ -237,6 +262,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         @Override
         public void onClick(View view) {
             mActivity.setLayoutFragmentVisible(false);
+            setLayoutProjectInvisible();
             mLayoutButton.setVisibility(View.INVISIBLE);
             if (mActivity.mProjectId == mSelectProjectId) {
                 return;
@@ -245,8 +271,18 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
             mActivity.mProjectId = mSelectProjectId;
             mActivity.mProjectName = mSelectProjectName;
             mActivity.openProject();
+
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_OPEN_PROJECT);
         }
     };
+
+    private void setLayoutProjectInvisible() {
+        View view = getView();
+        if (view != null) {
+            view.setVisibility(View.GONE);
+        }
+    }
 
     View.OnClickListener onBtnDeleteClick = new View.OnClickListener() {
         @Override
@@ -260,9 +296,10 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         mProjectTable.deleteProject(mSelectProjectId);
         mActivity.deleteAllObjects(mSelectProjectId);
         mLayoutScrollView.removeView(mPreviousSelectProject);
-
         mLayoutButton.setVisibility(View.INVISIBLE);
 
+        AnalyticsHelper.getInstance()
+                .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_DELETE_PROJECT);
     }
 
     private void log(String msg) {

@@ -7,9 +7,10 @@ package com.hecorat.azplugin2.interfaces;
 public interface DialogClickListener {
     int ASK_DONATE = 0;
     int DELETE_VIDEO = 1;
-    int DELETE_EXTRA = 2;
-    int DELETE_AUDIO = 3;
-    int DELETE_PROJECT = 4;
+    int DELETE_IMAGE = 2;
+    int DELETE_TEXT = 3;
+    int DELETE_AUDIO = 4;
+    int DELETE_PROJECT = 5;
 
     void onPositiveClick(int dialogId);
     void onNegativeClick(int dialogId);

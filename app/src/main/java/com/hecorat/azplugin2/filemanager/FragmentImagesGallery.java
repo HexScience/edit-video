@@ -20,7 +20,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.hecorat.azplugin2.R;
+import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.Utils;
+import com.hecorat.azplugin2.main.Constants;
 import com.hecorat.azplugin2.main.MainActivity;
 
 import java.io.File;
@@ -130,8 +132,12 @@ public class FragmentImagesGallery extends Fragment {
                 String stickerPath = Utils.getResourceFolder()+"/"+nameSticker;
                 Utils.copyFileFromAssets(mActivity, assetsPath, stickerPath);
                 mActivity.addImage(stickerPath, viewCoord);
+                AnalyticsHelper.getInstance()
+                        .send(mActivity, Constants.CATEGORY_ADD_FILE, Constants.ACTION_ADD_STICKER);
             } else {
                 mActivity.addImage(mListImage.get(i), viewCoord);
+                AnalyticsHelper.getInstance()
+                        .send(mActivity, Constants.CATEGORY_ADD_FILE, Constants.ACTION_ADD_IMAGE);
             }
         }
     };

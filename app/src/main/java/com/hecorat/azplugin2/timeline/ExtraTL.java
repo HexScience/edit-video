@@ -19,6 +19,7 @@ import com.hecorat.azplugin2.database.ImageObject;
 import com.hecorat.azplugin2.database.TextObject;
 import com.hecorat.azplugin2.export.ImageHolder;
 import com.hecorat.azplugin2.export.TextHolder;
+import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.main.Constants;
 import com.hecorat.azplugin2.main.MainActivity;
@@ -96,15 +97,23 @@ public class ExtraTL extends AppCompatImageView {
         updateTimeLineStatus();
     }
 
-    public void updateImageHolder(float layoutScale){
+    public void updateImageHolder(float layoutScale) {
         imageHolder.imagePath = imagePath;
         imageHolder.width = (int)(floatImage.widthScale*layoutScale);
         imageHolder.height = (int) (floatImage.heightScale*layoutScale);
         imageHolder.x = floatImage.xExport*layoutScale;
         imageHolder.y = floatImage.yExport*layoutScale;
         imageHolder.rotate = (float) (-floatImage.rotation* Math.PI/180);
-        imageHolder.startInTimeLineMs = startInTimeLineMs /1000f;
-        imageHolder.endInTimeLineMs = endInTimeLineMs /1000f;
+        imageHolder.startInTimeLineSec = startInTimeLineMs /1000f;
+        imageHolder.endInTimeLineSec = endInTimeLineMs /1000f;
+
+        int imageDuration = (int) (imageHolder.endInTimeLineSec - imageHolder.startInTimeLineSec);
+        AnalyticsHelper.getInstance()
+                .sendCustomDimension(mActivity, Constants.DIMENSION_IMAGE_DURATION, imageDuration + "");
+        if (imageHolder.rotate != 0) {
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_IMAGE, Constants.ACTION_ROTATE_IMAGE);
+        }
     }
 
     public void updateTextHolder(float layoutScale){
@@ -118,12 +127,20 @@ public class ExtraTL extends AppCompatImageView {
         textHolder.boxColor = convertToHexColor(floatText.mBackgroundColor);
         textHolder.x = floatText.xExport*layoutScale - textCorrection;
         textHolder.y = floatText.yExport*layoutScale - textCorrection;
-        textHolder.startInTimeLine = startInTimeLineMs /1000f;
-        textHolder.endInTimeLine = endInTimeLineMs /1000f;
+        textHolder.startInTimeLineSec = startInTimeLineMs /1000f;
+        textHolder.endInTimeLineSec = endInTimeLineMs /1000f;
         textHolder.rotate = (float) (-floatText.rotation* Math.PI/180);
         textHolder.width = (int) ((floatText.widthScale+FloatText.PADDING*2)*layoutScale);
         textHolder.height = (int) ((floatText.heightScale+FloatText.PADDING*2)*layoutScale);
         textHolder.padding = FloatText.PADDING * layoutScale;
+
+        int textDuration = (int) (textHolder.endInTimeLineSec - textHolder.startInTimeLineSec);
+        AnalyticsHelper.getInstance()
+                .sendCustomDimension(mActivity, Constants.DIMENSION_TEXT_DURATION, textDuration + "");
+        if (textHolder.rotate != 0) {
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_TEXT, Constants.ACTION_ROTATE_TEXT);
+        }
     }
 
     public String convertToHexColor(int color) {

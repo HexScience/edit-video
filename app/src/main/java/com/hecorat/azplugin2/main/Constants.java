@@ -4,6 +4,10 @@ package com.hecorat.azplugin2.main;
  * Created by bkmsx on 01/11/2016.
  */
 public interface Constants {
+    /**
+     * Constant values
+     */
+
     int DB_VERSION = 1;
     int SCALE_VALUE = 20;
     int MARGIN_LEFT_TIME_LINE = 100;
@@ -11,6 +15,70 @@ public interface Constants {
     int BORDER_WIDTH = 5;
     int MAX_VOLUME = 200;
 
+    /**
+     * Categories and Actions for Google Analytics
+     */
+    String CATEGORY_PROJECT = "PROJECT";
+    String ACTION_NEW_PROJECT = "New project";
+    String ACTION_OPEN_PROJECT = "Open project";
+    String ACTION_DELETE_PROJECT = "Delete project";
+    String ACTION_RENAME_PROJECT = "Rename project";
+
+    String CATEGORY_VIDEO = "EDIT VIDEO";
+    String ACTION_TRIM_VIDEO = "Trim video";
+    String ACTION_DELETE_VIDEO = "Delete video";
+    String ACTION_CHANGE_VOLUME_VIDEO = "Change volume video";
+    String ACTION_PICK_TIME_VIDEO = "Pick time video";
+    String ACTION_DRAG_VIDEO = "Drag video";
+
+    String CATEGORY_TEXT = "EDIT TEXT";
+    String ACTION_DELETE_TEXT = "Delete text";
+    String ACTION_CHANGE_TEXT = "Change text";
+    String ACTION_CHANGE_TEXT_COLOR = "Change text color";
+    String ACTION_CHANGE_TEXT_BACKGROUND = "Change text background";
+    String ACTION_CHANGE_HEX_COLOR = "Change hex color";
+    String ACTION_CHANGE_TEXT_FONT = "Change text font";
+    String ACTION_ROTATE_TEXT = "Rotate text";
+    String ACTION_DRAG_TEXT = "Drag text";
+
+    String CATEGORY_IMAGE = "EDIT IMAGE";
+    String ACTION_DELETE_IMAGE = "Delete image";
+    String ACTION_ROTATE_IMAGE = "Rotate image";
+    String ACTION_DRAG_IMAGE = "Drag image";
+
+    String CATEGORY_AUDIO = "EDIT AUDIO";
+    String ACTION_DELETE_AUDIO = "Delete audio";
+    String ACTION_CHANGE_VOLUME_AUDIO = "Change volume audio";
+    String ACTION_DRAG_AUDIO = "Drag audio";
+
+    String CATEGORY_ADD_FILE = "ADD FILE";
+    String ACTION_ADD_VIDEO = "Add video";
+    String ACTION_ADD_IMAGE = "Add image";
+    String ACTION_ADD_STICKER = "Add sticker";
+    String ACTION_ADD_TEXT = "Add text";
+    String ACTION_ADD_AUDIO = "Add audio";
+
+    String CATEGORY_EXPORT = "EXPORT VIDEO";
+    String ACTION_CANCEL_EXPORT = "Cancel export";
+    String ACTION_WATCH_VIDEO = "Watch video";
+    String ACTION_SHARE_VIDEO = "Share video";
+
+    String CATEGORY_CLICK_BACK = "CLICK BACK";
+    String ACTION_CLICK_BUTTON_BACK = "Click button back";
+    String ACTION_CLICK_NAVIGATION_BACK = "Click navigation back";
+
+    String CATEGORY_DONATE = "DONATE";
+    String ACTION_REMOVE_WATERMARK = "Remove watermark";
+
+    int DIMENSION_IMAGE_DURATION = 1;
+    int DIMENSION_TEXT_DURATION = 2;
+    int DIMENSION_AUDIO_DURATION = 3;
+    int DIMENSION_OUTPUT_QUALITY = 4;
+    int DIMENSION_OUTPUT_DURATION = 5;
+
+    /**
+     * Name folder and keys
+     */
     String OUTPUT_FOLDER = "AZ_Video_Editor";
     String TEMP_FOLDER = ".temp";
     String RESOURCE_FOLDER = ".resource";

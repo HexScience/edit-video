@@ -7,6 +7,6 @@ package com.hecorat.azplugin2.export;
 public class AudioHolder {
     public String audioPath;
     public float volume;
-    public float startInTimeLineMs, duration;
+    public float startInTimeLineMs, durationSec;
     public float startTimeMs;
 }

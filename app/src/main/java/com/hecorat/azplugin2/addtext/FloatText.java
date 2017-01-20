@@ -327,7 +327,7 @@ public class FloatText extends AppCompatImageView {
         // befor N canvas apply matrix from leftside of screen
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N){
             matrix.postTranslate(mActivity.mVideoViewLeft, 0);
-            canvas.getClipBounds(rectBound);
+            rectBound = canvas.getClipBounds();
             canvas.clipRect(rectBound.left, rectBound.top,
                     rectBound.right + mActivity.mVideoViewLeft, rectBound.bottom, Region.Op.REPLACE);
         }

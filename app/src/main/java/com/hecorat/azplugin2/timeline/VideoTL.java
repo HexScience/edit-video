@@ -78,15 +78,20 @@ public class VideoTL extends AppCompatImageView {
         isExists = new File(videoPath).exists();
         if (isExists) {
             retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(videoPath);
-            durationVideo = Integer.parseInt(retriever.extractMetadata
-                    (MediaMetadataRetriever.METADATA_KEY_DURATION));
-            new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            try {
+                retriever.setDataSource(videoPath);
+                durationVideo = Integer.parseInt(retriever.extractMetadata
+                        (MediaMetadataRetriever.METADATA_KEY_DURATION));
+                new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } catch (RuntimeException e) {
+                durationVideo = Constants.DEFAULT_DURATION;
+                mBackgroundColor = Color.RED;
+                isExists = false;
+            }
         } else {
             durationVideo = Constants.DEFAULT_DURATION;
             mBackgroundColor = Color.RED;
         }
-
         startTimeMs = 0;
         endTimeMs = durationVideo;
         left = 0;

@@ -2,6 +2,8 @@ package com.hecorat.azplugin2.main;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.ClipData;
 import android.content.Context;
@@ -547,9 +549,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mGalleryPagerAdapter = new GalleryPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mGalleryPagerAdapter);
         mViewPager.addOnPageChangeListener(onViewPagerChanged);
-        mFragmentVideosGallery = new FragmentVideosGallery();
-        mFragmentImagesGallery = new FragmentImagesGallery();
-        mFragmentAudioGallery = new FragmentAudioGallery();
+        mFragmentVideosGallery = FragmentVideosGallery.newInstance(mActivity);
+        mFragmentImagesGallery = FragmentImagesGallery.newInstance(mActivity);
+        mFragmentAudioGallery = FragmentAudioGallery.newInstance(mActivity);
     }
 
     private void keepScreenOn() {
@@ -635,8 +637,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void startAnimationAddFile(final int fileType,
-                                       int duration, final float xDes, float yDes) {
-        mMainLayout.addView(mLayoutAnimationAddFile);
+                                       final int duration, final float xDes, float yDes) {
+        ViewGroup parent = (ViewGroup) mLayoutAnimationAddFile.getParent();
+        if (parent == null) {
+            mMainLayout.addView(mLayoutAnimationAddFile);
+        }
 
         float x0 = xDes / 3;
         final float a = yDes / (xDes * xDes - 2 * x0 * xDes);
@@ -647,16 +652,18 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                float value = (Float) (animation.getAnimatedValue());
-                // Set translation of your view here. Position can be calculated
-                // out of value. This code should move the view in a half circle.
-                float x = value;
+                float x = (Float) (animation.getAnimatedValue());
                 float y = a * x * x + b * x;
                 mImageShadowAnimation.setTranslationX(x);
                 mImageShadowAnimation.setTranslationY(y);
-                if (value == xDes) {
-                    onAnimationAddFileCompleted(fileType);
-                }
+            }
+        });
+
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                onAnimationAddFileCompleted(fileType);
             }
         });
         animator.start();
@@ -1102,15 +1109,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View v) {
             if (mSelectedTL == TIMELINE_VIDEO) {
-                DialogConfirm.newInstance(mActivity, DialogClickListener.DELETE_VIDEO)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.DELETE_VIDEO)
                         .show(mActivity.getSupportFragmentManager(), "delete video");
             } else if (mSelectedTL == TIMELINE_EXTRA) {
                 int type = mSelectedExtraTL.isImage ? DialogClickListener.DELETE_IMAGE
                         : DialogClickListener.DELETE_TEXT;
-                DialogConfirm.newInstance(mActivity, type)
+                DialogConfirm.newInstance(mActivity, mActivity, type)
                         .show(mActivity.getSupportFragmentManager(), "delete extra");
             } else {
-                DialogConfirm.newInstance(mActivity, DialogClickListener.DELETE_AUDIO)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.DELETE_AUDIO)
                         .show(mActivity.getSupportFragmentManager(), "delete audio");
             }
 
@@ -2184,7 +2191,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void askDonate() {
-        DialogConfirm.newInstance(this, DialogClickListener.ASK_DONATE)
+        DialogConfirm.newInstance(this, this, DialogClickListener.ASK_DONATE)
                 .show(getSupportFragmentManager(), "ask donate");
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_DONATE, Constants.ACTION_REMOVE_WATERMARK);

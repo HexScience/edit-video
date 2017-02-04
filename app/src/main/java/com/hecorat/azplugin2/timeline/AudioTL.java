@@ -302,8 +302,10 @@ public class AudioTL extends AppCompatImageView {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            initSoundWave();
-            soundWaveReady = true;
+            if (soundFile != null) {
+                initSoundWave();
+                soundWaveReady = true;
+            }
             invalidate();
         }
     }

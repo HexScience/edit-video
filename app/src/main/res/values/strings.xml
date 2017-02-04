@@ -55,4 +55,6 @@
     <string name="btn_open_project">Open</string>
     <string name="btn_delete_project">Delete</string>
     <string name="btn_rename_project">Rename</string>
+    <string name="dialog_title_overwrite_file">Overwrite File</string>
+    <string name="dialog_msg_overwrite_file">This file name is already exists. Do you want to overwrite it?</string>
 </resources>

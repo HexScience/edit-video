@@ -37,6 +37,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     public View mPreviousSelectProject, mSelectProject;
     public Button mBtnOpen, mBtnDelete, mBtnRename;
     public LinearLayout mLayoutButton;
+    public View mView;
 
     public ProjectTable mProjectTable;
     public ArrayList<ProjectObject> mProjectList;
@@ -49,13 +50,32 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     public static ProjectFragment newInstance(MainActivity activity) {
         ProjectFragment projectFragment = new ProjectFragment();
         projectFragment.mActivity = activity;
+        projectFragment.inflateView();
         projectFragment.initFragmentArguments();
         return projectFragment;
     }
 
+    private void inflateView() {
+        mView = LayoutInflater.from(mActivity).inflate(R.layout.project_fragment, null);
+        mBtnAddProject = (ImageView) mView.findViewById(R.id.btn_add_project);
+        mBtnAddProject.setOnClickListener(onBtnAddProjectClick);
+
+        mBtnOpen = (Button) mView.findViewById(R.id.btn_open);
+        mBtnOpen.setOnClickListener(onBtnOpenClick);
+
+        mBtnDelete = (Button) mView.findViewById(R.id.btn_delete);
+        mBtnDelete.setOnClickListener(onBtnDeleteClick);
+
+        mBtnRename = (Button) mView.findViewById(R.id.btn_rename);
+        mBtnRename.setOnClickListener(onBtnRenameClick);
+
+        mLayoutScrollView = (LinearLayout) mView.findViewById(R.id.layout_scrollview);
+
+        mLayoutButton = (LinearLayout) mView.findViewById(R.id.layout_button);
+    }
+
     private void initFragmentArguments() {
         mProjectTable = mActivity.mProjectTable;
-        log("initFragmentArguments");
         new LoadProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -68,26 +88,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.project_fragment, null);
-        mBtnAddProject = (ImageView) view.findViewById(R.id.btn_add_project);
-        mBtnAddProject.setOnClickListener(onBtnAddProjectClick);
-
-        mBtnOpen = (Button) view.findViewById(R.id.btn_open);
-        mBtnOpen.setOnClickListener(onBtnOpenClick);
-
-        mBtnDelete = (Button) view.findViewById(R.id.btn_delete);
-        mBtnDelete.setOnClickListener(onBtnDeleteClick);
-
-        mBtnRename = (Button) view.findViewById(R.id.btn_rename);
-        mBtnRename.setOnClickListener(onBtnRenameClick);
-
-        mLayoutScrollView = (LinearLayout) view.findViewById(R.id.layout_scrollview);
-
-        mLayoutButton = (LinearLayout) view.findViewById(R.id.layout_button);
-
-        log("onCreateView");
-
-        return view;
+        return mView;
     }
 
     @Override
@@ -132,13 +133,13 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
             view.setOnClickListener(onProjectItemClick);
 
             ImageView imageView = (ImageView) view.findViewById(R.id.image_view);
-            Glide.with(getContext()).load(project.firstVideo).into(imageView);
+            Glide.with(mActivity).load(project.firstVideo).into(imageView);
 
             TextView nameProject = (TextView) view.findViewById(R.id.name_project);
             nameProject.setText(project.name);
 
             mLayoutScrollView.addView(view);
-            ((LinearLayout.LayoutParams) view.getLayoutParams()).rightMargin = Utils.dpToPixel(getContext(), 10);
+            ((LinearLayout.LayoutParams) view.getLayoutParams()).rightMargin = Utils.dpToPixel(mActivity, 10);
         }
     }
 
@@ -287,7 +288,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     View.OnClickListener onBtnDeleteClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            DialogConfirm.newInstance(ProjectFragment.this, DialogClickListener.DELETE_PROJECT)
+            DialogConfirm.newInstance(mActivity, ProjectFragment.this, DialogClickListener.DELETE_PROJECT)
                     .show(mActivity.getSupportFragmentManager(), "delete project");
         }
     };

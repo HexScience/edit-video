@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,11 +21,15 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.hecorat.azplugin2.R;
+import com.hecorat.azplugin2.dialogfragment.DialogConfirm;
 import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.NotificationHelper;
 import com.hecorat.azplugin2.helper.Utils;
+import com.hecorat.azplugin2.interfaces.DialogClickListener;
 import com.hecorat.azplugin2.main.Constants;
 import com.hecorat.azplugin2.main.MainActivity;
+
+import java.io.File;
 
 import at.grabner.circleprogress.CircleProgressView;
 import at.grabner.circleprogress.TextMode;
@@ -33,7 +38,7 @@ import at.grabner.circleprogress.TextMode;
  * Created by Bkmsx on 12/8/2016.
  */
 
-public class ExportFragment extends Fragment{
+public class ExportFragment extends Fragment implements DialogClickListener{
     MainActivity mActivity;
 
     public Button mBtnBack, mBtnExport;
@@ -45,8 +50,10 @@ public class ExportFragment extends Fragment{
     public LinearLayout mLayoutAfterExport;
     public TextView mTextViewTip;
     public Button mBtnShare, mBtnCancel, mBtnBackCancel;
+    public View mView;
 
     public String mVideoPath;
+    private String[] mFilesInFolder;
 
     private boolean mStop;
     public boolean mExporting;
@@ -54,28 +61,27 @@ public class ExportFragment extends Fragment{
     public static ExportFragment newInstance(MainActivity activity) {
         ExportFragment exportFragment = new ExportFragment();
         exportFragment.mActivity = activity;
+        exportFragment.inflateView();
+        exportFragment.setOutputName();
         return exportFragment;
     }
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.export_fragment, container, false);
-        mCircleProgressBar = (CircleProgressView) view.findViewById(R.id.export_progress);
-        mBtnBack = (Button) view.findViewById(R.id.btn_back);
-        mBtnExport = (Button) view.findViewById(R.id.btn_export);
-        mLayoutProgress = (LinearLayout) view.findViewById(R.id.layout_export_progress);
-        mLayoutQuality = (LinearLayout) view.findViewById(R.id.layout_choose_quality);
-        mEditText = (EditText) view.findViewById(R.id.edt_output_name);
-        mRadioGroup = (RadioGroup) view.findViewById(R.id.quality_groupradio);
-        mLayoutAfterExport = (LinearLayout) view.findViewById(R.id.layout_after_export);
-        mBtnBackAfterExport = (Button) view.findViewById(R.id.btn_back_after_export);
-        mBtnWatchVideo = (Button) view.findViewById(R.id.btn_watch_video);
-        mBtnCancel = (Button) view.findViewById(R.id.btn_cancel_export);
-        mTextViewTip = (TextView) view.findViewById(R.id.textview_tip);
-        mBtnShare = (Button) view.findViewById(R.id.btn_share);
-        mBtnBackCancel = (Button) view.findViewById(R.id.btn_back_cancel);
 
-        mEditText.setText(mActivity.mProjectName);
+    private void inflateView() {
+        mView = LayoutInflater.from(mActivity).inflate(R.layout.export_fragment, null);
+        mCircleProgressBar = (CircleProgressView) mView.findViewById(R.id.export_progress);
+        mBtnBack = (Button) mView.findViewById(R.id.btn_back);
+        mBtnExport = (Button) mView.findViewById(R.id.btn_export);
+        mLayoutProgress = (LinearLayout) mView.findViewById(R.id.layout_export_progress);
+        mLayoutQuality = (LinearLayout) mView.findViewById(R.id.layout_choose_quality);
+        mEditText = (EditText) mView.findViewById(R.id.edt_output_name);
+        mRadioGroup = (RadioGroup) mView.findViewById(R.id.quality_groupradio);
+        mLayoutAfterExport = (LinearLayout) mView.findViewById(R.id.layout_after_export);
+        mBtnBackAfterExport = (Button) mView.findViewById(R.id.btn_back_after_export);
+        mBtnWatchVideo = (Button) mView.findViewById(R.id.btn_watch_video);
+        mBtnCancel = (Button) mView.findViewById(R.id.btn_cancel_export);
+        mTextViewTip = (TextView) mView.findViewById(R.id.textview_tip);
+        mBtnShare = (Button) mView.findViewById(R.id.btn_share);
+        mBtnBackCancel = (Button) mView.findViewById(R.id.btn_back_cancel);
 
         mBtnExport.setOnClickListener(onBtnExportClick);
         mBtnBack.setOnClickListener(onBtnBackClick);
@@ -88,7 +94,36 @@ public class ExportFragment extends Fragment{
 
         mCircleProgressBar.setTextMode(TextMode.TEXT);
         setExportProgress(0);
-        return view;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return mView;
+    }
+
+    private void setOutputName() {
+        String outputName = mActivity.mProjectName;
+        String outName = outputName + ".mp4";
+        boolean unique;
+        mFilesInFolder = new File(Utils.getOutputFolder()).list();
+        do {
+            unique = true;
+            for (String fileName : mFilesInFolder) {
+                if (fileName.equals(outName)) {
+                    unique = false;
+                    outputName += "_copy";
+                    outName = outputName + ".mp4";
+                    break;
+                }
+            }
+        } while (!unique);
+
+        mEditText.setText(outputName);
+    }
+
+    private void log(String msg) {
+        Log.e("Export Fragment", msg);
     }
 
     View.OnClickListener onBtnCancelClick = new View.OnClickListener() {
@@ -178,14 +213,42 @@ public class ExportFragment extends Fragment{
     View.OnClickListener onBtnExportClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mLayoutQuality.setVisibility(View.GONE);
-            mLayoutProgress.setVisibility(View.VISIBLE);
+            String name = mEditText.getText().toString() + ".mp4";
+            for (String fileName : mFilesInFolder) {
+                if (name.equals(fileName)) {
+                    DialogConfirm.newInstance(mActivity, ExportFragment.this, DialogClickListener.OVERWRITE_FILE)
+                            .show(mActivity.getSupportFragmentManager(), "overwrite file");
+                    return;
+                }
+            }
             exportVideo();
-            mExporting = true;
         }
     };
 
+    @Override
+    public void onPositiveClick(int dialogId) {
+        switch (dialogId) {
+            case DialogClickListener.OVERWRITE_FILE:
+                mActivity.hideStatusBar();
+                exportVideo();
+                break;
+        }
+    }
+
+    @Override
+    public void onNegativeClick(int dialogId) {
+        switch (dialogId) {
+            case DialogClickListener.OVERWRITE_FILE:
+                mActivity.hideStatusBar();
+                break;
+        }
+    }
+
     private void exportVideo(){
+        mLayoutQuality.setVisibility(View.GONE);
+        mLayoutProgress.setVisibility(View.VISIBLE);
+        mExporting = true;
+
         int id = mRadioGroup.getCheckedRadioButtonId();
         RadioButton radioButton = (RadioButton) mLayoutQuality.findViewById(id);
         int quality = Integer.parseInt(radioButton.getTag().toString());

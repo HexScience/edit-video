@@ -37,6 +37,7 @@ public class FragmentImagesGallery extends Fragment {
     public String mStoragePath;
     public ImageGalleryAdapter mFolderAdapter, mImageAdapter;
     public MainActivity mActivity;
+    private View mView;
 
     public boolean mIsSubFolder;
     public int mCountSubFolder;
@@ -49,12 +50,17 @@ public class FragmentImagesGallery extends Fragment {
     public static final String STICKER_FOLDER = "sticker";
     public static final String STICKER_FOLDER_NAME = "Stickers";
     public static final String ASSETS_PATH = "file:///android_asset/";
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mActivity = (MainActivity) getActivity();
-        View view = inflater.inflate(R.layout.fragment_videos_gallery, null);
-        mGridView = (GridView) view.findViewById(R.id.video_gallery);
+
+    public static FragmentImagesGallery newInstance(MainActivity activity) {
+        FragmentImagesGallery fragmentImagesGallery = new FragmentImagesGallery();
+        fragmentImagesGallery.mActivity = activity;
+        fragmentImagesGallery.inflateViews();
+        return fragmentImagesGallery;
+    }
+
+    private void inflateViews(){
+        mView = LayoutInflater.from(mActivity).inflate(R.layout.fragment_videos_gallery, null);
+        mGridView = (GridView) mView.findViewById(R.id.video_gallery);
         mStoragePath = Environment.getExternalStorageDirectory().toString();
         File fileDirectory = new File(mStoragePath);
         mListFolder = new ArrayList<>();
@@ -71,9 +77,13 @@ public class FragmentImagesGallery extends Fragment {
         mFolderAdapter = new ImageGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstImage);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
-        mFolderName = getString(R.string.image_tab_title);
+        mFolderName = mActivity.getString(R.string.image_tab_title);
+    }
 
-        return view;
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return mView;
     }
 
     private boolean matchFile(File file){
@@ -113,7 +123,7 @@ public class FragmentImagesGallery extends Fragment {
             }
             mChooseSticker = false;
             mListImage.clear();
-            mImageAdapter = new ImageGalleryAdapter(getContext(), R.layout.image_gallery_layout, mListImage);
+            mImageAdapter = new ImageGalleryAdapter(mActivity, R.layout.image_gallery_layout, mListImage);
             mGridView.setAdapter(mImageAdapter);
             mFolderName += " / " + new File(mListFolder.get(i)).getName();
             mActivity.setFolderName(mFolderName);
@@ -262,43 +272,43 @@ public class FragmentImagesGallery extends Fragment {
         }
 
         private View getFolderLayout(int position){
-            View convertView = LayoutInflater.from(getContext()).inflate(R.layout.folder_gallery_layout, null);
+            View convertView = LayoutInflater.from(mActivity).inflate(R.layout.folder_gallery_layout, null);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
 
             if (position == 0) {
                 textView.setText(STICKER_FOLDER_NAME);
                 Uri uri = Uri.parse(ASSETS_PATH + mListFirstImage.get(0));
-                Glide.with(getContext()).load(uri).centerCrop().into(imageView);
+                Glide.with(mActivity).load(uri).centerCrop().into(imageView);
             } else {
                 String name = new File(mListFolder.get(position)).getName();
                 textView.setText(name);
-                Glide.with(getContext()).load(mListFirstImage.get(position)).centerCrop().into(imageView);
+                Glide.with(mActivity).load(mListFirstImage.get(position)).centerCrop().into(imageView);
             }
             return convertView;
         }
 
         private View getStickerLayout(int position){
-            View convertView = LayoutInflater.from(getContext()).inflate(R.layout.image_gallery_layout, null);
+            View convertView = LayoutInflater.from(mActivity).inflate(R.layout.image_gallery_layout, null);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
             ImageView iconFolder = (ImageView) convertView.findViewById(R.id.icon_folder);
             iconFolder.setVisibility(View.GONE);
             textView.setVisibility(View.GONE);
             Uri uri = Uri.parse(ASSETS_PATH + mListStiker.get(position));
-            Glide.with(getContext()).load(uri).centerCrop().into(imageView);
+            Glide.with(mActivity).load(uri).centerCrop().into(imageView);
 
             return convertView;
         }
 
         private View getImageLayout(int position){
-            View convertView = LayoutInflater.from(getContext()).inflate(R.layout.image_gallery_layout, null);
+            View convertView = LayoutInflater.from(mActivity).inflate(R.layout.image_gallery_layout, null);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
             String imagePath = mListImage.get(position);
             String name = new File(imagePath).getName();
             textView.setText(name);
-            Glide.with(getContext()).load(imagePath).centerCrop().into(imageView);
+            Glide.with(mActivity).load(imagePath).centerCrop().into(imageView);
             return convertView;
         }
 

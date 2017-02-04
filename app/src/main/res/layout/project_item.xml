@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
             android:gravity="center_horizontal"
-            android:maxLines="1" />
+            android:singleLine="true" />
     </LinearLayout>
 
 </LinearLayout>

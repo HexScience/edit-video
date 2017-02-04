@@ -46,7 +46,7 @@ public class AddSilentAudoTask extends AsyncTask<Void, Void, Void>{
 
     private void fixOne(VideoTL videoTL) {
         VideoMetaData videoMetaData = VideoMetaData.getMetaData(context, videoTL.videoPath);
-        if (!videoMetaData.hasAudio){
+        if (videoMetaData == null || !videoMetaData.hasAudio ){
             String outPath = Utils.getTempFolder()+"/"+System.currentTimeMillis()+".mp4";
             addSilentAudio(videoTL.videoPath, outPath);
             videoTL.videoPath = outPath;

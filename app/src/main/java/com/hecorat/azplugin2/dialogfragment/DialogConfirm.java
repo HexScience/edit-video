@@ -2,6 +2,7 @@ package com.hecorat.azplugin2.dialogfragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,8 +21,10 @@ import com.hecorat.azplugin2.interfaces.DialogClickListener;
 public class DialogConfirm extends DialogFragment {
     DialogClickListener mCallback;
     int mType;
-    public static DialogConfirm newInstance(DialogClickListener listener, int type){
+    Context mContext;
+    public static DialogConfirm newInstance(Context context, DialogClickListener listener, int type){
         DialogConfirm dialogConfirm = new DialogConfirm();
+        dialogConfirm.mContext = context;
         dialogConfirm.mCallback = listener;
         dialogConfirm.mType = type;
         return dialogConfirm;
@@ -30,14 +33,14 @@ public class DialogConfirm extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         DialogData dialogData = getDialogData();
         builder.setIcon(dialogData.iconId);
         builder.setTitle(dialogData.titleId);
 
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_confirm_layout, null);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.dialog_confirm_layout, null);
         TextView textView = (TextView) view.findViewById(R.id.text_view);
-        textView.setText(getContext().getString(dialogData.messageId));
+        textView.setText(mContext.getString(dialogData.messageId));
         builder.setView(view);
 
         builder.setPositiveButton(R.string.ok_btn, new DialogInterface.OnClickListener() {
@@ -93,6 +96,11 @@ public class DialogConfirm extends DialogFragment {
                 dialogData.iconId = R.drawable.ic_delete;
                 dialogData.titleId = R.string.dialog_title_delete_project;
                 dialogData.messageId = R.string.dialog_msg_delete_project;
+                break;
+            case DialogClickListener.OVERWRITE_FILE:
+                dialogData.iconId = R.drawable.ic_overwrite;
+                dialogData.titleId = R.string.dialog_title_overwrite_file;
+                dialogData.messageId = R.string.dialog_msg_overwrite_file;
                 break;
         }
 

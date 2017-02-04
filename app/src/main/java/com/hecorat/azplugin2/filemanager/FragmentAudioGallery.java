@@ -33,18 +33,23 @@ public class FragmentAudioGallery extends Fragment {
     public String mStoragePath;
     public AudioGalleryAdapter mFolderAdapter, mAudioAdapter;
     public MainActivity mActivity;
+    private View mView;
 
     public int mCountSubFolder;
     public boolean mIsSubFolder;
     public String mFolderName;
     String[] patterns = {".mp3", ".aac"};
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mActivity = (MainActivity) getActivity();
-        View view = inflater.inflate(R.layout.fragment_videos_gallery, null);
-        mGridView = (GridView) view.findViewById(R.id.video_gallery);
+    public static FragmentAudioGallery newInstance(MainActivity activity) {
+        FragmentAudioGallery fragmentAudioGallery = new FragmentAudioGallery();
+        fragmentAudioGallery.mActivity = activity;
+        fragmentAudioGallery.inflateViews();
+        return fragmentAudioGallery;
+    }
+
+    private void inflateViews() {
+        mView = LayoutInflater.from(mActivity).inflate(R.layout.fragment_videos_gallery, null);
+        mGridView = (GridView) mView.findViewById(R.id.video_gallery);
         mStoragePath = Environment.getExternalStorageDirectory().toString();
         File fileDirectory = new File(mStoragePath);
         mListFolder = new ArrayList<>();
@@ -59,8 +64,13 @@ public class FragmentAudioGallery extends Fragment {
         mFolderAdapter = new AudioGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstAudio);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
-        mFolderName = getString(R.string.audio_tab_title);
-        return view;
+        mFolderName = mActivity.getString(R.string.audio_tab_title);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return mView;
     }
 
     private boolean matchFile(File file) {
@@ -220,7 +230,7 @@ public class FragmentAudioGallery extends Fragment {
         public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             ViewHolder viewHolder;
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.folder_gallery_layout, null);
+                convertView = LayoutInflater.from(mActivity).inflate(R.layout.folder_gallery_layout, null);
                 viewHolder = new ViewHolder();
                 viewHolder.imageView = (ImageView) convertView.findViewById(R.id.image_view);
                 viewHolder.textView = (TextView) convertView.findViewById(R.id.text_view);

@@ -35,18 +35,23 @@ public class FragmentVideosGallery extends Fragment {
     public String mStoragePath;
     public VideoGalleryAdapter mFolderAdapter, mVideoAdapter;
     public MainActivity mActivity;
+    private View mView;
 
     public boolean mIsSubFolder;
     public String mFolderName;
     public String[] patterns = {".mp4"};
     public int mCountSubFolder;
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mActivity = (MainActivity) getActivity();
-        View view = inflater.inflate(R.layout.fragment_videos_gallery, null);
-        mGridView = (GridView) view.findViewById(R.id.video_gallery);
+    public static FragmentVideosGallery newInstance(MainActivity activity) {
+        FragmentVideosGallery fragmentVideosGallery = new FragmentVideosGallery();
+        fragmentVideosGallery.mActivity = activity;
+        fragmentVideosGallery.inflateViews();
+        return fragmentVideosGallery;
+    }
+
+    private void inflateViews(){
+        mView = LayoutInflater.from(mActivity).inflate(R.layout.fragment_videos_gallery, null);
+        mGridView = (GridView) mView.findViewById(R.id.video_gallery);
         mStoragePath = Environment.getExternalStorageDirectory().toString();
         File fileDirectory = new File(mStoragePath);
         mListFolder = new ArrayList<>();
@@ -61,8 +66,13 @@ public class FragmentVideosGallery extends Fragment {
         mFolderAdapter = new VideoGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstVideo);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
-        mFolderName = getString(R.string.video_tab_title);
-        return view;
+        mFolderName = mActivity.getString(R.string.video_tab_title);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return mView;
     }
 
     private boolean matchFile(File file){
@@ -194,6 +204,10 @@ public class FragmentVideosGallery extends Fragment {
         }
         boolean result = false;
         File[] fileList = fileDirectory.listFiles();
+        if (fileList == null) {
+            return false;
+        }
+
         for (File file : fileList){
             if (file.isDirectory()) {
                 if (includeSubDir) {
@@ -246,7 +260,7 @@ public class FragmentVideosGallery extends Fragment {
             }
             viewHolder.iconFolder.setImageResource(iconId);
             viewHolder.textView.setText(name);
-            Glide.with(getContext()).load(videoPath).centerCrop().into(viewHolder.imageView);
+            Glide.with(mActivity).load(videoPath).centerCrop().into(viewHolder.imageView);
             return convertView;
         }
 

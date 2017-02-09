@@ -78,10 +78,18 @@ public class AudioTL extends AppCompatImageView {
         isExists = new File(audioPath).exists();
         if (isExists) {
             retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(audioPath);
-            duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-            name = new File(audioPath).getName();
-            nameColor = Color.MAGENTA;
+            try {
+                retriever.setDataSource(audioPath);
+                duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+                name = new File(audioPath).getName();
+                nameColor = Color.MAGENTA;
+            } catch (RuntimeException e) {
+                duration = Constants.DEFAULT_DURATION;
+                name = "??????";
+                background = Color.RED;
+                nameColor = Color.WHITE;
+                isExists = false;
+            }
         } else {
             duration = Constants.DEFAULT_DURATION;
             name = "??????";

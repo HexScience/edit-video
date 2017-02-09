@@ -34,6 +34,7 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
     Button mBtnOk, mBtnCancel;
     FrameLayout mLayoutPickTime;
     PickTimePanel mPickTimePanel;
+    View mView;
 
     int startTimeMs, endTimeMs;
     String mVideoPath;
@@ -44,20 +45,19 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
         trimFragment.mActivity = activity;
         trimFragment.mVideoPath = videoTL.videoPath;
         trimFragment.mVideoTL = videoTL;
+        trimFragment.inflateViews();
         return trimFragment;
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.trim_fragment, container, false);
-        mVideoView = (VideoView) view.findViewById(R.id.video_view);
-        mLayoutSeekbar = (FrameLayout) view.findViewById(R.id.layout_seekbar);
-        mLayoutVideoView = (RelativeLayout) view.findViewById(R.id.videoview_layout);
-        mLayoutFragment = (LinearLayout) view.findViewById(R.id.layout_fragment);
-        mBtnOk = (Button) view.findViewById(R.id.btn_ok);
-        mBtnCancel = (Button) view.findViewById(R.id.btn_cancel);
-        mLayoutPickTime = (FrameLayout) view.findViewById(R.id.layout_pick_time_trim);
+    private void inflateViews() {
+        mView = LayoutInflater.from(mActivity).inflate(R.layout.trim_fragment, null);
+        mVideoView = (VideoView) mView.findViewById(R.id.video_view);
+        mLayoutSeekbar = (FrameLayout) mView.findViewById(R.id.layout_seekbar);
+        mLayoutVideoView = (RelativeLayout) mView.findViewById(R.id.videoview_layout);
+        mLayoutFragment = (LinearLayout) mView.findViewById(R.id.layout_fragment);
+        mBtnOk = (Button) mView.findViewById(R.id.btn_ok);
+        mBtnCancel = (Button) mView.findViewById(R.id.btn_cancel);
+        mLayoutPickTime = (FrameLayout) mView.findViewById(R.id.layout_pick_time_trim);
 
         mBtnOk.setOnClickListener(onBtnOkClick);
         mBtnCancel.setOnClickListener(onBtnCancelClick);
@@ -65,7 +65,12 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
         mVideoView.setVideoPath(mVideoPath);
         int seekTime = Math.max(10, mVideoTL.startTimeMs);
         mVideoView.seekTo(seekTime);
-        return view;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return mView;
     }
 
     @Override
@@ -142,7 +147,7 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
         float layoutWidth = videoLayoutWidth*1.3f;
         layoutParams.width = (int) layoutWidth;
 
-        mRangeSeekBar = new RangeSeekBar(mActivity, (int)layoutWidth, 100, mVideoPath);
+        mRangeSeekBar = new RangeSeekBar(mActivity, this, (int)layoutWidth, 100, mVideoPath);
         mLayoutSeekbar.addView(mRangeSeekBar);
         setSeekbarPosition(mVideoTL.startTimeMs, mVideoTL.endTimeMs);
         log("mVideoTL.startTimeMs = " + mVideoTL.startTimeMs);

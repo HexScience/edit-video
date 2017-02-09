@@ -155,6 +155,10 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     };
 
     private void findMaxIndex() {
+        if (mProjectList == null) {
+            mMaxIndex = 0;
+            return;
+        }
         for (ProjectObject project : mProjectList) {
             String name = project.name;
             String[] listString = name.split("_");

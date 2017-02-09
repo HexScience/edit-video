@@ -22,7 +22,8 @@ public class DialogConfirm extends DialogFragment {
     DialogClickListener mCallback;
     int mType;
     Context mContext;
-    public static DialogConfirm newInstance(Context context, DialogClickListener listener, int type){
+
+    public static DialogConfirm newInstance(Context context, DialogClickListener listener, int type) {
         DialogConfirm dialogConfirm = new DialogConfirm();
         dialogConfirm.mContext = context;
         dialogConfirm.mCallback = listener;
@@ -49,14 +50,13 @@ public class DialogConfirm extends DialogFragment {
                 mCallback.onPositiveClick(mType);
             }
         });
-        if (mType != DialogClickListener.ASK_DONATE) {
-            builder.setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    mCallback.onNegativeClick(mType);
-                }
-            });
-        }
+
+        builder.setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mCallback.onNegativeClick(mType);
+            }
+        });
 
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -109,6 +109,6 @@ public class DialogConfirm extends DialogFragment {
 
     private class DialogData {
         int iconId;
-        int  titleId, messageId;
+        int titleId, messageId;
     }
 }

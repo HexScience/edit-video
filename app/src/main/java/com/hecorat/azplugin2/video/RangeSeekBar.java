@@ -61,7 +61,7 @@ public class RangeSeekBar extends AppCompatImageView {
 		super(context);
 	}
 
-	public RangeSeekBar(MainActivity activity, int width, int height, String videoPath) {
+	public RangeSeekBar(MainActivity activity, OnSeekBarChangedListener listener, int width, int height, String videoPath) {
 		super(activity);
 		mActivity = activity;
 		thumbWidth = Utils.dpToPixel(activity, 10);
@@ -100,7 +100,7 @@ public class RangeSeekBar extends AppCompatImageView {
 		currentValue = minValue;
 		updateSeekBar();
 		setOnTouchListener(onTouchListener);
-		onSeekBarChangedListener = mActivity.mTrimFragment;
+		onSeekBarChangedListener = listener;
 		new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 

@@ -173,6 +173,9 @@ public class FragmentImagesGallery extends Fragment {
 
     private void loadAllImage(File fileDirectory, ArrayList<String> listImage, boolean subFolder){
         File[] fileList = fileDirectory.listFiles();
+        if (fileList == null) {
+            return;
+        }
         for (File file : fileList){
             if (file.isDirectory()) {
                 if (subFolder) {
@@ -218,6 +221,9 @@ public class FragmentImagesGallery extends Fragment {
 
     private void listFolderFrom(File fileDirectory){
         File[] listFile = fileDirectory.listFiles();
+        if (listFile == null) {
+            return;
+        }
         for (File file : listFile) {
             if (file.isDirectory()) {
                 String name = file.getName();
@@ -234,6 +240,9 @@ public class FragmentImagesGallery extends Fragment {
         }
         boolean result = false;
         File[] fileList = fileDirectory.listFiles();
+        if (fileList == null) {
+            return false;
+        }
         for (File file : fileList){
             if (file.isDirectory()) {
                 if (includeSubDir) {

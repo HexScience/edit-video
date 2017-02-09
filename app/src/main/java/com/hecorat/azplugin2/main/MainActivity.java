@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private RelativeLayout mLayoutFloatView;
     private ImageView mBtnUpLevel;
     private LinearLayout mLayoutExtraTools;
+    private ImageView mBtnReport;
 
     private Thread mThreadPreviewVideo;
     public ArrayList<VideoTL> mVideoList;
@@ -292,6 +293,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutFloatView = (RelativeLayout) findViewById(R.id.layout_floatview);
         mBtnUpLevel = (ImageView) findViewById(R.id.btn_up_level);
         mLayoutExtraTools = (LinearLayout) findViewById(R.id.extra_toolbar);
+        mBtnReport = (ImageView) findViewById(R.id.btn_report);
 
         mColorPicker.setAlphaSliderVisible(true);
         mColorPicker.setOnColorChangedListener(this);
@@ -339,6 +341,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mTopLayout.setOnClickListener(onHideStatusClick);
         mVideoView1.setOnClickListener(onHideStatusClick);
         mVideoView2.setOnClickListener(onHideStatusClick);
+        mBtnReport.setOnClickListener(onBtnReportClick);
 
         mEditText.setOnEditorActionListener(onEditTextActionListener);
         mEdtColorHex.setOnEditorActionListener(onEditColorActionListener);
@@ -378,6 +381,22 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         checkVip();
     }
+
+    View.OnClickListener onBtnReportClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("message/rfc822");
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"az.video.edit@gmail.com"});
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Report problems");
+            intent.putExtra(Intent.EXTRA_TEXT, "Hello Hecorat,");
+            try {
+                mActivity.startActivity(intent);
+            } catch (android.content.ActivityNotFoundException ex) {
+                Toast.makeText(mActivity, "There are no email apps installed.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
     View.OnClickListener onHideStatusClick = new View.OnClickListener() {
         @Override
@@ -485,7 +504,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         hideStatusBar();
         switch (dialogId) {
             case DialogClickListener.ASK_DONATE:
-//                startDonate();
+                startDonate();
                 break;
             case DialogClickListener.DELETE_VIDEO:
                 deleteVideo();
@@ -1066,6 +1085,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void updateLayoutEditText() {
+        if (mSelectedExtraTL == null) {
+            return;
+        }
         mEditText.setText(mSelectedExtraTL.text);
         FloatText floatText = mSelectedExtraTL.floatText;
         mBtnTextColor.setBackground(new AlphaColorDrawable(floatText.mColor));
@@ -2203,6 +2225,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutFloatView.removeView(mWaterMark);
         mTextList.remove(mWaterMark.timeline);
         Toast.makeText(this, "Watermark was removed", Toast.LENGTH_LONG).show();
+
+        AnalyticsHelper.getInstance()
+                .send(this, Constants.CATEGORY_DONATE, Constants.ACTION_REMOVE_SUCCESSFUL);
     }
 
     private void addTextTL() {
@@ -2426,18 +2451,21 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 mViewPager.setCurrentItem(VIDEO_TAB, true);
                 setHightLighTab(VIDEO_TAB);
                 setFolderName(mFragmentVideosGallery.mFolderName);
+                setBtnUpLevelVisible(mOpenVideoSubFolder);
             }
 
             if (view.equals(mImageTabLayout)) {
                 mViewPager.setCurrentItem(IMAGE_TAB, true);
                 setHightLighTab(IMAGE_TAB);
                 setFolderName(mFragmentImagesGallery.mFolderName);
+                setBtnUpLevelVisible(mOpenImageSubFolder);
             }
 
             if (view.equals(mAudioTabLayout)) {
                 mViewPager.setCurrentItem(AUDIO_TAB, true);
                 setHightLighTab(AUDIO_TAB);
                 setFolderName(mFragmentAudioGallery.mFolderName);
+                setBtnUpLevelVisible(mOpenAudioSubFolder);
             }
         }
     };
@@ -2550,13 +2578,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             switch (position) {
                 case VIDEO_TAB:
                     setFolderName(mFragmentVideosGallery.mFolderName);
+                    setBtnUpLevelVisible(mOpenVideoSubFolder);
                     break;
                 case IMAGE_TAB:
-
+                    setBtnUpLevelVisible(mOpenImageSubFolder);
                     setFolderName(mFragmentImagesGallery.mFolderName);
                     break;
                 case AUDIO_TAB:
-
+                    setBtnUpLevelVisible(mOpenAudioSubFolder);
                     setFolderName(mFragmentAudioGallery.mFolderName);
                     break;
             }
@@ -2717,6 +2746,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     View.OnDragListener onAudioDragListener = new View.OnDragListener() {
         int finalMargin;
+
         @Override
         public boolean onDrag(View view, DragEvent dragEvent) {
             if (mDragCode != DRAG_AUDIO) {
@@ -3221,6 +3251,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 if (!mSelectedVideoTL.isExists) {
                     highlightSelectedVideoTL();
                     setBtnDeleteVisible(true);
+                    setBtnEditVisible(false);
                     return;
                 }
                 selectVideoTL();

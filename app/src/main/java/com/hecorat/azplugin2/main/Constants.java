@@ -59,6 +59,8 @@ public interface Constants {
     String ACTION_ADD_AUDIO = "Add audio";
 
     String CATEGORY_EXPORT = "EXPORT VIDEO";
+    String ACTION_CLICK_EXPORT = "Click export";
+    String ACTION_EXPORT_SUCCESSFUL = "Export successful";
     String ACTION_CANCEL_EXPORT = "Cancel export";
     String ACTION_WATCH_VIDEO = "Watch video";
     String ACTION_SHARE_VIDEO = "Share video";
@@ -69,6 +71,8 @@ public interface Constants {
 
     String CATEGORY_DONATE = "DONATE";
     String ACTION_REMOVE_WATERMARK = "Remove watermark";
+    String ACTION_REMOVE_SUCCESSFUL = "Remove successful";
+    String ACTION_REMOVE_FAILED = "Remove failed";
 
     int DIMENSION_IMAGE_DURATION = 1;
     int DIMENSION_TEXT_DURATION = 2;

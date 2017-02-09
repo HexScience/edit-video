@@ -1,5 +1,6 @@
 package com.hecorat.azplugin2.export;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -19,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hecorat.azplugin2.R;
 import com.hecorat.azplugin2.dialogfragment.DialogConfirm;
@@ -169,8 +171,13 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         @Override
         public void onClick(View view) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.parse(mVideoPath), "video/mp4");
-            mActivity.startActivity(intent);
+            File videoFile = new File(mVideoPath);
+            intent.setDataAndType(Uri.fromFile(videoFile), "video/mp4");
+            try {
+                mActivity.startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(mActivity, R.string.msg_need_install_video_player, Toast.LENGTH_LONG).show();
+            }
 
             AnalyticsHelper.getInstance()
                     .send(mActivity, Constants.CATEGORY_EXPORT, Constants.ACTION_WATCH_VIDEO);
@@ -258,6 +265,9 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         ExportTask exportTask = new ExportTask(mActivity, mActivity.mVideoList, mActivity.mImageList,
                 mActivity.mTextList, mActivity.mAudioList, name, quality);
         exportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        AnalyticsHelper.getInstance()
+                .send(mActivity, Constants.CATEGORY_EXPORT, Constants.ACTION_CLICK_EXPORT);
     }
 
     public void setExportProgress(int value) {
@@ -298,6 +308,9 @@ public class ExportFragment extends Fragment implements DialogClickListener{
             mLayoutAfterExport.setVisibility(View.VISIBLE);
             mTextViewTip.setVisibility(View.INVISIBLE);
             NotificationHelper.updateNotification(mActivity, -1, mVideoPath);
+
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_EXPORT, Constants.ACTION_EXPORT_SUCCESSFUL);
         }
     }
 }

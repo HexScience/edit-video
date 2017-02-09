@@ -18,7 +18,7 @@
     <string name="toast_file_not_exists_when_click_export">Some file is not exists, please remove it before exporting</string>
     <string name="spinner_text">Aa Bb Cc</string>
     <string name="dialog_ask_premium_title">Remove Watermark</string>
-    <string name="dialog_ask_premium_message">You can not remove watermark in Beta version</string>
+    <string name="dialog_ask_premium_message">Please upgrade to remove watermark and use all future premium features.</string>
     <string name="no_internet_connection">No internet connection</string>
     <string name="purchase_failed">Purchase failed</string>
     <string name="purchase_success">Thank you for donate</string>
@@ -57,4 +57,5 @@
     <string name="btn_rename_project">Rename</string>
     <string name="dialog_title_overwrite_file">Overwrite File</string>
     <string name="dialog_msg_overwrite_file">This file name is already exists. Do you want to overwrite it?</string>
+    <string name="msg_need_install_video_player">You must install video player to watch video</string>
 </resources>

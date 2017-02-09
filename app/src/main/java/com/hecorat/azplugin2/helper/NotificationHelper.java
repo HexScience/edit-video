@@ -10,6 +10,8 @@ import android.support.v4.app.NotificationCompat;
 
 import com.hecorat.azplugin2.R;
 
+import java.io.File;
+
 /**
  * Created by Bkmsx on 12/8/2016.
  */
@@ -27,7 +29,8 @@ public class NotificationHelper {
                 .setOngoing(true);
         if (progress == -1){
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.parse(videoPath), "video/mp4");
+            File videoFile = new File(videoPath);
+            intent.setDataAndType(Uri.fromFile(videoFile), "video/mp4");
             PendingIntent pendingIntent = PendingIntent
                     .getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
             mNotifyBuilder.setProgress(0, 0, false)

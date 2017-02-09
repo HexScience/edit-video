@@ -144,6 +144,9 @@ public class FragmentVideosGallery extends Fragment {
 
     private void loadAllVideo(File fileDirectory, ArrayList<String> listVideo, boolean subFolder){
         File[] fileList = fileDirectory.listFiles();
+        if (fileList == null){
+            return;
+        }
         for (File file : fileList){
             if (file.isDirectory()) {
                 if (subFolder) {
@@ -188,6 +191,9 @@ public class FragmentVideosGallery extends Fragment {
 
     private void listFolderFrom(File fileDirectory){
         File[] listFile = fileDirectory.listFiles();
+        if (listFile == null) {
+            return;
+        }
         for (File file : listFile) {
             if (file.isDirectory()) {
                 String name = file.getName();
@@ -236,7 +242,6 @@ public class FragmentVideosGallery extends Fragment {
         @NonNull
         @Override
         public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-            String videoPath = getItem(position);
             ViewHolder viewHolder;
             if (convertView == null) {
                 viewHolder = new ViewHolder();
@@ -249,12 +254,14 @@ public class FragmentVideosGallery extends Fragment {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
 
-            String name;
+            String name, videoPath;
             int iconId ;
             if (mIsSubFolder) {
-                name = new File(mListVideo.get(position)).getName();
+                videoPath = mListVideo.get(position);
+                name = new File(videoPath).getName();
                 iconId = R.drawable.ic_video;
             } else {
+                videoPath = mListFirstVideo.get(position);
                 name = new File(mListFolder.get(position)).getName();
                 iconId = R.drawable.ic_folder;
             }

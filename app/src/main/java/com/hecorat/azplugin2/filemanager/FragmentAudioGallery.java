@@ -139,6 +139,9 @@ public class FragmentAudioGallery extends Fragment {
 
     private void loadAllAudio(File fileDirectory, ArrayList<String> listAudio, boolean subFolder) {
         File[] fileList = fileDirectory.listFiles();
+        if (fileList == null) {
+            return;
+        }
         for (File file : fileList) {
             if (file.isDirectory()) {
                 if (subFolder) {
@@ -184,6 +187,9 @@ public class FragmentAudioGallery extends Fragment {
 
     private void listFolderFrom(File fileDirectory) {
         File[] listFile = fileDirectory.listFiles();
+        if (listFile == null) {
+            return;
+        }
         for (File file : listFile) {
             if (file.isDirectory()) {
                 String name = file.getName();
@@ -200,6 +206,9 @@ public class FragmentAudioGallery extends Fragment {
         }
         boolean result = false;
         File[] fileList = fileDirectory.listFiles();
+        if (fileList == null) {
+            return false;
+        }
         for (File file : fileList) {
             if (file.isDirectory()) {
                 if (includeSubDir) {

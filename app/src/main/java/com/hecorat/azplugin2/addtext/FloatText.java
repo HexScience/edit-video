@@ -111,13 +111,12 @@ public class FloatText extends AppCompatImageView {
 
         if (isWaterMark) {
             rotateBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_remove_watermark);
-            drawBorder(false);
             mColor = Color.WHITE;
         } else {
             rotateBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_rotate);
-            drawBorder(true);
             mColor = Color.RED;
         }
+        drawBorder(true);
         scaleBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_scale);
         params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT);

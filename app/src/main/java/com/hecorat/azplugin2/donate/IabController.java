@@ -10,6 +10,7 @@ import com.hecorat.azplugin2.donate.util.IabResult;
 import com.hecorat.azplugin2.donate.util.Inventory;
 import com.hecorat.azplugin2.donate.util.Purchase;
 import com.hecorat.azplugin2.donate.util.SkuDetails;
+import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.main.Constants;
 import com.hecorat.azplugin2.main.MainActivity;
 
@@ -47,6 +48,9 @@ public class IabController {
     public void buyItem() {
         if (mSetupFailed) {
             toast(mainActivity.getString(R.string.no_internet_connection));
+            AnalyticsHelper.getInstance()
+                    .send(mainActivity, Constants.CATEGORY_DONATE, Constants.ACTION_REMOVE_FAILED);
+
             return;
         }
         try {
@@ -64,6 +68,8 @@ public class IabController {
         {
             if (result.isFailure()) {
                 toast(mainActivity.getString(R.string.purchase_failed));
+                AnalyticsHelper.getInstance()
+                        .send(mainActivity, Constants.CATEGORY_DONATE, Constants.ACTION_REMOVE_FAILED);
             } else if (purchase.getSku().equals(Constants.SKU_DONATE)) {
                 toast(mainActivity.getString(R.string.purchase_success));
                 mainActivity.removeWaterMark();
@@ -95,6 +101,7 @@ public class IabController {
                 // does the user have the premium upgrade?
                 if (!inventory.hasPurchase(Constants.SKU_DONATE)) {
                     mainActivity.onCheckVipCompleted(false);
+                    log("onCheckVipCompleted(false)");
                     return;
                 }
                 Purchase purchase = inventory.getPurchase(Constants.SKU_DONATE);
@@ -103,6 +110,7 @@ public class IabController {
                 log(purchase.getPurchaseTime()+"");
                 log(purchase.getItemType());
                 mainActivity.onCheckVipCompleted(true);
+                log("onCheckVipCompleted(true)");
             }
         }
     };

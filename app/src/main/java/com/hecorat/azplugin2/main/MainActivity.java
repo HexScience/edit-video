@@ -77,6 +77,7 @@ import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.interfaces.DialogClickListener;
 import com.hecorat.azplugin2.dialogfragment.DialogConfirm;
 import com.hecorat.azplugin2.preview.CustomVideoView;
+import com.hecorat.azplugin2.preview.Effects;
 import com.hecorat.azplugin2.timeline.AudioTL;
 import com.hecorat.azplugin2.timeline.AudioTLControl;
 import com.hecorat.azplugin2.timeline.BigTimeMark;
@@ -254,8 +255,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mVideoTabLayout = (LinearLayout) findViewById(R.id.video_tab_layout);
         mImageTabLayout = (LinearLayout) findViewById(R.id.image_tab_layout);
         mAudioTabLayout = (LinearLayout) findViewById(R.id.audio_tab_layout);
-        mVideoView1 = (CustomVideoView) findViewById(R.id.video_view1);
-        mVideoView2 = (CustomVideoView) findViewById(R.id.video_view2);
+
         mLayoutTimeLine = (RelativeLayout) findViewById(R.id.layout_timeline);
         mLimitTimeLineVideo = (FrameLayout) findViewById(R.id.limit_timeline_video);
         mLimitTimeLineImage = (FrameLayout) findViewById(R.id.limit_timeline_image);
@@ -294,6 +294,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mBtnUpLevel = (ImageView) findViewById(R.id.btn_up_level);
         mLayoutExtraTools = (LinearLayout) findViewById(R.id.extra_toolbar);
         mBtnReport = (ImageView) findViewById(R.id.btn_report);
+
+        mVideoView1 = new CustomVideoView(this);
+        mVideoView2 = new CustomVideoView(this);
+        RelativeLayout.LayoutParams videoViewParam = new RelativeLayout.LayoutParams
+                (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        mVideoViewLayout.addView(mVideoView1, videoViewParam);
+        mVideoViewLayout.addView(mVideoView2, videoViewParam);
+        mLayoutFloatView.bringToFront();
 
         mColorPicker.setAlphaSliderVisible(true);
         mColorPicker.setOnColorChangedListener(this);
@@ -1026,7 +1034,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View v) {
             if (mSelectedTL == TIMELINE_VIDEO) {
-                openLayoutTrimVideo();
+//                openLayoutTrimVideo();
+                mActiveVideoView.changeFilter(Effects.NEGATIVE);
+                mInActiveVideoView.changeFilter(Effects.NEGATIVE);
             } else {
                 if (mOpenLayoutEditText) {
                     openLayoutEditText(false);

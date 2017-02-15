@@ -107,23 +107,11 @@
                 android:background="#060606"
                 android:orientation="horizontal">
 
-                <com.hecorat.azplugin2.preview.CustomVideoView
-                    android:id="@+id/video_view1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_centerHorizontal="true" />
-
-                <com.hecorat.azplugin2.preview.CustomVideoView
-                    android:id="@+id/video_view2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_centerHorizontal="true"
-                    android:visibility="gone" />
-
                 <RelativeLayout
                     android:id="@+id/layout_floatview"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    />
             </RelativeLayout>
 
             <FrameLayout

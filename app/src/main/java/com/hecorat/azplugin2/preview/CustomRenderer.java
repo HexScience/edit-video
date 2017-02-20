@@ -24,12 +24,22 @@ public class CustomRenderer implements GLSurfaceView.Renderer {
     int textureId;
     float[] mvpMatrix = new float[16], textureMatrix = new float[16];
     int programHandle;
+    boolean stop;
 
     OnSurfaceTextureListener callback;
     SurfaceTexture surfaceTexture;
 
     CustomRenderer(Context context, OnSurfaceTextureListener listener) {
         callback = listener;
+        stop = false;
+    }
+
+    public void reset() {
+        stop = false;
+    }
+
+    public void stop() {
+        stop = true;
     }
 
     private void setupVertex() {
@@ -124,8 +134,12 @@ public class CustomRenderer implements GLSurfaceView.Renderer {
         surfaceTexture.updateTexImage();
         surfaceTexture.getTransformMatrix(textureMatrix);
 
-        GLES20.glClearColor(0, 1, 0, 1);
+        GLES20.glClearColor(0, 0, 0, 1);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+
+        if (stop) {
+            return;
+        }
 
         GLES20.glUseProgram(programHandle);
 

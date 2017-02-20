@@ -38,6 +38,7 @@ public class VideoTL extends AppCompatImageView {
     public VideoHolder videoHolder;
 
     public int width, height;
+    public float videoRatio, originVideoRatio;
     public int MARGIN_LEFT_TIME_LINE;
     public int startInTimeLineMs, endInTimeLineMs;
     public int startTimeMs, endTimeMs;
@@ -53,6 +54,8 @@ public class VideoTL extends AppCompatImageView {
     public int orderInList;
     public int projectId;
     public boolean isExists;
+    public float leftSide, rightSide, bottomSide, topSide;
+    private int videoWidth, videoHeight;
 
     VideoTL(Context context) {
         super(context);
@@ -82,6 +85,21 @@ public class VideoTL extends AppCompatImageView {
                 retriever.setDataSource(videoPath);
                 durationVideo = Integer.parseInt(retriever.extractMetadata
                         (MediaMetadataRetriever.METADATA_KEY_DURATION));
+                videoWidth = Integer.parseInt(retriever.extractMetadata
+                        (MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+                videoHeight = Integer.parseInt(retriever.extractMetadata(
+                        MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+                int rotation = Integer.parseInt(retriever.extractMetadata
+                        (MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+                if (rotation == 90 || rotation == 270) {
+                    int temp = videoHeight;
+                    videoHeight = videoWidth;
+                    videoWidth = temp;
+                }
+                originVideoRatio = (float) videoWidth / videoHeight;
+                log("videoWidth = " + videoWidth);
+                log("videoHeight = " + videoHeight);
+                log("rotation = " + rotation);
                 new AsyncTaskExtractFrame().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } catch (RuntimeException e) {
                 durationVideo = Constants.DEFAULT_DURATION;
@@ -105,9 +123,18 @@ public class VideoTL extends AppCompatImageView {
         params = new RelativeLayout.LayoutParams(width, height);
         setLayoutParams(params);
         drawTimeLineWith(startTimeMs, endTimeMs);
+        setVideoSides(0, 1, 0, 1);
 
         // spare
         this.audioPreview = videoPath;
+    }
+
+    public void setVideoSides(float left, float right, float bottom, float top) {
+        leftSide = left;
+        rightSide = right;
+        bottomSide = bottom;
+        topSide = top;
+        videoRatio = (right - left) / (top - bottom) * originVideoRatio;
     }
 
     public void restoreVideoObject(VideoObject video) {
@@ -117,6 +144,13 @@ public class VideoTL extends AppCompatImageView {
         left = Integer.parseInt(video.left);
         volume = Float.parseFloat(video.volume);
         volumePreview = Float.parseFloat(video.volumePreview);
+        leftSide = Float.parseFloat(video.leftSide);
+        rightSide = Float.parseFloat(video.rightSide);
+        bottomSide = Float.parseFloat(video.bottomSide);
+        topSide = Float.parseFloat(video.topSide);
+        videoRatio = (rightSide - leftSide) / (topSide - bottomSide) * originVideoRatio;
+        log("originVideoRatio = " + originVideoRatio);
+        log("videoRatio = " + videoRatio);
         drawTimeLineWith(startTimeMs, endTimeMs);
     }
 
@@ -130,6 +164,10 @@ public class VideoTL extends AppCompatImageView {
         videoObject.orderInList = orderInList + "";
         videoObject.volume = volume + "";
         videoObject.volumePreview = volumePreview + "";
+        videoObject.leftSide = leftSide + "";
+        videoObject.rightSide = rightSide + "";
+        videoObject.bottomSide = bottomSide + "";
+        videoObject.topSide = topSide + "";
         return videoObject;
     }
 
@@ -206,6 +244,11 @@ public class VideoTL extends AppCompatImageView {
         videoHolder.startTimeSecond = startTimeMs /1000f;
         videoHolder.durationSec = (endTimeMs - startTimeMs)/1000f;
         videoHolder.volume = volume;
+        videoHolder.left = (int) (videoWidth * leftSide);
+        videoHolder.top = (int) (videoHeight * (1 - topSide));
+        videoHolder.width = (int) (videoWidth * (rightSide - leftSide));
+        videoHolder.height = (int) (videoHeight * (topSide - bottomSide));
+        videoHolder.ratio = videoRatio;
         return videoHolder;
     }
 

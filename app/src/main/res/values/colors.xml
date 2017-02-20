@@ -21,4 +21,7 @@
     <color name="text_min_max_color">#FCF586</color>
     <color name="edit_text_bgr_color">#332c46</color>
     <color name="init_bgr_float_text">#0040ae6c</color>
+    <color name="crop_overlay_color">#99202020</color>
+    <color name="crop_frame_stroke">#a503f0fd</color>
+    <color name="crop_highlight_color">#f94403</color>
 </resources>

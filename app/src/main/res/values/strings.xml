@@ -11,8 +11,8 @@
     <string name="confirm_export_title">Confirm Export</string>
     <string name="confirm_export_msg">Do you want to export video now?</string>
     <string name="export_progress_msg">Export video</string>
-    <string name="dialog_title_create_project">Name Project</string>
-    <string name="dialog_title_rename">Rename</string>
+    <string name="dialog_title_create_project">Create Project</string>
+    <string name="dialog_title_rename">Rename Project</string>
     <string name="positive_btn_text_create_project">Create Project</string>
     <string name="toast_file_not_exists_when_click_play">Some file is not exists, please remove it before playing</string>
     <string name="toast_file_not_exists_when_click_export">Some file is not exists, please remove it before exporting</string>
@@ -58,4 +58,18 @@
     <string name="dialog_title_overwrite_file">Overwrite File</string>
     <string name="dialog_msg_overwrite_file">This file name is already exists. Do you want to overwrite it?</string>
     <string name="msg_need_install_video_player">You must install video player to watch video</string>
+    <string name="btn_remove_watermark_text">Remove Watermark</string>
+    <string name="btn_report">Report</string>
+    <string name="text_btn_back">Back</string>
+    <string name="text_btn_add">Add</string>
+    <string name="text_btn_play">Play</string>
+    <string name="text_btn_setting">More</string>
+    <string name="text_btn_export">Export</string>
+    <string name="text_btn_media">Media</string>
+    <string name="text_btn_add_text">Text</string>
+    <string name="text_btn_trim">Trim</string>
+    <string name="text_btn_delete">Delete</string>
+    <string name="text_btn_volume">Volume</string>
+    <string name="text_btn_crop">Crop</string>
+    <string name="text_btn_edit_text">Edit Text</string>
 </resources>

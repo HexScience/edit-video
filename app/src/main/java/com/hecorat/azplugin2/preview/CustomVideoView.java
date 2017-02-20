@@ -6,7 +6,11 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Surface;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.VideoView;
 
 /**
@@ -16,8 +20,9 @@ import android.widget.VideoView;
 public class CustomVideoView extends GLSurfaceView implements CustomRenderer.OnSurfaceTextureListener {
     CustomRenderer customRenderer;
     MediaPlayer mediaPlayer;
-    SurfaceTexture surfaceTexture;
+    Surface surface;
     Context context;
+
     public CustomVideoView(Context context) {
         super(context);
         this.context = context;
@@ -32,8 +37,7 @@ public class CustomVideoView extends GLSurfaceView implements CustomRenderer.OnS
 
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surfaceTexture) {
-        String videoPath = Environment.getExternalStorageDirectory() + "/p4.mp4";
-        this.surfaceTexture = surfaceTexture;
+        surface = new Surface(surfaceTexture);
     }
 
     public void changeFilter(final Effects type) {
@@ -53,9 +57,11 @@ public class CustomVideoView extends GLSurfaceView implements CustomRenderer.OnS
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
+            customRenderer.stop();
         }
         mediaPlayer = MediaPlayer.create(context, Uri.parse(videoPath));
-        mediaPlayer.setSurface(new Surface(surfaceTexture));
+        mediaPlayer.setSurface(surface);
+        customRenderer.reset();
     }
 
     public void setVolume(float volume) {
@@ -102,6 +108,12 @@ public class CustomVideoView extends GLSurfaceView implements CustomRenderer.OnS
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
+            mediaPlayer = null;
         }
+        customRenderer.stop();
+    }
+
+    private void log(String msg) {
+        Log.e("CustomVideoView", msg);
     }
 }

@@ -8,7 +8,7 @@ public interface Constants {
      * Constant values
      */
 
-    int DB_VERSION = 1;
+    int DB_VERSION = 2;
     int SCALE_VALUE = 20;
     int MARGIN_LEFT_TIME_LINE = 100;
     int DEFAULT_DURATION = 10000;

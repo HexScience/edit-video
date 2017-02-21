@@ -8,4 +8,6 @@ public class VideoHolder {
     public String videoPath;
     public float startTimeSecond, durationSec;
     public float volume;
+    public int left, top, width, height;
+    public float ratio;
 }

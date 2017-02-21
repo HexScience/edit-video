@@ -501,7 +501,7 @@ public class FloatText extends AppCompatImageView {
                 mActivity.setExtraControlVisible(true);
                 mActivity.restoreExtraControl(timeline);
                 mActivity.setBtnEditVisible(true);
-                mActivity.setBtnEditIcon(R.drawable.ic_edit_text);
+                mActivity.setBtnEdit(R.drawable.ic_pen);
                 mActivity.setBtnDeleteVisible(true);
                 mActivity.setBtnVolumeVisible(false);
                 mActivity.updateLayoutEditText();

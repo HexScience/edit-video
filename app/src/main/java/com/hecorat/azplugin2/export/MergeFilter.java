@@ -27,8 +27,14 @@ class MergeFilter {
         String in = "["+index+":v]";
         int height = quality;
         int width = height * 16 / 9;
-
-        filter += in+"scale=-1:"+quality+"[v_scale];";
+        int widthScale = -1;
+        if (video.ratio > 16/9) {
+            widthScale = width;
+        }
+        filter += in + "crop=" + video.width + ":" + video.height +
+                ":" + video.left + ":" + video.top + "[crop];";
+        in = "[crop]";
+        filter += in + "scale=" + widthScale +":"+quality+"[v_scale];";
         in = "[v_scale]";
         filter += "color=black:" + width + "x" +height + ", fps=30[bgr0];" +
                 "[bgr0][0:v]overlay[bgr];";

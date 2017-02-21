@@ -349,6 +349,7 @@ public class FloatImage extends AppCompatImageView {
                 mActivity.setBtnDeleteVisible(true);
                 mActivity.setBtnEditVisible(false);
                 mActivity.setBtnVolumeVisible(false);
+                mActivity.setBtnCropVisible(false);
                 mActivity.slideExtraToolsIn(true);
                 mActivity.unhighlightVideoTL();
                 mActivity.pausePreview();

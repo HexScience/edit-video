@@ -22,6 +22,10 @@ public class VideoTable {
     private String ORDER = "_Order";
     private String VOLUME = "Volume";
     private String VOLUME_PREVIEW = "VolumePreview";
+    private String LEFT_SIDE = "LeftSide";
+    private String RIGHT_SIDE = "RightSide";
+    private String BOTTOM_SIDE = "BottomSide";
+    private String TOP_SIDE = "TopSide";
     private DBHelper mDbHelper;
 
     public VideoTable(Context context) {
@@ -39,7 +43,11 @@ public class VideoTable {
                 LEFT + " text, " +
                 ORDER + " text, " +
                 VOLUME + " text, " +
-                VOLUME_PREVIEW + " text)";
+                VOLUME_PREVIEW + " text, " +
+                LEFT_SIDE + " text, " +
+                RIGHT_SIDE + " text, " +
+                BOTTOM_SIDE + " text, " +
+                TOP_SIDE + " text)";
         sqLiteDatabase.execSQL(sql);
     }
 
@@ -60,6 +68,10 @@ public class VideoTable {
         contentValues.put(ORDER, video.orderInList);
         contentValues.put(VOLUME, video.volume);
         contentValues.put(VOLUME_PREVIEW, video.volumePreview);
+        contentValues.put(LEFT_SIDE, video.leftSide);
+        contentValues.put(RIGHT_SIDE, video.rightSide);
+        contentValues.put(BOTTOM_SIDE, video.bottomSide);
+        contentValues.put(TOP_SIDE, video.topSide);
         sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
     }
 
@@ -87,6 +99,10 @@ public class VideoTable {
                 video.orderInList = cursor.getString(cursor.getColumnIndex(ORDER));
                 video.volume = cursor.getString(cursor.getColumnIndex(VOLUME));
                 video.volumePreview = cursor.getString(cursor.getColumnIndex(VOLUME_PREVIEW));
+                video.leftSide = cursor.getString(cursor.getColumnIndex(LEFT_SIDE));
+                video.rightSide = cursor.getString(cursor.getColumnIndex(RIGHT_SIDE));
+                video.bottomSide = cursor.getString(cursor.getColumnIndex(BOTTOM_SIDE));
+                video.topSide = cursor.getString(cursor.getColumnIndex(TOP_SIDE));
                 list.add(video);
             }
         } finally {

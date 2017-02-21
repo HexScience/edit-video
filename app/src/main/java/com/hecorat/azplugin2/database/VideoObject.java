@@ -7,7 +7,8 @@ package com.hecorat.azplugin2.database;
 public class VideoObject {
     public int id, projectId;
     public String path, startTime, endTime, left,
-            orderInList, volume, volumePreview;
+            orderInList, volume, volumePreview,
+            leftSide, rightSide, bottomSide, topSide;
 
     public VideoObject(){}
 

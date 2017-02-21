@@ -55,8 +55,8 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
         mLayoutSeekbar = (FrameLayout) mView.findViewById(R.id.layout_seekbar);
         mLayoutVideoView = (RelativeLayout) mView.findViewById(R.id.videoview_layout);
         mLayoutFragment = (LinearLayout) mView.findViewById(R.id.layout_fragment);
-        mBtnOk = (Button) mView.findViewById(R.id.btn_ok);
-        mBtnCancel = (Button) mView.findViewById(R.id.btn_cancel);
+        mBtnOk = (Button) mView.findViewById(R.id.btn_ok_crop);
+        mBtnCancel = (Button) mView.findViewById(R.id.btn_cancel_crop);
         mLayoutPickTime = (FrameLayout) mView.findViewById(R.id.layout_pick_time_trim);
 
         mBtnOk.setOnClickListener(onBtnOkClick);

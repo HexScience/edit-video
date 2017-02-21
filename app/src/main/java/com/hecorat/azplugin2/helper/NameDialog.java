@@ -77,7 +77,7 @@ public class NameDialog extends DialogFragment {
     private String getPositiveBtnText() {
         switch (mType) {
             case CREATE_PROJECT:
-                return getString(R.string.positive_btn_text_create_project);
+                return getString(R.string.ok_btn);
             case RENAME:
                 return getString(R.string.ok_btn);
         }

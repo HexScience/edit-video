@@ -8,8 +8,8 @@ android {
         applicationId "com.hecorat.azplugin2"
         minSdkVersion 21
         targetSdkVersion 22
-        versionCode 14
-        versionName "4.02-beta"
+        versionCode 15
+        versionName "4.03-beta"
     }
     buildTypes {
         release {

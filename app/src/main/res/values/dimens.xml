@@ -23,4 +23,9 @@
     <dimen name="project_item_margin">10dp</dimen>
     <dimen name="text_size_btn_toolbar">10sp</dimen>
     <dimen name="margin_top_text_btn_toolbar">3dp</dimen>
+    <dimen name="margin_top_seekbar_gif">18dp</dimen>
+    <item name="weigh_title_quality_gif" type="dimen" format="float">1.0</item>
+    <item name="weigh_seekbar_quality_gif" type="dimen" format="float">5</item>
+    <item name="weigh_value_quality_gif" type="dimen" format="float">1.5</item>
+    <dimen name="text_size_quality_gif">14sp</dimen>
 </resources>

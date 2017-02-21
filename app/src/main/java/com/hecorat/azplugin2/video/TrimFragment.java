@@ -1,5 +1,6 @@
 package com.hecorat.azplugin2.video;
 
+import android.app.DialogFragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,8 +15,10 @@ import android.widget.RelativeLayout;
 import android.widget.VideoView;
 
 import com.hecorat.azplugin2.R;
+import com.hecorat.azplugin2.dialogfragment.DialogConfirm;
 import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.helper.picktime.PickTimePanel;
+import com.hecorat.azplugin2.interfaces.DialogClickListener;
 import com.hecorat.azplugin2.main.MainActivity;
 import com.hecorat.azplugin2.timeline.VideoTL;
 
@@ -109,6 +112,11 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
     View.OnClickListener onBtnOkClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            if (!mActivity.mIsVip) {
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.ASK_DONATE)
+                        .show(mActivity.getSupportFragmentManager(), "donate");
+                return;
+            }
             close();
             mActivity.onTrimVideoCompleted(startTimeMs, endTimeMs);
         }

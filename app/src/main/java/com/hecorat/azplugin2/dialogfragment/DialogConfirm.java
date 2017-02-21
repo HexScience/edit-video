@@ -51,12 +51,14 @@ public class DialogConfirm extends DialogFragment {
             }
         });
 
-        builder.setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                mCallback.onNegativeClick(mType);
-            }
-        });
+        if (mType != DialogClickListener.WARNING_DURATION_GIF) {
+            builder.setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mCallback.onNegativeClick(mType);
+                }
+            });
+        }
 
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -101,6 +103,11 @@ public class DialogConfirm extends DialogFragment {
                 dialogData.iconId = R.drawable.ic_overwrite;
                 dialogData.titleId = R.string.dialog_title_overwrite_file;
                 dialogData.messageId = R.string.dialog_msg_overwrite_file;
+                break;
+            case DialogClickListener.WARNING_DURATION_GIF:
+                dialogData.iconId = R.drawable.ic_gif_duration;
+                dialogData.titleId = R.string.dialog_title_gif_duration_warning;
+                dialogData.messageId = R.string.dialog_msg_gif_duration_warning;
                 break;
         }
 

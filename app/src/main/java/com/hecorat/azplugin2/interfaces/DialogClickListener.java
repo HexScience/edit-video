@@ -12,6 +12,7 @@ public interface DialogClickListener {
     int DELETE_AUDIO = 4;
     int DELETE_PROJECT = 5;
     int OVERWRITE_FILE = 6;
+    int WARNING_DURATION_GIF = 7;
 
     void onPositiveClick(int dialogId);
     void onNegativeClick(int dialogId);

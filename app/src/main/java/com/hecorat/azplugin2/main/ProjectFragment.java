@@ -228,6 +228,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         mActivity.resetActivity();
         mActivity.hideStatusBar();
         mActivity.addWaterMark();
+        mActivity.addVideoTL();
         setLayoutProjectInvisible();
 
         AnalyticsHelper.getInstance()

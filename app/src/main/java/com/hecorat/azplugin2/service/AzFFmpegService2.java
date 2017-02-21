@@ -624,7 +624,6 @@ public class AzFFmpegService2 extends Service {
 
     public static boolean executeFFmpegCommand(LinkedList<String> command) {
         // Execute ffmpeg
-
         Process ffmpegProcess;
         ProcessBuilder procBuilder = new ProcessBuilder(command);
         mAllLog = "";

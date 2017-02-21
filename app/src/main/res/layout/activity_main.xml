@@ -284,6 +284,23 @@
                     android:text="@string/text_btn_export"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/text_size_btn_toolbar"/>
+                <ImageView
+                    android:id="@+id/btn_gif"
+                    android:layout_width="@dimen/toolbar_icon_dimension"
+                    android:layout_height="@dimen/toolbar_icon_dimension"
+                    android:layout_marginTop="@dimen/margin_top_toolbar"
+                    android:background="@drawable/btn_touch_feedback_oval"
+                    android:clickable="true"
+                    android:contentDescription="@null"
+                    android:padding="@dimen/toolbar_icon_padding"
+                    android:src="@drawable/ic_gif" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_top_text_btn_toolbar"
+                    android:text="@string/text_btn_gif"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/text_size_btn_toolbar"/>
             </LinearLayout>
 
             <LinearLayout

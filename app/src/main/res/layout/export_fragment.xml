@@ -26,12 +26,13 @@
                 android:orientation="vertical"
                 android:gravity="center_vertical">
                 <TextView
+                    android:id="@+id/name_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
                     android:layout_marginBottom="5dp"
                     android:textSize="@dimen/text_size_export"
-                    android:text="@string/edit_name_title"/>
+                    android:text="@string/video_name_title"/>
                 <EditText
                     android:id="@+id/edt_output_name"
                     android:labelFor="@+id/edt_output_name"
@@ -40,37 +41,132 @@
                     android:layout_height="30dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="35dp"
+                    android:layout_marginTop="10dp"
                     android:background="@drawable/edittext_border"/>
             </LinearLayout>
-
-            <RadioGroup
-                android:id="@+id/quality_groupradio"
+            <LinearLayout
+                android:id="@+id/layout_quality_video"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checkedButton="@+id/hd_radio"
-                android:layout_marginStart="20dp">
-                <RadioButton
-                    android:id="@+id/full_hd_radio"
+                android:layout_marginStart="20dp"
+                android:orientation="vertical">
+                <RadioGroup
+                    android:id="@+id/quality_groupradio"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:tag="1080"
-                    android:textSize="@dimen/text_size_export"
-                    android:text="@string/full_hd_quality"/>
-                <RadioButton
-                    android:id="@+id/hd_radio"
+                    android:checkedButton="@+id/hd_radio">
+                    <RadioButton
+                        android:id="@+id/full_hd_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:tag="1080"
+                        android:textSize="@dimen/text_size_export"
+                        android:text="@string/full_hd_quality"/>
+                    <RadioButton
+                        android:id="@+id/hd_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:tag="720"
+                        android:textSize="@dimen/text_size_export"
+                        android:text="@string/hd_quality"/>
+                    <RadioButton
+                        android:id="@+id/sd_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:tag="480"
+                        android:textSize="@dimen/text_size_export"
+                        android:text="@string/sd_quality"/>
+                </RadioGroup>
+                <CheckBox
+                    android:id="@+id/checkbox_original_ratio"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:tag="720"
-                    android:textSize="@dimen/text_size_export"
-                    android:text="@string/hd_quality"/>
-                <RadioButton
-                    android:id="@+id/sd_radio"
-                    android:layout_width="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/keep_original_ratio"
+                    android:textSize="15sp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_quality_gif"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:tag="480"
-                    android:textSize="@dimen/text_size_export"
-                    android:text="@string/sd_quality"/>
-            </RadioGroup>
+                    android:layout_marginTop="@dimen/margin_top_seekbar_gif">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="@dimen/weigh_title_quality_gif"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:textSize="@dimen/text_size_quality_gif"
+                        android:text="@string/fps_gif"/>
+                    <SeekBar
+                        android:id="@+id/seekbar_fps"
+                        android:layout_width="0dp"
+                        android:layout_weight="@dimen/weigh_seekbar_quality_gif"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:id="@+id/textview_fps"
+                        android:layout_width="0dp"
+                        android:layout_weight="@dimen/weigh_value_quality_gif"
+                        android:gravity="center_horizontal"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/text_size_quality_gif"
+                        android:text="@string/text_default_fps_gif"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_top_seekbar_gif">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="@dimen/weigh_title_quality_gif"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:textSize="@dimen/text_size_quality_gif"
+                        android:text="@string/scale_gif"/>
+                    <SeekBar
+                        android:id="@+id/seekbar_scale"
+                        android:layout_width="0dp"
+                        android:layout_weight="@dimen/weigh_seekbar_quality_gif"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:id="@+id/textview_scale"
+                        android:layout_width="0dp"
+                        android:layout_weight="@dimen/weigh_value_quality_gif"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:textSize="@dimen/text_size_quality_gif"
+                        android:text="@string/text_default_scale_gif"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_top_seekbar_gif">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="@dimen/weigh_title_quality_gif"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:textSize="@dimen/text_size_quality_gif"
+                        android:text="@string/loop_gif"/>
+                    <SeekBar
+                        android:id="@+id/seekbar_loop"
+                        android:layout_width="0dp"
+                        android:layout_weight="@dimen/weigh_seekbar_quality_gif"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:id="@+id/textview_loop"
+                        android:layout_width="0dp"
+                        android:layout_weight="@dimen/weigh_value_quality_gif"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:textSize="@dimen/text_size_quality_gif"
+                        android:text="@string/text_default_loop_gif"/>
+                </LinearLayout>
+            </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -87,7 +183,7 @@
                     android:id="@+id/btn_export"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/btn_export" />
+                    android:text="@string/btn_export_video" />
             </LinearLayout>
         </LinearLayout>
         <LinearLayout
@@ -106,11 +202,19 @@
                 app:cpv_rimColor="@color/circle_progress_rim_color"
                 app:cpv_textColor="@color/circle_progress_text_color"
                 app:cpv_fillColor="@color/circle_progress_fill_color"/>
+            <TextView
+                android:id="@+id/process_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_horizontal"
+                android:text="@string/exporting_video"
+                android:textColor="#d7dc45"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:layout_marginTop="30dp">
+                android:layout_marginTop="20dp">
                 <Button
                     android:id="@+id/btn_cancel_export"
                     android:layout_width="wrap_content"
@@ -153,6 +257,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/btn_share"/>
             </LinearLayout>
+
             <TextView
                 android:id="@+id/textview_tip"
                 android:layout_width="wrap_content"

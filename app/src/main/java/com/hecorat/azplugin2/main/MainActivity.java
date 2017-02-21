@@ -5,6 +5,7 @@ import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -69,6 +70,7 @@ import com.hecorat.azplugin2.database.VideoObject;
 import com.hecorat.azplugin2.database.VideoTable;
 import com.hecorat.azplugin2.donate.IabController;
 import com.hecorat.azplugin2.export.ExportFragment;
+import com.hecorat.azplugin2.export.VideoHolder;
 import com.hecorat.azplugin2.filemanager.FragmentAudioGallery;
 import com.hecorat.azplugin2.filemanager.FragmentImagesGallery;
 import com.hecorat.azplugin2.filemanager.FragmentVideosGallery;
@@ -139,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private ImageView mBtnCrop, mBtnSetting;
     private TextView mBtnRemoveWatermark;
     private LinearLayout mLayoutSetting;
+    private ImageView mBtnExportGif;
 
     private Thread mThreadPreviewVideo;
     public ArrayList<VideoTL> mVideoList;
@@ -203,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public boolean mFoundImage, mFoundText;
     public int mProjectId;
     public boolean mOpenLayoutProject;
-    private boolean mIsVip;
+    public boolean mIsVip;
     private boolean mOpenExtraTools;
     public boolean mOpenLayoutTrimVideo;
     public boolean mOpenLayoutExport;
@@ -307,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mBtnCrop = (ImageView) findViewById(R.id.btn_crop);
         mBtnSetting = (ImageView) findViewById(R.id.btn_setting);
         mBtnRemoveWatermark = (TextView) findViewById(R.id.btn_remove_watermark);
+        mBtnExportGif = (ImageView) findViewById(R.id.btn_gif);
 
         mColorPicker.setAlphaSliderVisible(true);
         mColorPicker.setOnColorChangedListener(this);
@@ -356,6 +360,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mBtnRemoveWatermark.setOnClickListener(onBtnRemoveWatermarkClick);
         mBtnReport.setOnClickListener(onBtnReportClick);
         mBtnCrop.setOnClickListener(onBtnCropClick);
+        mBtnExportGif.setOnClickListener(onBtnExportGifClick);
 
         mEditText.setOnEditorActionListener(onEditTextActionListener);
         mEdtColorHex.setOnEditorActionListener(onEditColorActionListener);
@@ -394,7 +399,32 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         checkVip();
 
         initVideoView();
+
+
     }
+
+    View.OnClickListener onBtnExportGifClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mVideoList.isEmpty()) {
+                return;
+            }
+            int duration = mVideoList.get(mCountVideo - 1).endInTimeLineMs / 1000;
+            if (duration > 20) {
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.WARNING_DURATION_GIF)
+                        .show(getSupportFragmentManager(), "warning gif duration");
+                return;
+            }
+            if (!mIsVip) {
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.ASK_DONATE)
+                        .show(getSupportFragmentManager(), "donate");
+                return;
+            }
+            pausePreview();
+            hideAllFloatNControlers();
+            exportVideo(false);
+        }
+    };
 
     View.OnClickListener onBtnSettingClick = new View.OnClickListener() {
         @Override
@@ -621,7 +651,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void startDonate() {
-        mIabController.buyItem();
+//        mIabController.buyItem();
+        Intent intent = new Intent(Constants.ACTION_IABTABLE);
+        startActivityForResult(intent, Constants.REQUEST_CODE_PURCHASE);
     }
 
     @Override
@@ -823,6 +855,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mTimeLineVideoHeight = mLayoutVideo.getHeight() - 10;
             addVideoControler();
             mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            mVideoPath = "/storage/3730-6461/Videos/2017_02_21_14_27_17.mp4";
         }
     };
 
@@ -1355,7 +1388,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 return;
             }
             hideAllFloatNControlers();
-            exportVideo();
+            exportVideo(true);
         }
     };
 
@@ -1384,8 +1417,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    public void exportVideo() {
-        mExportFragment = ExportFragment.newInstance(mActivity);
+    public void exportVideo(boolean exportVideo) {
+        mExportFragment = ExportFragment.newInstance(mActivity, exportVideo);
         mActivity.getSupportFragmentManager().beginTransaction().replace(R.id.layout_fragment, mExportFragment).commit();
         setLayoutFragmentVisible(true);
         mOpenLayoutExport = true;
@@ -1931,7 +1964,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setBtnPlayVisible(true);
     }
 
-    private void addVideoTL() {
+    public void addVideoTL() {
         VideoTL videoTL = new VideoTL(this, mVideoPath, mTimeLineVideoHeight);
         videoTL.setOnClickListener(onVideoTimeLineClick);
         videoTL.setOnLongClickListener(onVideoLongClick);
@@ -2385,6 +2418,19 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         mIabController.handleActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case Constants.REQUEST_CODE_PURCHASE:
+                log("REQUEST_CODE_PURCHASE");
+                if (resultCode == Activity.RESULT_OK) {
+                    boolean purchaseResult = data.getBooleanExtra("purchase_result", false);
+                    log("purchaseResult = " + purchaseResult);
+                    if (purchaseResult) {
+                        removeWaterMark();
+                    }
+                }
+                break;
+        }
     }
 
     private void startAnimationAddText() {
@@ -3256,7 +3302,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     || mAudioList.size() > 0) {
                 setBtnExportVisible(true);
             } else {
-                setBtnExportVisible(false);
+                setBtnExportVisible(true);
             }
         } else {
             setBtnExportVisible(false);

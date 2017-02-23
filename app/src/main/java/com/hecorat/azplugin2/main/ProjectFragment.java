@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * Created by Bkmsx on 12/12/2016.
  */
 
-public class ProjectFragment extends Fragment implements NameDialog.DialogClickListener, DialogClickListener {
+public class ProjectFragment extends DialogFragment implements NameDialog.DialogClickListener, DialogClickListener {
     MainActivity mActivity;
     public ImageView mBtnAddProject;
     public LinearLayout mLayoutScrollView;
@@ -117,15 +117,6 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         }
     }
 
-    View.OnClickListener onBtnRenameClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            NameDialog dialog = NameDialog.newInstance(mActivity, NameDialog.RENAME, mSelectProjectName);
-            dialog.setOnClickListener(ProjectFragment.this);
-            dialog.show(mActivity.getSupportFragmentManager(), "rename");
-        }
-    };
-
     private void addProjectsToLayoutScrollView() {
         for (ProjectObject project : mProjectList) {
             View view = LayoutInflater.from(mActivity).inflate(R.layout.project_item, null);
@@ -178,7 +169,6 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
 
     @Override
     public void onPositiveClick(int dialogId) {
-        mActivity.hideStatusBar();
         switch (dialogId) {
             case DialogClickListener.DELETE_PROJECT:
                 deleteProject();
@@ -188,7 +178,6 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
 
     @Override
     public void onNegativeClick(int dialogId) {
-        mActivity.hideStatusBar();
     }
 
     @Override
@@ -204,7 +193,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     }
 
     private void renameProject(String name) {
-        mProjectTable.updateValue(mSelectProjectId, ProjectTable.NAME, name);
+        mProjectTable.updateValue(mSelectProjectId, ProjectTable.PROJECT_NAME, name);
         mSelectProjectName = name;
 
         ProjectObject projectObject = (ProjectObject) mSelectProject.getTag();
@@ -216,7 +205,6 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
 
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_RENAME_PROJECT);
-        mActivity.hideStatusBar();
     }
     
     private void createNewProject(String name) {
@@ -226,8 +214,8 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
                 System.currentTimeMillis() + "");
         mActivity.mProjectId = (int) id;
         mActivity.resetActivity();
-        mActivity.hideStatusBar();
         mActivity.addWaterMark();
+        mActivity.addVideoTL();
         setLayoutProjectInvisible();
 
         AnalyticsHelper.getInstance()
@@ -236,7 +224,6 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
 
     @Override
     public void onNegativeClick() {
-        mActivity.hideStatusBar();
     }
 
     View.OnClickListener onProjectItemClick = new View.OnClickListener() {
@@ -263,22 +250,30 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         }
     };
 
+    View.OnClickListener onBtnRenameClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            NameDialog dialog = NameDialog.newInstance(mActivity, NameDialog.RENAME, mSelectProjectName);
+            dialog.setOnClickListener(ProjectFragment.this);
+            dialog.show(mActivity.getSupportFragmentManager(), "rename");
+        }
+    };
+
     View.OnClickListener onBtnOpenClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mActivity.setLayoutFragmentVisible(false);
-            setLayoutProjectInvisible();
-            mLayoutButton.setVisibility(View.INVISIBLE);
-            if (mActivity.mProjectId == mSelectProjectId) {
-                return;
-            }
-            mActivity.resetActivity();
-            mActivity.mProjectId = mSelectProjectId;
-            mActivity.mProjectName = mSelectProjectName;
-            mActivity.openProject();
-
-            AnalyticsHelper.getInstance()
-                    .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_OPEN_PROJECT);
+//            mActivity.setLayoutFragmentVisible(false);
+//            setLayoutProjectInvisible();
+//            mLayoutButton.setVisibility(View.INVISIBLE);
+//            if (mActivity.mProjectId == mSelectProjectId) return;
+//
+//            mActivity.resetActivity();
+//            mActivity.mProjectId = mSelectProjectId;
+//            mActivity.mProjectName = mSelectProjectName;
+//            mActivity.openProject();
+//
+//            AnalyticsHelper.getInstance()
+//                    .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_OPEN_PROJECT);
         }
     };
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,6 +13,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.hecorat.azplugin2.database.ProjectObject;
 import com.hecorat.azplugin2.main.Constants;
 
 import java.io.File;
@@ -24,6 +26,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+
+import static com.hecorat.azplugin2.database.ProjectTable.PROJECT_DATA;
+import static com.hecorat.azplugin2.database.ProjectTable.PROJECT_FIRST_VIDEO;
+import static com.hecorat.azplugin2.database.ProjectTable.PROJECT_ID;
+import static com.hecorat.azplugin2.database.ProjectTable.PROJECT_NAME;
 
 /**
  * Created by bkmsx on 11/11/2016.
@@ -44,7 +51,7 @@ public class Utils {
                 .format(new Date(System.currentTimeMillis()));
     }
 
-    public static Bitmap createDefaultBitmap(){
+    public static Bitmap createDefaultBitmap() {
         Paint paint = new Paint();
         Bitmap bitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -53,17 +60,17 @@ public class Utils {
         return bitmap;
     }
 
-    public static int getScreenWidth(){
+    public static int getScreenWidth() {
         return Resources.getSystem().getDisplayMetrics().widthPixels;
     }
 
-    public static int getScreenHeight(){
+    public static int getScreenHeight() {
         return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
     public static int dpToPixel(Context context, int dp) {
         float density = context.getResources().getDisplayMetrics().density;
-        return (int) (dp*density);
+        return (int) (dp * density);
     }
 
     public static ArrayList<String> listFilesFromAssets(Context context, String directory) {
@@ -76,13 +83,13 @@ public class Utils {
             e.printStackTrace();
         }
         ArrayList<String> arrayList = new ArrayList<>();
-        for (String fileName : fileList){
-            arrayList.add(directory+"/"+fileName);
+        for (String fileName : fileList) {
+            arrayList.add(directory + "/" + fileName);
         }
         return arrayList;
     }
 
-    public static void copyFileFromAssets(Context context, String input, String output){
+    public static void copyFileFromAssets(Context context, String input, String output) {
         AssetManager assetManager = context.getAssets();
         InputStream in;
         OutputStream out;
@@ -99,25 +106,25 @@ public class Utils {
             out.flush();
             out.close();
         } catch (Exception e) {
-            
+
         }
     }
 
-    public static String getOutputFolder(){
+    public static String getOutputFolder() {
         String direct = Environment.getExternalStorageDirectory().toString();
-        String outputFolder = direct+"/"+ Constants.OUTPUT_FOLDER;
+        String outputFolder = direct + "/" + Constants.OUTPUT_FOLDER;
         File file = new File(outputFolder);
-        if (!file.exists()){
+        if (!file.exists()) {
             file.mkdirs();
         }
         return outputFolder;
     }
 
-    public static String getTempFolder(){
+    public static String getTempFolder() {
         String direct = Environment.getExternalStorageDirectory().toString();
-        String tempFolder = direct+"/"+ Constants.OUTPUT_FOLDER+"/"+Constants.TEMP_FOLDER;
+        String tempFolder = direct + "/" + Constants.OUTPUT_FOLDER + "/" + Constants.TEMP_FOLDER;
         File file = new File(tempFolder);
-        if (!file.exists()){
+        if (!file.exists()) {
             file.mkdirs();
         }
         return tempFolder;
@@ -130,21 +137,21 @@ public class Utils {
         }
     }
 
-    public static String getResourceFolder(){
+    public static String getResourceFolder() {
         String direct = Environment.getExternalStorageDirectory().toString();
-        String resourceFolder = direct+"/"+ Constants.OUTPUT_FOLDER+"/"+Constants.RESOURCE_FOLDER;
+        String resourceFolder = direct + "/" + Constants.OUTPUT_FOLDER + "/" + Constants.RESOURCE_FOLDER;
         File file = new File(resourceFolder);
-        if (!file.exists()){
+        if (!file.exists()) {
             file.mkdirs();
         }
         return resourceFolder;
     }
 
-    public static String getFontFolder(){
+    public static String getFontFolder() {
         String direct = Environment.getExternalStorageDirectory().toString();
-        String resourceFolder = direct+"/"+ Constants.OUTPUT_FOLDER+"/"+Constants.FONT_FOLDER;
+        String resourceFolder = direct + "/" + Constants.OUTPUT_FOLDER + "/" + Constants.FONT_FOLDER;
         File file = new File(resourceFolder);
-        if (!file.exists()){
+        if (!file.exists()) {
             file.mkdirs();
         }
         return resourceFolder;
@@ -156,11 +163,28 @@ public class Utils {
 
     public static String timeToText(int second) {
         String pattern = "mm:ss";
-        Date date = new Date(second%3600*1000);
+        Date date = new Date(second % 3600 * 1000);
         String time = new SimpleDateFormat(pattern, Locale.getDefault()).format(date);
-        if (second>=3600){
-            time = second/3600+":"+time;
+        if (second >= 3600) {
+            time = second / 3600 + ":" + time;
         }
         return time;
+    }
+
+    public static ArrayList<ProjectObject> getRecentProjectsFromCursor(Cursor cursor) {
+        ArrayList<ProjectObject> recentProjectsList = new ArrayList<>();
+        if(cursor.moveToFirst()){
+            do{
+                ProjectObject project = new ProjectObject();
+                project.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
+                project.name = cursor.getString(cursor.getColumnIndex(PROJECT_NAME));
+                project.data = cursor.getString(cursor.getColumnIndex(PROJECT_DATA));
+                project.firstVideo = cursor.getString(cursor.getColumnIndex(PROJECT_FIRST_VIDEO));
+                recentProjectsList.add(project);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return recentProjectsList;
     }
 }

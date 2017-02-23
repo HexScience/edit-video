@@ -109,7 +109,7 @@ public class IabController {
                 log(purchase.getOriginalJson());
                 log(purchase.getPurchaseTime()+"");
                 log(purchase.getItemType());
-                mainActivity.onCheckVipCompleted(true);
+                mainActivity.onCheckVipCompleted(false);
                 log("onCheckVipCompleted(true)");
             }
         }

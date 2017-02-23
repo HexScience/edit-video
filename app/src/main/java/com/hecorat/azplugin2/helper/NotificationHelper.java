@@ -18,7 +18,7 @@ import java.io.File;
 
 public class NotificationHelper {
     private static int notifyID = 1;
-    public static void updateNotification(Context context, int progress, String videoPath) {
+    public static void updateNotification(Context context, int progress, String videoPath, boolean isVideo) {
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -30,7 +30,12 @@ public class NotificationHelper {
         if (progress == -1){
             Intent intent = new Intent(Intent.ACTION_VIEW);
             File videoFile = new File(videoPath);
-            intent.setDataAndType(Uri.fromFile(videoFile), "video/mp4");
+            if (isVideo) {
+                intent.setDataAndType(Uri.fromFile(videoFile), "video/mp4");
+            } else {
+                intent.setDataAndType(Uri.fromFile(videoFile), "image/gif");
+            }
+
             PendingIntent pendingIntent = PendingIntent
                     .getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
             mNotifyBuilder.setProgress(0, 0, false)

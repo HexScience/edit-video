@@ -61,7 +61,7 @@ class ExportProgress extends AsyncTask<Void, Integer, Void> {
 
 	@Override
 	protected void onPostExecute(Void result) {
-		mActivity.hideStatusBar();
+//		mActivity.hideStatusBar();
 		mExportFragment.onExportCompleted();
 		super.onPostExecute(result);
 	}

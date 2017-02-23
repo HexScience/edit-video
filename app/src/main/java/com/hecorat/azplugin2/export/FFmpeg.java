@@ -2,6 +2,7 @@ package com.hecorat.azplugin2.export;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 import com.hecorat.azplugin2.helper.Utils;
 
@@ -60,6 +61,7 @@ public class FFmpeg {
     }
 
     public boolean executeFFmpegCommand(LinkedList<String> command) {
+        Log.e("FFmpeg", command.toString());
         mStop = false;
         command.add(0, mFfmpegPath);
         Process ffmpegProcess;

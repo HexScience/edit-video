@@ -59,9 +59,9 @@ public interface Constants {
     String ACTION_ADD_AUDIO = "Add audio";
 
     String CATEGORY_EXPORT = "EXPORT VIDEO";
-    String ACTION_CLICK_EXPORT = "Click export";
+    String ACTION_CLICK_EXPORT = "Click exportVideo";
     String ACTION_EXPORT_SUCCESSFUL = "Export successful";
-    String ACTION_CANCEL_EXPORT = "Cancel export";
+    String ACTION_CANCEL_EXPORT = "Cancel exportVideo";
     String ACTION_WATCH_VIDEO = "Watch video";
     String ACTION_SHARE_VIDEO = "Share video";
 
@@ -94,4 +94,10 @@ public interface Constants {
             "skSegPipPwnsjAlc0eEqhBX2YVKGB7lq0py7bi2AmiWPC5s3fwYi1nOgfRu7itbFaZVJrZAhYcm" +
             "eyxPFcBfbSDimKXFzfnEh3TWidQIDAQAB";
     String SKU_DONATE = "donate";
+
+    /**
+     * Request code
+     */
+    int REQUEST_CODE_PURCHASE = 1;
+    String ACTION_IABTABLE = "com.hecorat.IABTABLE";
 }

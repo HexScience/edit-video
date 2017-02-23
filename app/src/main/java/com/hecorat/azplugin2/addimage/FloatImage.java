@@ -336,7 +336,7 @@ public class FloatImage extends AppCompatImageView {
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mActivity.hideStatusBar();
+//            mActivity.hideStatusBar();
             if (drawBorder) {
                 drawBorder(false);
                 mActivity.setExtraControlVisible(false);

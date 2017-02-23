@@ -177,7 +177,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     }
 
     @Override
-    public void onPositiveClick(int dialogId) {
+    public void onPositiveClick(int dialogId, String detail) {
         mActivity.hideStatusBar();
         switch (dialogId) {
             case DialogClickListener.DELETE_PROJECT:
@@ -228,7 +228,6 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
         mActivity.resetActivity();
         mActivity.hideStatusBar();
         mActivity.addWaterMark();
-        mActivity.addVideoTL();
         setLayoutProjectInvisible();
 
         AnalyticsHelper.getInstance()
@@ -293,7 +292,7 @@ public class ProjectFragment extends Fragment implements NameDialog.DialogClickL
     View.OnClickListener onBtnDeleteClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            DialogConfirm.newInstance(mActivity, ProjectFragment.this, DialogClickListener.DELETE_PROJECT)
+            DialogConfirm.newInstance(mActivity, ProjectFragment.this, DialogClickListener.DELETE_PROJECT, "")
                     .show(mActivity.getSupportFragmentManager(), "delete project");
         }
     };

@@ -39,14 +39,16 @@ public class FragmentImagesGallery extends Fragment {
     public MainActivity mActivity;
     private View mView;
 
-    public boolean mIsSubFolder;
     public int mCountSubFolder;
-    public boolean mChooseSticker;
+    private boolean mHasSdCard;
 
-    public ArrayList<String> mListFolder, mListStiker;
-    public ArrayList<String> mListFirstImage, mListImage;
+    public ArrayList<String> mListFolder, mListStiker, mListFolderSd;
+    public ArrayList<String> mListFirstImage, mListImage, mListFirstImageSd;
     public String mFolderName;
     public String[] patterns = {".png", "jpg"};
+    public GalleryState galleryState;
+    private String mSdPath;
+
     public static final String STICKER_FOLDER = "sticker";
     public static final String STICKER_FOLDER_NAME = "Stickers";
     public static final String ASSETS_PATH = "file:///android_asset/";
@@ -61,24 +63,97 @@ public class FragmentImagesGallery extends Fragment {
     private void inflateViews(){
         mView = LayoutInflater.from(mActivity).inflate(R.layout.fragment_videos_gallery, null);
         mGridView = (GridView) mView.findViewById(R.id.video_gallery);
-        mStoragePath = Environment.getExternalStorageDirectory().toString();
-        File fileDirectory = new File(mStoragePath);
+
         mListFolder = new ArrayList<>();
-        mListFolder.add(STICKER_FOLDER_NAME);
-        mListFolder.add(mStoragePath);
-        listFolderFrom(fileDirectory);
         mListFirstImage = new ArrayList<>();
         mListImage = new ArrayList<>();
+        mListFolderSd = new ArrayList<>();
+        mListFirstImageSd = new ArrayList<>();
+
+        galleryState = GalleryState.IMAGE_FOLDER;
+
+        mSdPath = Utils.getSdPath(mActivity);
+        if (mSdPath != null) {
+            mListFolder.add(mSdPath);
+            mListFirstImage.add("");
+            mHasSdCard = true;
+        } else {
+            mHasSdCard = false;
+        }
+
+        mStoragePath = Environment.getExternalStorageDirectory().toString();
+        File fileDirectory = new File(mStoragePath);
+        mListFolder.add(STICKER_FOLDER_NAME);
+        mListFolder.add(mStoragePath);
+        listFolderFrom(fileDirectory, mListFolder);
 
         new AsyncTaskScanFolder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        mChooseSticker = false;
-        mIsSubFolder = false;
         mFolderAdapter = new ImageGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstImage);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
         mFolderName = mActivity.getString(R.string.image_tab_title);
     }
+
+    private void openLayoutSdCard(){
+        galleryState = GalleryState.IMAGE_FOLDER_SD;
+        mListFolderSd.clear();
+        mListFirstImageSd.clear();
+
+        mListFolderSd.add(mSdPath);
+        listFolderFrom(new File(mSdPath), mListFolderSd);
+        mFolderAdapter = new ImageGalleryAdapter
+                (mActivity, R.layout.folder_gallery_layout, mListFirstImageSd);
+        mGridView.setAdapter(mFolderAdapter);
+        mGridView.setOnItemClickListener(onSdCardFolderClickListener);
+        mActivity.setBtnUpLevelVisible(true);
+        mFolderName += Constants.SLASH + Constants.SD_CARD;
+        mActivity.setFolderName(mFolderName);
+
+        new ScanFolderSdCardTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private class ScanFolderSdCardTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            for (int i=0; i<mListFolderSd.size(); i++) {
+                boolean scanSubFolder = !mListFolderSd.get(i).equals(mSdPath);
+                mCountSubFolder = 0;
+                if (!isImageFolder(new File(mListFolderSd.get(i)), scanSubFolder)){
+                    mListFolderSd.remove(i);
+                    i--;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mFolderAdapter.notifyDataSetChanged();
+        }
+    }
+
+    AdapterView.OnItemClickListener onSdCardFolderClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            galleryState = GalleryState.IMAGE_SUBFOLDER_SD;
+            mListImage.clear();
+            mImageAdapter = new ImageGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListImage);
+            mGridView.setAdapter(mImageAdapter);
+            mGridView.setOnItemClickListener(onImageClickListener);
+            mActivity.setBtnUpLevelVisible(true);
+            String folder = mListFolderSd.get(position);
+            if (folder.equals(mSdPath)) {
+                mFolderName += Constants.SLASH + Constants.STORAGE_NAME;
+            } else {
+                mFolderName += Constants.SLASH + new File(folder).getName();
+            }
+            mActivity.setFolderName(mFolderName);
+
+            new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, position);
+        }
+    };
 
     @Nullable
     @Override
@@ -95,37 +170,56 @@ public class FragmentImagesGallery extends Fragment {
         return false;
     }
 
-    public void backToMain() {
-        mIsSubFolder = false;
-        if (mFolderAdapter==null){
-            mFolderAdapter = new ImageGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstImage);
+    public void upLevel() {
+        switch (galleryState) {
+            case IMAGE_FOLDER_SD:
+            case IMAGE_SUBFOLDER:
+            case IMAGE_SUBFOLDER_STICKER:
+                galleryState = GalleryState.IMAGE_FOLDER;
+                mFolderAdapter = new ImageGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstImage);
+                mGridView.setAdapter(mFolderAdapter);
+                mGridView.setOnItemClickListener(onFolderClickListener);
+
+                mFolderName = mActivity.getString(R.string.image_tab_title);
+                mActivity.setFolderName(mFolderName);
+                mActivity.setBtnUpLevelVisible(false);
+                break;
+            case IMAGE_SUBFOLDER_SD:
+                galleryState = GalleryState.IMAGE_FOLDER_SD;
+                mFolderAdapter = new ImageGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstImageSd);
+                mGridView.setAdapter(mFolderAdapter);
+                mActivity.setBtnUpLevelVisible(true);
+                mFolderName = mActivity.getString(R.string.image_tab_title)
+                        + Constants.SLASH + Constants.SD_CARD;
+                mActivity.setFolderName(mFolderName);
+                mGridView.setOnItemClickListener(onSdCardFolderClickListener);
+                break;
         }
-        mGridView.setAdapter(mFolderAdapter);
-        mFolderName = getString(R.string.image_tab_title);
-        mActivity.setFolderName(mFolderName);
-        mGridView.setOnItemClickListener(onFolderClickListener);
     }
 
     AdapterView.OnItemClickListener onFolderClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            mIsSubFolder = true;
+            if (mHasSdCard && i == 0 && galleryState == GalleryState.IMAGE_FOLDER) {
+                openLayoutSdCard();
+                return;
+            }
             mGridView.setOnItemClickListener(onImageClickListener);
             mActivity.mOpenImageSubFolder = true;
             mActivity.setBtnUpLevelVisible(true);
-            if (i==0){
-                mChooseSticker = true;
+            if (i==0 || mHasSdCard && i==1){
+                galleryState = GalleryState.IMAGE_SUBFOLDER_STICKER;
                 mImageAdapter = new ImageGalleryAdapter(mActivity, R.layout.image_gallery_layout, mListStiker);
                 mGridView.setAdapter(mImageAdapter);
-                mFolderName = STICKER_FOLDER_NAME;
+                mFolderName += Constants.SLASH + STICKER_FOLDER_NAME;
                 mActivity.setFolderName(mFolderName);
                 return;
             }
-            mChooseSticker = false;
+            galleryState = GalleryState.IMAGE_SUBFOLDER;
             mListImage.clear();
             mImageAdapter = new ImageGalleryAdapter(mActivity, R.layout.image_gallery_layout, mListImage);
             mGridView.setAdapter(mImageAdapter);
-            mFolderName += " / " + new File(mListFolder.get(i)).getName();
+            mFolderName += Constants.SLASH + new File(mListFolder.get(i)).getName();
             mActivity.setFolderName(mFolderName);
             new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
         }
@@ -136,7 +230,7 @@ public class FragmentImagesGallery extends Fragment {
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             int viewCoord[] = new int[2];
             view.getLocationOnScreen(viewCoord);
-            if (mChooseSticker){
+            if (galleryState == GalleryState.IMAGE_SUBFOLDER_STICKER){
                 String assetsPath = mListStiker.get(i);
                 String nameSticker = assetsPath.replace("/","_");
                 String stickerPath = Utils.getResourceFolder()+"/"+nameSticker;
@@ -156,8 +250,9 @@ public class FragmentImagesGallery extends Fragment {
         @Override
         protected Void doInBackground(Integer... value) {
             boolean subFolder = true;
-            String folderPath = mListFolder.get(value[0]);
-            if (folderPath.equals(mStoragePath)){
+            String folderPath = galleryState == GalleryState.IMAGE_SUBFOLDER_SD ?
+                   mListFolderSd.get(value[0]) :  mListFolder.get(value[0]);
+            if (folderPath.equals(mStoragePath) || folderPath.equals(mSdPath)){
                 subFolder = false;
             }
             loadAllImage(new File(folderPath), mListImage, subFolder);
@@ -201,7 +296,8 @@ public class FragmentImagesGallery extends Fragment {
         protected Void doInBackground(Void... voids) {
             mListStiker = Utils.listFilesFromAssets(mActivity, STICKER_FOLDER);
             mListFirstImage.add(mListStiker.get(0));
-            for (int i=1; i<mListFolder.size(); i++) {
+            int begin = mHasSdCard ? 2 : 1;
+            for (int i=begin; i<mListFolder.size(); i++) {
                 boolean scanSubFolder = !mListFolder.get(i).equals(mStoragePath);
                 mCountSubFolder = 0;
                 if (!isImageFolder(new File(mListFolder.get(i)), scanSubFolder)){
@@ -219,7 +315,7 @@ public class FragmentImagesGallery extends Fragment {
         }
     }
 
-    private void listFolderFrom(File fileDirectory){
+    private void listFolderFrom(File fileDirectory, ArrayList<String> listFolder){
         File[] listFile = fileDirectory.listFiles();
         if (listFile == null) {
             return;
@@ -228,7 +324,7 @@ public class FragmentImagesGallery extends Fragment {
             if (file.isDirectory()) {
                 String name = file.getName();
                 if (name.charAt(0) != '.'){
-                    mListFolder.add(file.getAbsolutePath());
+                    listFolder.add(file.getAbsolutePath());
                 }
             }
         }
@@ -250,7 +346,11 @@ public class FragmentImagesGallery extends Fragment {
                 }
             } else {
                 if (matchFile(file)) {
-                    mListFirstImage.add(file.getAbsolutePath());
+                    if (galleryState == GalleryState.IMAGE_FOLDER) {
+                        mListFirstImage.add(file.getAbsolutePath());
+                    } else {
+                        mListFirstImageSd.add(file.getAbsolutePath());
+                    }
                     result = true;
                 }
             }
@@ -271,12 +371,18 @@ public class FragmentImagesGallery extends Fragment {
         @NonNull
         @Override
         public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-            if (!mIsSubFolder){
-                return getFolderLayout(position);
-            } else if (mChooseSticker){
-                return getStickerLayout(position);
-            } else {
-                return getImageLayout(position);
+            switch (galleryState) {
+                case IMAGE_FOLDER:
+                    return getFolderLayout(position);
+                case IMAGE_FOLDER_SD:
+                    return getFolderLayoutSd(position);
+                case IMAGE_SUBFOLDER_STICKER:
+                    return getStickerLayout(position);
+                case IMAGE_SUBFOLDER_SD:
+                case IMAGE_SUBFOLDER:
+                    return getImageLayout(position);
+                default:
+                    return getFolderLayout(position);
             }
         }
 
@@ -284,16 +390,37 @@ public class FragmentImagesGallery extends Fragment {
             View convertView = LayoutInflater.from(mActivity).inflate(R.layout.folder_gallery_layout, null);
             ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
-
-            if (position == 0) {
+            ImageView iconFolder = (ImageView) convertView.findViewById(R.id.icon_folder);
+            iconFolder.setVisibility(View.VISIBLE);
+            int stickerPosition = mHasSdCard ? 1 : 0;
+            if (mHasSdCard && position == 0) {
+                textView.setText("Sd Card");
+                imageView.setImageResource(R.drawable.ic_sd_card);
+                iconFolder.setVisibility(View.INVISIBLE);
+            } else if (position == stickerPosition) {
                 textView.setText(STICKER_FOLDER_NAME);
-                Uri uri = Uri.parse(ASSETS_PATH + mListFirstImage.get(0));
+                Uri uri = Uri.parse(ASSETS_PATH + mListFirstImage.get(stickerPosition));
                 Glide.with(mActivity).load(uri).centerCrop().into(imageView);
             } else {
                 String name = new File(mListFolder.get(position)).getName();
                 textView.setText(name);
                 Glide.with(mActivity).load(mListFirstImage.get(position)).centerCrop().into(imageView);
             }
+            return convertView;
+        }
+
+        private View getFolderLayoutSd(int position){
+            View convertView = LayoutInflater.from(mActivity).inflate(R.layout.folder_gallery_layout, null);
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.image_view);
+            TextView textView = (TextView) convertView.findViewById(R.id.text_view);
+            String folder = mListFolderSd.get(position);
+            if (folder.equals(mSdPath)) {
+                textView.setText("0");
+            } else {
+                String name = new File(folder).getName();
+                textView.setText(name);
+            }
+            Glide.with(mActivity).load(mListFirstImageSd.get(position)).centerCrop().into(imageView);
             return convertView;
         }
 

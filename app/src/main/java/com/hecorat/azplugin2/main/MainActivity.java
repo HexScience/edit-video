@@ -70,10 +70,10 @@ import com.hecorat.azplugin2.database.VideoObject;
 import com.hecorat.azplugin2.database.VideoTable;
 import com.hecorat.azplugin2.donate.IabController;
 import com.hecorat.azplugin2.export.ExportFragment;
-import com.hecorat.azplugin2.export.VideoHolder;
 import com.hecorat.azplugin2.filemanager.FragmentAudioGallery;
 import com.hecorat.azplugin2.filemanager.FragmentImagesGallery;
 import com.hecorat.azplugin2.filemanager.FragmentVideosGallery;
+import com.hecorat.azplugin2.filemanager.GalleryState;
 import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.interfaces.DialogClickListener;
@@ -188,8 +188,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private int mTimeLineImageHeight = 70;
     private int mFragmentCode;
     private boolean mOpenFileManager;
-    public boolean mOpenVideoSubFolder,
-            mOpenImageSubFolder, mOpenAudioSubFolder;
+    public boolean mOpenImageSubFolder, mOpenAudioSubFolder;
     private boolean mRunThread;
     private int mCurrentVideoId, mTLPositionInMs;
     private int mPreviewStatus;
@@ -400,7 +399,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         initVideoView();
 
-
     }
 
     View.OnClickListener onBtnExportGifClick = new View.OnClickListener() {
@@ -411,12 +409,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             }
             int duration = mVideoList.get(mCountVideo - 1).endInTimeLineMs / 1000;
             if (duration > 20) {
-                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.WARNING_DURATION_GIF)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.WARNING_DURATION_GIF, "")
                         .show(getSupportFragmentManager(), "warning gif duration");
                 return;
             }
             if (!mIsVip) {
-                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.ASK_DONATE)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.ASK_DONATE,
+                        Constants.EVENT_ACTION_DIALOG_FROM_NEW_GIF)
                         .show(getSupportFragmentManager(), "donate");
                 return;
             }
@@ -625,11 +624,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     @Override
-    public void onPositiveClick(int dialogId) {
+    public void onPositiveClick(int dialogId, String detail) {
         hideStatusBar();
         switch (dialogId) {
             case DialogClickListener.ASK_DONATE:
-                startDonate();
+                startDonate(detail);
                 break;
             case DialogClickListener.DELETE_VIDEO:
                 deleteVideo();
@@ -650,9 +649,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    private void startDonate() {
+    private void startDonate(String detail) {
 //        mIabController.buyItem();
         Intent intent = new Intent(Constants.ACTION_IABTABLE);
+        intent.putExtra("from", detail);
         startActivityForResult(intent, Constants.REQUEST_CODE_PURCHASE);
     }
 
@@ -855,7 +855,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mTimeLineVideoHeight = mLayoutVideo.getHeight() - 10;
             addVideoControler();
             mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            mVideoPath = "/storage/3730-6461/Videos/2017_02_21_14_27_17.mp4";
         }
     };
 
@@ -1262,15 +1261,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View v) {
             if (mSelectedTL == TIMELINE_VIDEO) {
-                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.DELETE_VIDEO)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.DELETE_VIDEO, "")
                         .show(mActivity.getSupportFragmentManager(), "delete video");
             } else if (mSelectedTL == TIMELINE_EXTRA) {
                 int type = mSelectedExtraTL.isImage ? DialogClickListener.DELETE_IMAGE
                         : DialogClickListener.DELETE_TEXT;
-                DialogConfirm.newInstance(mActivity, mActivity, type)
+                DialogConfirm.newInstance(mActivity, mActivity, type, "")
                         .show(mActivity.getSupportFragmentManager(), "delete extra");
             } else {
-                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.DELETE_AUDIO)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.DELETE_AUDIO, "")
                         .show(mActivity.getSupportFragmentManager(), "delete audio");
             }
         }
@@ -2366,7 +2365,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void askDonate() {
-        DialogConfirm.newInstance(this, this, DialogClickListener.ASK_DONATE)
+        DialogConfirm.newInstance(this, this, DialogClickListener.ASK_DONATE,
+                Constants.EVENT_ACTION_DIALOG_FROM_WATERMARK)
                 .show(getSupportFragmentManager(), "ask donate");
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_DONATE, Constants.ACTION_REMOVE_WATERMARK);
@@ -2618,21 +2618,24 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 mViewPager.setCurrentItem(VIDEO_TAB, true);
                 setHightLighTab(VIDEO_TAB);
                 setFolderName(mFragmentVideosGallery.mFolderName);
-                setBtnUpLevelVisible(mOpenVideoSubFolder);
+                setBtnUpLevelVisible(
+                        mFragmentVideosGallery.galleryState != GalleryState.VIDEO_FOLDER);
             }
 
             if (view.equals(mImageTabLayout)) {
                 mViewPager.setCurrentItem(IMAGE_TAB, true);
                 setHightLighTab(IMAGE_TAB);
                 setFolderName(mFragmentImagesGallery.mFolderName);
-                setBtnUpLevelVisible(mOpenImageSubFolder);
+                setBtnUpLevelVisible(
+                        mFragmentImagesGallery.galleryState != GalleryState.IMAGE_FOLDER);
             }
 
             if (view.equals(mAudioTabLayout)) {
                 mViewPager.setCurrentItem(AUDIO_TAB, true);
                 setHightLighTab(AUDIO_TAB);
                 setFolderName(mFragmentAudioGallery.mFolderName);
-                setBtnUpLevelVisible(mOpenAudioSubFolder);
+                setBtnUpLevelVisible(
+                        mFragmentAudioGallery.galleryState != GalleryState.AUDIO_FOLDER);
             }
         }
     };
@@ -2673,8 +2676,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
         setLayoutAddVisible(in);
         int distance = Utils.dpToPixel(this, 60);
-        TranslateAnimation animation = in ? new TranslateAnimation(- distance, 0, 0, 0) :
-                                            new TranslateAnimation(0, - distance, 0, 0);
+        TranslateAnimation animation = in ? new TranslateAnimation(-distance, 0, 0, 0) :
+                new TranslateAnimation(0, -distance, 0, 0);
         animation.setDuration(200);
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
         mLayoutAdd.startAnimation(animation);
@@ -2725,26 +2728,23 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private boolean upLevelFileManager() {
         switch (mFragmentCode) {
             case VIDEO_TAB:
-                if (mOpenVideoSubFolder) {
-                    mFragmentVideosGallery.backToMain();
-                    mOpenVideoSubFolder = false;
-                    setBtnUpLevelVisible(false);
+                if (mFragmentVideosGallery.galleryState
+                        != GalleryState.VIDEO_FOLDER) {
+                    mFragmentVideosGallery.upLevel();
                     return true;
                 }
                 break;
             case IMAGE_TAB:
-                if (mOpenImageSubFolder) {
-                    mFragmentImagesGallery.backToMain();
-                    mOpenImageSubFolder = false;
-                    setBtnUpLevelVisible(false);
+                if (mFragmentImagesGallery.galleryState
+                        != GalleryState.IMAGE_FOLDER) {
+                    mFragmentImagesGallery.upLevel();
                     return true;
                 }
                 break;
             case AUDIO_TAB:
-                if (mOpenAudioSubFolder) {
-                    mFragmentAudioGallery.backToMain();
-                    mOpenAudioSubFolder = false;
-                    setBtnUpLevelVisible(false);
+                if (mFragmentAudioGallery.galleryState
+                        != GalleryState.AUDIO_FOLDER) {
+                    mFragmentAudioGallery.upLevel();
                     return true;
                 }
                 break;
@@ -2770,15 +2770,18 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             switch (position) {
                 case VIDEO_TAB:
                     setFolderName(mFragmentVideosGallery.mFolderName);
-                    setBtnUpLevelVisible(mOpenVideoSubFolder);
+                    setBtnUpLevelVisible(
+                            mFragmentVideosGallery.galleryState != GalleryState.VIDEO_FOLDER);
                     break;
                 case IMAGE_TAB:
-                    setBtnUpLevelVisible(mOpenImageSubFolder);
                     setFolderName(mFragmentImagesGallery.mFolderName);
+                    setBtnUpLevelVisible(
+                            mFragmentImagesGallery.galleryState != GalleryState.IMAGE_FOLDER);
                     break;
                 case AUDIO_TAB:
-                    setBtnUpLevelVisible(mOpenAudioSubFolder);
                     setFolderName(mFragmentAudioGallery.mFolderName);
+                    setBtnUpLevelVisible(
+                            mFragmentAudioGallery.galleryState != GalleryState.AUDIO_FOLDER);
                     break;
             }
         }

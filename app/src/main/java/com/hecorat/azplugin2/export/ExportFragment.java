@@ -406,7 +406,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
             String name = mEditText.getText().toString() + mExtension;
             for (String fileName : mFilesInFolder) {
                 if (name.equals(fileName)) {
-                    DialogConfirm.newInstance(mActivity, ExportFragment.this, DialogClickListener.OVERWRITE_FILE)
+                    DialogConfirm.newInstance(mActivity, ExportFragment.this, DialogClickListener.OVERWRITE_FILE, "")
                             .show(mActivity.getSupportFragmentManager(), "overwrite file");
                     return;
                 }
@@ -438,7 +438,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
     }
 
     @Override
-    public void onPositiveClick(int dialogId) {
+    public void onPositiveClick(int dialogId, String detail) {
         switch (dialogId) {
             case DialogClickListener.OVERWRITE_FILE:
                 mActivity.hideStatusBar();

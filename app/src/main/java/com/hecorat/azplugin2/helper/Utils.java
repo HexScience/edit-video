@@ -163,4 +163,13 @@ public class Utils {
         }
         return time;
     }
+    public static String getSdPath(Context context){
+        File[] listDir = context.getExternalFilesDirs(Environment.DIRECTORY_MOVIES);
+        if (listDir.length < 2) {
+            return null;
+        }
+        String sdDir = listDir[1].getAbsolutePath();
+        int index = sdDir.indexOf("/Android/data");
+        return sdDir.substring(0, index);
+    }
 }

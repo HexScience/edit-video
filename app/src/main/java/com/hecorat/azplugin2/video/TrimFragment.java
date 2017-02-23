@@ -19,6 +19,7 @@ import com.hecorat.azplugin2.dialogfragment.DialogConfirm;
 import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.helper.picktime.PickTimePanel;
 import com.hecorat.azplugin2.interfaces.DialogClickListener;
+import com.hecorat.azplugin2.main.Constants;
 import com.hecorat.azplugin2.main.MainActivity;
 import com.hecorat.azplugin2.timeline.VideoTL;
 
@@ -113,7 +114,8 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
         @Override
         public void onClick(View view) {
             if (!mActivity.mIsVip) {
-                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.ASK_DONATE)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.ASK_DONATE,
+                        Constants.EVENT_ACTION_DIALOG_FROM_NEW_TRIM)
                         .show(mActivity.getSupportFragmentManager(), "donate");
                 return;
             }

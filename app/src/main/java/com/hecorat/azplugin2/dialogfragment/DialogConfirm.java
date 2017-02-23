@@ -22,12 +22,14 @@ public class DialogConfirm extends DialogFragment {
     DialogClickListener mCallback;
     int mType;
     Context mContext;
+    String mDetail;
 
-    public static DialogConfirm newInstance(Context context, DialogClickListener listener, int type) {
+    public static DialogConfirm newInstance(Context context, DialogClickListener listener, int type, String detail) {
         DialogConfirm dialogConfirm = new DialogConfirm();
         dialogConfirm.mContext = context;
         dialogConfirm.mCallback = listener;
         dialogConfirm.mType = type;
+        dialogConfirm.mDetail = detail;
         return dialogConfirm;
     }
 
@@ -47,7 +49,7 @@ public class DialogConfirm extends DialogFragment {
         builder.setPositiveButton(R.string.ok_btn, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mCallback.onPositiveClick(mType);
+                mCallback.onPositiveClick(mType, mDetail);
             }
         });
 

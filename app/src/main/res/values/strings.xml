@@ -65,17 +65,24 @@
     <string name="btn_report">Report</string>
     <string name="text_btn_back">Back</string>
     <string name="text_btn_add">Add</string>
-    <string name="text_btn_play">Play</string>
+    <string name="text_btn_play">Preview</string>
     <string name="text_btn_setting">More</string>
     <string name="text_btn_export">Export</string>
-    <string name="text_btn_media">Media</string>
+    <string name="text_btn_video">Video</string>
+    <string name="text_btn_image">Image</string>
+    <string name="text_btn_audio">Audio</string>
     <string name="text_btn_add_text">Text</string>
     <string name="text_btn_trim">Trim</string>
     <string name="text_btn_delete">Delete</string>
     <string name="text_btn_volume">Volume</string>
     <string name="text_btn_crop">Crop</string>
+    <string name="text_btn_upgrade">Upgrade</string>
+    <string name="text_btn_feedback">Feedback</string>
     <string name="text_btn_edit_text">Edit Text</string>
     <string name="text_btn_gif">Export Gif</string>
+    <string name="text_btn_new">New</string>
+    <string name="text_btn_recent">Recent</string>
+    <string name="text_pro">Pro</string>
     <string name="fps_gif">Fps</string>
     <string name="scale_gif">Scale</string>
     <string name="loop_gif">Loop</string>
@@ -88,4 +95,14 @@
     <string name="keep_original_ratio">Keep original ratio (Much faster)</string>
     <string name="dialog_title_gif_duration_warning">Gif Duration Limit</string>
     <string name="dialog_msg_gif_duration_warning">You can not export Gif with duration longer than 20 seconds.\n\nPlease adjust videos.</string>
+    <string name="recent_project_dialog_title">Recent projects</string>
+    <string name="recent_project_action_open">Open</string>
+    <string name="recent_project_action_rename">Rename</string>
+    <string name="recent_project_action_delete">Delete</string>
+    <string name="default_project_title">project_0</string>
+    <string name="toast_open_current_project">You currently working on this project</string>
+    <string name="toast_delete_current_project">You can not delete this project</string>
+    <string name="dialog_open_project_title">Open project</string>
+    <string name="dialog_open_project_mess">Do you want open project "'"%s"'"? All state of current editing project will be saved.</string>
+
 </resources>

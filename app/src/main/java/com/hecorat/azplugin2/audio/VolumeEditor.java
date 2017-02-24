@@ -53,7 +53,7 @@ public class VolumeEditor extends DialogFragment {
         builder.setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mActivity.hideStatusBar();
+//                mActivity.hideStatusBar();
             }
         });
         builder.setOnKeyListener(onKeyListener);
@@ -85,7 +85,7 @@ public class VolumeEditor extends DialogFragment {
         @Override
         public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
             if (keyCode == KeyEvent.KEYCODE_BACK){
-                mActivity.hideStatusBar();
+//                mActivity.hideStatusBar();
             }
             return false;
         }

@@ -77,27 +77,27 @@ public class DialogConfirm extends DialogFragment {
                 dialogData.messageId = R.string.dialog_ask_premium_message;
                 break;
             case DialogClickListener.DELETE_VIDEO:
-                dialogData.iconId = R.drawable.ic_delete;
+                dialogData.iconId = R.drawable.ic_delete_2;
                 dialogData.titleId = R.string.dialog_title_delete_video;
                 dialogData.messageId = R.string.dialog_msg_delete_video;
                 break;
             case DialogClickListener.DELETE_IMAGE:
-                dialogData.iconId = R.drawable.ic_delete;
+                dialogData.iconId = R.drawable.ic_delete_2;
                 dialogData.titleId = R.string.dialog_title_delete_image;
                 dialogData.messageId = R.string.dialog_msg_delete_image;
                 break;
             case DialogClickListener.DELETE_TEXT:
-                dialogData.iconId = R.drawable.ic_delete;
+                dialogData.iconId = R.drawable.ic_delete_2;
                 dialogData.titleId = R.string.dialog_title_delete_text;
                 dialogData.messageId = R.string.dialog_msg_delete_text;
                 break;
             case DialogClickListener.DELETE_AUDIO:
-                dialogData.iconId = R.drawable.ic_delete;
+                dialogData.iconId = R.drawable.ic_delete_2;
                 dialogData.titleId = R.string.dialog_title_delete_audio;
                 dialogData.messageId = R.string.dialog_msg_delete_audio;
                 break;
             case DialogClickListener.DELETE_PROJECT:
-                dialogData.iconId = R.drawable.ic_delete;
+                dialogData.iconId = R.drawable.ic_delete_2;
                 dialogData.titleId = R.string.dialog_title_delete_project;
                 dialogData.messageId = R.string.dialog_msg_delete_project;
                 break;

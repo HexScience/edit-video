@@ -372,7 +372,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 mEditText.clearFocus();
-                mActivity.hideStatusBar();
+//                mActivity.hideStatusBar();
             }
             return false;
         }
@@ -441,7 +441,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
     public void onPositiveClick(int dialogId, String detail) {
         switch (dialogId) {
             case DialogClickListener.OVERWRITE_FILE:
-                mActivity.hideStatusBar();
+//                mActivity.hideStatusBar();
                 startExport();
                 break;
         }
@@ -451,7 +451,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
     public void onNegativeClick(int dialogId) {
         switch (dialogId) {
             case DialogClickListener.OVERWRITE_FILE:
-                mActivity.hideStatusBar();
+//                mActivity.hideStatusBar();
                 break;
         }
     }

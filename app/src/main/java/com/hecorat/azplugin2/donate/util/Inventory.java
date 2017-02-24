@@ -51,7 +51,7 @@ public class Inventory {
     }
 
     /**
-     * Erase a purchase (locally) from the inventory, given its product ID. This just
+     * Erase a purchase (locally) from the inventory, given its product PROJECT_ID. This just
      * modifies the Inventory object locally and has no effect on the server! This is
      * useful when you have an existing Inventory object which you know to be up to date,
      * and you have just consumed an item successfully, which means that erasing its

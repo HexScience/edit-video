@@ -486,7 +486,7 @@ public class FloatText extends AppCompatImageView {
     OnClickListener onClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            mActivity.hideStatusBar();
+//            mActivity.hideStatusBar();
         if (drawBorder) {
             drawBorder(false);
             if (!isWaterMark) {
@@ -501,7 +501,7 @@ public class FloatText extends AppCompatImageView {
                 mActivity.setExtraControlVisible(true);
                 mActivity.restoreExtraControl(timeline);
                 mActivity.setBtnEditVisible(true);
-                mActivity.setBtnEditIcon(R.drawable.ic_edit_text);
+                mActivity.setBtnTrimVisible(false);
                 mActivity.setBtnDeleteVisible(true);
                 mActivity.setBtnVolumeVisible(false);
                 mActivity.updateLayoutEditText();

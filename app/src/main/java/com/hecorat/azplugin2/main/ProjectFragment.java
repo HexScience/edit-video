@@ -210,9 +210,8 @@ public class ProjectFragment extends DialogFragment implements NameDialog.Dialog
     private void createNewProject(String name) {
         mActivity.setLayoutFragmentVisible(false);
         mActivity.mProjectName = name;
-        long id = mActivity.mProjectTable.insertValue(mActivity.mProjectName,
+        mActivity.mProjectId = (int) mActivity.mProjectTable.insertValue(mActivity.mProjectName,
                 System.currentTimeMillis() + "");
-        mActivity.mProjectId = (int) id;
         mActivity.resetActivity();
         mActivity.addWaterMark();
         setLayoutProjectInvisible();

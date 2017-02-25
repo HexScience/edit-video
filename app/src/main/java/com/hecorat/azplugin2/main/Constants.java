@@ -14,7 +14,11 @@ public interface Constants {
     int DEFAULT_DURATION = 10000;
     int BORDER_WIDTH = 5;
     int MAX_VOLUME = 200;
-
+    String VIDEO_FILE_PATH = "filePath";
+    String USE_SD_CARD = "use sd card";
+    String DIRECTORY = "directory";
+    String ACTION_COPY_FILE_TO_SDCARD = "copy file to sd";
+    String ACTION_COPY_COMPLETED = "copy completed";
     /**
      * Categories and Actions for Google Analytics
      */

@@ -101,7 +101,7 @@ public class ProjectListDialog extends DialogFragment {
             @Override
             public void deliverResult(Cursor cursor) {
                 super.deliverResult(cursor);
-                mProjectList = Utils.getRecentProjectsFromCursor(cursor);
+                mProjectList = mProjectTable.getRecentProjectsFromCursor(cursor);
                 if (mProjectList.size() > 0) mAdapter.notifyDataSetChanged();
             }
         };

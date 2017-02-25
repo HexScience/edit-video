@@ -93,4 +93,21 @@ public class ProjectTable {
         String selection = "SELECT * FROM " + TABLE_NAME;
         return database.rawQuery(selection, null);
     }
+
+    public ArrayList<ProjectObject> getRecentProjectsFromCursor(Cursor cursor) {
+        ArrayList<ProjectObject> recentProjectsList = new ArrayList<>();
+        if(cursor.moveToFirst()){
+            do{
+                ProjectObject project = new ProjectObject();
+                project.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
+                project.name = cursor.getString(cursor.getColumnIndex(PROJECT_NAME));
+                project.data = cursor.getString(cursor.getColumnIndex(PROJECT_DATA));
+                project.firstVideo = cursor.getString(cursor.getColumnIndex(PROJECT_FIRST_VIDEO));
+                recentProjectsList.add(project);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return recentProjectsList;
+    }
 }

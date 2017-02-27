@@ -6,17 +6,20 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -34,6 +37,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.DragEvent;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +53,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -80,6 +85,7 @@ import com.hecorat.azplugin2.export.ExportFragment;
 import com.hecorat.azplugin2.filemanager.FragmentAudioGallery;
 import com.hecorat.azplugin2.filemanager.FragmentImagesGallery;
 import com.hecorat.azplugin2.filemanager.FragmentVideosGallery;
+import com.hecorat.azplugin2.filemanager.GalleryState;
 import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.interfaces.DialogClickListener;
@@ -97,6 +103,7 @@ import com.hecorat.azplugin2.timeline.VideoTLControl;
 import com.hecorat.azplugin2.video.FragmentCrop;
 import com.hecorat.azplugin2.video.TrimFragment;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -149,25 +156,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private RelativeLayout mLayoutSetting;
     private ImageView mBtnExportGif;
     private FrameLayout mBtnTrimContainer;
-
-    private Thread mThreadPreviewVideo;
-    public ArrayList<VideoTL> mVideoList;
-    public ArrayList<ExtraTL> mImageList;
-    public ArrayList<ExtraTL> mTextList;
-    public ArrayList<AudioTL> mAudioList;
-    private ArrayList<ExtraTL> mListInLayoutImage, mListInLayoutText;
-    private ArrayList<ExtraTL> mTempListLayoutImage, mTempListLayoutText;
-    public ArrayList<String> mFontPath;
-    private AudioManager mAudioManager;
-
-    public String mProjectName;
-    public String mVideoPath, mImagePath, mAudioPath;
+    private WindowManager mWindowManager;
+    private ProgressBar mProgressBar;
 
     private MainActivity mActivity;
     private FontAdapter mFontAdapter;
     private MediaPlayer mMediaPlayer;
     private VideoTL mSelectedVideoTL, mCurrentVideoTL;
-    private VideoTLControl mVideoTLControl;
     private ExtraTL mSelectedExtraTL;
     private ExtraTLControl mExtraTLControl;
     private AudioTLControl mAudioTLControl;
@@ -189,14 +184,27 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private IabController mIabController;
     private FragmentCrop mFragmentCrop;
 
+    private AudioManager mAudioManager;
+    private Thread mThreadPreviewVideo;
+    public ArrayList<VideoTL> mVideoList;
+    public ArrayList<ExtraTL> mImageList;
+    public ArrayList<ExtraTL> mTextList;
+    public ArrayList<AudioTL> mAudioList;
+    private ArrayList<ExtraTL> mListInLayoutImage, mListInLayoutText;
+    private ArrayList<ExtraTL> mTempListLayoutImage, mTempListLayoutText;
+    public ArrayList<String> mFontPath;
+
+    public String mProjectName;
+    public String mVideoPath, mImagePath, mAudioPath;
+    public String mOutputDirectory;
+
     private int mDragCode = DRAG_VIDEO;
     private int mCountVideo = 0;
     private int mTimeLineVideoHeight = 150;
     private int mTimeLineImageHeight = 70;
     private int mFragmentCode;
     private boolean mOpenFileManager;
-    public boolean mOpenVideoSubFolder,
-            mOpenImageSubFolder, mOpenAudioSubFolder;
+    public boolean mOpenImageSubFolder, mOpenAudioSubFolder;
     private boolean mRunThread;
     private int mCurrentVideoId, mTLPositionInMs;
     private int mPreviewStatus;
@@ -222,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private int mVideoViewHeight;
     private boolean mOpenLayoutCropVideo;
     private boolean mOpenLayoutSetting;
+    public boolean mUseSdCard;
 
     private static final int TIMELINE_VIDEO = 0;
     private static final int TIMELINE_EXTRA = 1;
@@ -248,13 +257,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private static final String RECENT_PROJECT_LIST_FG = "recent_project_list_fg";
     private static final String ACTION_CREATE_NEW_PROJECT = "create_new_project";
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        showWaitingProgress();
         super.onCreate(savedInstanceState);
         log("onCreate");
         setContentView(R.layout.activity_main);
+        getVideoPathFromAzRecorder();
 
         mVideoViewLayout = (RelativeLayout) findViewById(R.id.video_view_layout);
         mLayoutVideo = (RelativeLayout) findViewById(R.id.layout_video);
@@ -419,14 +429,67 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         keepScreenOn();
 
-        checkVip();
-
         initVideoView();
 
         setFullscreen();
 
-        //load all projects from db
-        loadRecentProjectsFromDb();
+        checkVip();
+
+        registerReceiver(broadcastReceiverCopyFileCompleted, new IntentFilter(Constants.ACTION_COPY_COMPLETED));
+    }
+
+    BroadcastReceiver broadcastReceiverCopyFileCompleted = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mExportFragment.onBroadcastReceived(intent, Constants.ACTION_COPY_COMPLETED);
+        }
+    };
+
+    private void showWaitingProgress() {
+        mProgressBar = new ProgressBar(this);
+        mProgressBar.setIndeterminate(false);
+        mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+
+        WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+
+        mParams.gravity = Gravity.CENTER;
+        try {
+            mWindowManager.addView(mProgressBar, mParams);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void dissmissWaitingProgress(){
+        try {
+            mWindowManager.removeView(mProgressBar);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getVideoPathFromAzRecorder() {
+        Intent intent = getIntent();
+        if (intent != null) {
+            mVideoPath = intent.getStringExtra(Constants.VIDEO_FILE_PATH);
+            mUseSdCard = intent.getBooleanExtra(Constants.USE_SD_CARD, false);
+            mOutputDirectory = intent.getStringExtra(Constants.DIRECTORY);
+            if (mVideoPath == null) {
+                return;
+            }
+            String videoName = new File(mVideoPath).getName();
+            mProjectName = videoName.substring(0, videoName.length() - 4);
+            log("video path: " + mVideoPath);
+            log("use sd card = " + mUseSdCard);
+            log("output directory: " + mOutputDirectory);
+        }
     }
 
     private String getUniqueProjectName() {
@@ -455,7 +518,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mProjectId = (int) id;
         resetActivity();
         addWaterMark();
-        addVideoTL();
 
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_NEW_PROJECT);
@@ -477,26 +539,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 // init working project here, intercept intent with video path from az,
                 // if no intent or no data intercepted try open project from db, if db empty create
                 // new empty project and let user select video to it
-                mProjectList = Utils.getRecentProjectsFromCursor(cursor);
-                int numberOfRecentProjects = mProjectList.size();
-                Intent interceptedIntent = getIntent();
-                if (interceptedIntent != null && interceptedIntent.getData() != null
-                        && ACTION_CREATE_NEW_PROJECT.equals(interceptedIntent.getAction())) {
-                    mVideoPath = interceptedIntent.getData().toString();
-                    String projectName = getUniqueProjectName();
-                    createNewProject(projectName);
-                } else if (numberOfRecentProjects > 0) {
-                    openProject(mProjectList.get(numberOfRecentProjects - 1));
-                } else {
-                    createEmptyProject();
-                }
+                mProjectList = mProjectTable.getRecentProjectsFromCursor(cursor);
             }
         };
         cursorLoader.startLoading();
-    }
-
-    private void createEmptyProject(){
-
     }
 
     @Override
@@ -525,12 +571,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             }
             int duration = mVideoList.get(mCountVideo - 1).endInTimeLineMs / 1000;
             if (duration > 20) {
-                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.WARNING_DURATION_GIF)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.WARNING_DURATION_GIF, "")
                         .show(getSupportFragmentManager(), "warning gif duration");
                 return;
             }
             if (!mIsVip) {
-                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.ASK_DONATE)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.ASK_DONATE,
+                        Constants.EVENT_ACTION_DIALOG_FROM_NEW_GIF)
                         .show(getSupportFragmentManager(), "donate");
                 return;
             }
@@ -716,7 +763,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             findViewById(R.id.text_pro_2).setVisibility(View.GONE);
         } else {
             mBtnRemoveWatermark.setVisibility(View.VISIBLE);
+            addWaterMark();
         }
+        dissmissWaitingProgress();
     }
 
     private void saveLastAccount() {
@@ -735,10 +784,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     @Override
-    public void onPositiveClick(int dialogId) {
+    public void onPositiveClick(int dialogId, String detail) {
         switch (dialogId) {
             case DialogClickListener.ASK_DONATE:
-                startDonate();
+                startDonate(detail);
                 break;
             case DialogClickListener.DELETE_VIDEO:
                 deleteVideo();
@@ -759,9 +808,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    private void startDonate() {
+    private void startDonate(String detail) {
 //        mIabController.buyItem();
         Intent intent = new Intent(Constants.ACTION_IABTABLE);
+        intent.putExtra("from", detail);
         startActivityForResult(intent, Constants.REQUEST_CODE_PURCHASE);
     }
 
@@ -962,12 +1012,17 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     ViewTreeObserver.OnGlobalLayoutListener onLayoutVideoCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override
         public void onGlobalLayout() {
+            log("onLayoutVideoCreated");
             mTimeLineVideoHeight = mLayoutVideo.getHeight() - 10;
-            addVideoControler();
+//            addVideoControler();
+            if (mVideoPath != null) {
+                addVideoTL();
+            }
+//            dissmissWaitingProgress();
             mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            mVideoPath = "/storage/3730-6461/Videos/2017_02_21_14_27_17.mp4";
         }
     };
+
 
     public void openProject(ProjectObject projectObject) {
         mProjectId = projectObject.id;
@@ -1388,15 +1443,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         @Override
         public void onClick(View v) {
             if (mSelectedTL == TIMELINE_VIDEO) {
-                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.DELETE_VIDEO)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.DELETE_VIDEO, "")
                         .show(mActivity.getSupportFragmentManager(), "delete video");
             } else if (mSelectedTL == TIMELINE_EXTRA) {
                 int type = mSelectedExtraTL.isImage ? DialogClickListener.DELETE_IMAGE
                         : DialogClickListener.DELETE_TEXT;
-                DialogConfirm.newInstance(mActivity, mActivity, type)
+                DialogConfirm.newInstance(mActivity, mActivity, type, "")
                         .show(mActivity.getSupportFragmentManager(), "delete extra");
             } else {
-                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.DELETE_AUDIO)
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.DELETE_AUDIO, "")
                         .show(mActivity.getSupportFragmentManager(), "delete audio");
             }
         }
@@ -1472,9 +1527,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     ViewTreeObserver.OnGlobalLayoutListener onLayoutTimeLineCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override
         public void onGlobalLayout() {
+            log("onLayoutTimeLineCreated");
             mLeftMarginTimeLine = mLayoutTimeLine.getWidth() / 2 - Utils.dpToPixel(mActivity, 45);
             updateLayoutTimeLine();
             setTimeMark();
+
             mLayoutTimeLine.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
@@ -1556,6 +1613,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         stopThreadPreview();
         stopMediaPlayer();
         Utils.deleteTempFiles();
+        unregisterReceiver(broadcastReceiverCopyFileCompleted);
         super.onDestroy();
     }
 
@@ -2100,7 +2158,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         getLeftMargin(mCountVideo - 1);
 
         mMaxTimeLineMs = videoTL.endInTimeLineMs;
-        setWaterMarkEndTime(mMaxTimeLineMs);
         mTLPositionInMs = videoTL.startInTimeLineMs;
         scrollTo(mTLPositionInMs);
         mActiveVideoView.setVideoPath(videoTL.videoPath);
@@ -2494,7 +2551,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void askDonate() {
-        DialogConfirm.newInstance(this, this, DialogClickListener.ASK_DONATE)
+        DialogConfirm.newInstance(this, this, DialogClickListener.ASK_DONATE,
+                Constants.EVENT_ACTION_DIALOG_FROM_WATERMARK)
                 .show(getSupportFragmentManager(), "ask donate");
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_DONATE, Constants.ACTION_REMOVE_WATERMARK);
@@ -2760,19 +2818,22 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 mViewPager.setCurrentItem(VIDEO_TAB, true);
                 setHighLightTab(VIDEO_TAB);
                 setFolderName(mFragmentVideosGallery.mFolderName);
-                setBtnUpLevelVisible(mOpenVideoSubFolder);
+                setBtnUpLevelVisible(
+                        mFragmentVideosGallery.galleryState != GalleryState.VIDEO_FOLDER);
                 break;
             case IMAGE_TAB:
                 mViewPager.setCurrentItem(IMAGE_TAB, true);
                 setHighLightTab(IMAGE_TAB);
                 setFolderName(mFragmentImagesGallery.mFolderName);
-                setBtnUpLevelVisible(mOpenImageSubFolder);
+                setBtnUpLevelVisible(
+                        mFragmentImagesGallery.galleryState != GalleryState.IMAGE_FOLDER);
                 break;
             case AUDIO_TAB:
                 mViewPager.setCurrentItem(AUDIO_TAB, true);
                 setHighLightTab(AUDIO_TAB);
                 setFolderName(mFragmentAudioGallery.mFolderName);
-                setBtnUpLevelVisible(mOpenAudioSubFolder);
+                setBtnUpLevelVisible(
+                        mFragmentAudioGallery.galleryState != GalleryState.AUDIO_FOLDER);
                 break;
             case ACCEPT_TAB:
                 openFileManager(false);
@@ -2854,7 +2915,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     View.OnClickListener onBtnBackClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            onBackClick();
+            finish();
+            setResult(RESULT_OK);
             AnalyticsHelper.getInstance()
                     .send(mActivity, Constants.CATEGORY_CLICK_BACK, Constants.ACTION_CLICK_BUTTON_BACK);
         }
@@ -2873,26 +2935,23 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private boolean upLevelFileManager() {
         switch (mFragmentCode) {
             case VIDEO_TAB:
-                if (mOpenVideoSubFolder) {
-                    mFragmentVideosGallery.backToMain();
-                    mOpenVideoSubFolder = false;
-                    setBtnUpLevelVisible(false);
+                if (mFragmentVideosGallery.galleryState
+                        != GalleryState.VIDEO_FOLDER) {
+                    mFragmentVideosGallery.upLevel();
                     return true;
                 }
                 break;
             case IMAGE_TAB:
-                if (mOpenImageSubFolder) {
-                    mFragmentImagesGallery.backToMain();
-                    mOpenImageSubFolder = false;
-                    setBtnUpLevelVisible(false);
+                if (mFragmentImagesGallery.galleryState
+                        != GalleryState.IMAGE_FOLDER) {
+                    mFragmentImagesGallery.upLevel();
                     return true;
                 }
                 break;
             case AUDIO_TAB:
-                if (mOpenAudioSubFolder) {
-                    mFragmentAudioGallery.backToMain();
-                    mOpenAudioSubFolder = false;
-                    setBtnUpLevelVisible(false);
+                if (mFragmentAudioGallery.galleryState
+                        != GalleryState.AUDIO_FOLDER) {
+                    mFragmentAudioGallery.upLevel();
                     return true;
                 }
                 break;
@@ -2918,15 +2977,18 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             switch (position) {
                 case VIDEO_TAB:
                     setFolderName(mFragmentVideosGallery.mFolderName);
-                    setBtnUpLevelVisible(mOpenVideoSubFolder);
+                    setBtnUpLevelVisible(
+                            mFragmentVideosGallery.galleryState != GalleryState.VIDEO_FOLDER);
                     break;
                 case IMAGE_TAB:
-                    setBtnUpLevelVisible(mOpenImageSubFolder);
                     setFolderName(mFragmentImagesGallery.mFolderName);
+                    setBtnUpLevelVisible(
+                            mFragmentImagesGallery.galleryState != GalleryState.IMAGE_FOLDER);
                     break;
                 case AUDIO_TAB:
-                    setBtnUpLevelVisible(mOpenAudioSubFolder);
                     setFolderName(mFragmentAudioGallery.mFolderName);
+                    setBtnUpLevelVisible(
+                            mFragmentAudioGallery.galleryState != GalleryState.AUDIO_FOLDER);
                     break;
             }
         }
@@ -3566,7 +3628,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public void setExtraControlVisible(boolean visible) {
         if (visible) {
             mExtraTLControl.setVisibility(View.VISIBLE);
-            mVideoTLControl.setVisibility(View.GONE);
             mAudioTLControl.setVisibility(View.GONE);
             mSelectedTL = TIMELINE_EXTRA;
         } else {
@@ -3747,35 +3808,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         slideExtraToolsIn(false);
     }
 
-    private void setVideoControlVisible(boolean visible) {
-        visible = false;
-        if (visible) {
-            mVideoTLControl.setVisibility(View.VISIBLE);
-            mScrollView.scroll = false;
-            mExtraTLControl.setVisibility(View.GONE);
-            mAudioTLControl.setVisibility(View.GONE);
-        } else {
-            mVideoTLControl.setVisibility(View.GONE);
-            mScrollView.scroll = true;
-        }
-    }
-
     private void setAudioControlVisible(boolean visible) {
         if (visible) {
             mAudioTLControl.setVisibility(View.VISIBLE);
             mScrollView.scroll = false;
-            mVideoTLControl.setVisibility(View.GONE);
             mExtraTLControl.setVisibility(View.GONE);
         } else {
             mAudioTLControl.setVisibility(View.GONE);
             mScrollView.scroll = true;
         }
-    }
-
-    private void addVideoControler() {
-        mVideoTLControl = new VideoTLControl(this, 500, mTimeLineVideoHeight, mLeftMarginTimeLine);
-        mTimeLineVideo.addView(mVideoTLControl, mVideoTLControl.params);
-        setVideoControlVisible(false);
     }
 
     private void addExtraNAudioController() {

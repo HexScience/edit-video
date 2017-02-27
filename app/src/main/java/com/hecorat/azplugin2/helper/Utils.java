@@ -9,19 +9,24 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
+import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
 import com.hecorat.azplugin2.database.ProjectObject;
 import com.hecorat.azplugin2.main.Constants;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,8 +51,8 @@ public class Utils {
         }
     }
 
-    public static String getDefaultName() {
-        return new SimpleDateFormat("yy_MM_dd_HH_mm_ss", Locale.getDefault())
+    public static String getNameExtension() {
+        return new SimpleDateFormat("_HH_mm_ss", Locale.getDefault())
                 .format(new Date(System.currentTimeMillis()));
     }
 
@@ -171,20 +176,66 @@ public class Utils {
         return time;
     }
 
-    public static ArrayList<ProjectObject> getRecentProjectsFromCursor(Cursor cursor) {
-        ArrayList<ProjectObject> recentProjectsList = new ArrayList<>();
-        if(cursor.moveToFirst()){
-            do{
-                ProjectObject project = new ProjectObject();
-                project.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
-                project.name = cursor.getString(cursor.getColumnIndex(PROJECT_NAME));
-                project.data = cursor.getString(cursor.getColumnIndex(PROJECT_DATA));
-                project.firstVideo = cursor.getString(cursor.getColumnIndex(PROJECT_FIRST_VIDEO));
-                recentProjectsList.add(project);
-            } while (cursor.moveToNext());
+    public static String getSdPath(Context context) {
+        File[] listDir = context.getExternalFilesDirs(Environment.DIRECTORY_MOVIES);
+        if (listDir.length < 2) {
+            return null;
         }
+        String sdDir = listDir[1].getAbsolutePath();
+        int index = sdDir.indexOf("/Android/data");
+        return sdDir.substring(0, index);
+    }
 
-        cursor.close();
-        return recentProjectsList;
+    public static boolean moveFile(Context context, String src, String dst,
+                                   boolean useUri, boolean isVideo) {
+        if (useUri) {
+            try {
+                FileInputStream is = new FileInputStream(src);
+                FileChannel srcChannel = is.getChannel();
+                String outputName = "hello.mp4";
+                DocumentFile outputDir = DocumentFile.fromTreeUri(context,
+                        Uri.parse(dst));
+                String mediaType = isVideo ? "video/mp4" : "image/gif";
+                DocumentFile outputFile = outputDir.createFile(mediaType,
+                        outputName.substring(0, outputName.length() - 4));
+                ParcelFileDescriptor parcelFd;
+
+                parcelFd = context.getContentResolver().openFileDescriptor(
+                        outputFile.getUri(), "rw");
+                FileOutputStream os = new FileOutputStream(
+                        parcelFd.getFileDescriptor());
+                FileChannel dstChannel = os.getChannel();
+
+                dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
+
+                srcChannel.close();
+                is.close();
+                dstChannel.close();
+                os.close();
+                parcelFd.closeWithError("error");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        } else {
+            try {
+                FileInputStream is = new FileInputStream(src);
+                FileChannel srcChannel = is.getChannel();
+
+                FileOutputStream os = new FileOutputStream(dst);
+                FileChannel dstChannel = os.getChannel();
+                dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
+                srcChannel.close();
+                is.close();
+                dstChannel.close();
+                os.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+        }
+        return true;
     }
 }

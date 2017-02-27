@@ -1,7 +1,6 @@
 package com.hecorat.azplugin2.filemanager;
 
 import android.content.Context;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,6 +19,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.hecorat.azplugin2.R;
+import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.main.MainActivity;
 
 import java.io.File;
@@ -29,18 +29,21 @@ import java.util.ArrayList;
  * Created by bkmsx on 08/11/2016.
  */
 public class FragmentVideosGallery extends Fragment {
-    public ArrayList<String> mListFolder;
-    public ArrayList<String> mListFirstVideo, mListVideo;
     public GridView mGridView;
-    public String mStoragePath;
     public VideoGalleryAdapter mFolderAdapter, mVideoAdapter;
     public MainActivity mActivity;
     private View mView;
 
-    public boolean mIsSubFolder;
+    private String mSdPath;
     public String mFolderName;
     public String[] patterns = {".mp4"};
+    public String mStoragePath;
+    public ArrayList<String> mListFolder, mListFolderSd;
+    public ArrayList<String> mListFirstVideo, mListVideo, mListFirstVideoSd;
+
     public int mCountSubFolder;
+    private boolean mHasSdCard;
+    public GalleryState galleryState;
 
     public static FragmentVideosGallery newInstance(MainActivity activity) {
         FragmentVideosGallery fragmentVideosGallery = new FragmentVideosGallery();
@@ -52,22 +55,37 @@ public class FragmentVideosGallery extends Fragment {
     private void inflateViews(){
         mView = LayoutInflater.from(mActivity).inflate(R.layout.fragment_videos_gallery, null);
         mGridView = (GridView) mView.findViewById(R.id.video_gallery);
-        mStoragePath = Environment.getExternalStorageDirectory().toString();
-        File fileDirectory = new File(mStoragePath);
         mListFolder = new ArrayList<>();
-        mListFolder.add(mStoragePath);
-        listFolderFrom(fileDirectory);
         mListFirstVideo = new ArrayList<>();
         mListVideo = new ArrayList<>();
+        mListFolderSd = new ArrayList<>();
+        mListFirstVideoSd = new ArrayList<>();
 
-        new AsyncTaskScanFolder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        mSdPath = Utils.getSdPath(mActivity);
+        if (mSdPath != null) {
+            mListFolder.add(mSdPath);
+            mListFirstVideo.add("");
+            mHasSdCard = true;
+        } else {
+            mHasSdCard = false;
+        }
 
-        mIsSubFolder = false;
+        mStoragePath = Environment.getExternalStorageDirectory().toString();
+        File fileDirectory = new File(mStoragePath);
+        mListFolder.add(mStoragePath);
+
+        listFolderFrom(fileDirectory, mListFolder);
+        galleryState = GalleryState.VIDEO_FOLDER;
+
+        new AsyncTaskScanFolderVideo().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
         mFolderAdapter = new VideoGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstVideo);
         mGridView.setAdapter(mFolderAdapter);
         mGridView.setOnItemClickListener(onFolderClickListener);
         mFolderName = mActivity.getString(R.string.video_tab_title);
     }
+
+
 
     @Nullable
     @Override
@@ -84,32 +102,81 @@ public class FragmentVideosGallery extends Fragment {
         return false;
     }
 
-    public void backToMain() {
-        mIsSubFolder = false;
-        if (mFolderAdapter == null){
-            mFolderAdapter = new VideoGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstVideo);
+    public void upLevel() {
+        switch (galleryState) {
+            case VIDEO_FOLDER_SD:
+            case VIDEO_SUBFOLDER:
+                galleryState = GalleryState.VIDEO_FOLDER;
+                mFolderAdapter = new VideoGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstVideo);
+                mGridView.setAdapter(mFolderAdapter);
+                mGridView.setOnItemClickListener(onFolderClickListener);
+                mFolderName = getString(R.string.video_tab_title);
+                mActivity.setFolderName(mFolderName);
+                mActivity.setBtnUpLevelVisible(false);
+                break;
+            case VIDEO_SUBFOLDER_SD:
+                galleryState = GalleryState.VIDEO_FOLDER_SD;
+                mFolderAdapter = new VideoGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstVideoSd);
+                mGridView.setAdapter(mFolderAdapter);
+                mGridView.setOnItemClickListener(onFolderClickListener);
+                mFolderName = getString(R.string.video_tab_title) + " / Sd Card";
+                mActivity.setFolderName(mFolderName);
+                mActivity.setBtnUpLevelVisible(true);
+                break;
         }
-        mGridView.setAdapter(mFolderAdapter);
-        mGridView.setOnItemClickListener(onFolderClickListener);
-        mFolderName = getString(R.string.video_tab_title);
-        mActivity.setFolderName(mFolderName);
     }
 
     AdapterView.OnItemClickListener onFolderClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            mIsSubFolder = true;
+            log("onFolderClickListener i = " + i);
+            if (mHasSdCard && i == 0 && galleryState == GalleryState.VIDEO_FOLDER) {
+                setupLayoutSdFolder();
+                return;
+            }
+
             mListVideo.clear();
+            mActivity.setBtnUpLevelVisible(true);
+            String name = "";
+            if (galleryState == GalleryState.VIDEO_FOLDER) {
+                galleryState = GalleryState.VIDEO_SUBFOLDER;
+                name = new File(mListFolder.get(i)).getName();
+            } else {
+                galleryState = GalleryState.VIDEO_SUBFOLDER_SD;
+                String folderPath = mListFolderSd.get(i);
+                if (folderPath.equals(mSdPath)) {
+                    name = "0";
+                } else {
+                    name = new File(folderPath).getName();
+                }
+            }
+            mFolderName += " / " + name;
+            mActivity.setFolderName(mFolderName);
+            new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
+
             mVideoAdapter = new VideoGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListVideo);
             mGridView.setAdapter(mVideoAdapter);
             mGridView.setOnItemClickListener(onVideoClickListener);
-            mActivity.mOpenVideoSubFolder = true;
-            mActivity.setBtnUpLevelVisible(true);
-            mFolderName += " / " + new File(mListFolder.get(i)).getName();
-            mActivity.setFolderName(mFolderName);
-            new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
         }
     };
+
+    private void setupLayoutSdFolder() {
+        galleryState = GalleryState.VIDEO_FOLDER_SD;
+        mListFolderSd.clear();
+        mListFirstVideoSd.clear();
+
+        mFolderAdapter = new VideoGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstVideoSd);
+        mGridView.setAdapter(mFolderAdapter);
+        mGridView.setOnItemClickListener(onFolderClickListener);
+
+        mActivity.setBtnUpLevelVisible(true);
+        mFolderName += "/Sd Card";
+        mActivity.setFolderName(mFolderName);
+        mListFolderSd.add(mSdPath);
+        listFolderFrom(new File(mSdPath), mListFolderSd);
+
+        new AsyncTaskScanFolderVideo().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
 
     AdapterView.OnItemClickListener onVideoClickListener = new AdapterView.OnItemClickListener() {
         @Override
@@ -118,8 +185,6 @@ public class FragmentVideosGallery extends Fragment {
             int point[] = new int[2];
             view.getLocationOnScreen(point);
             mActivity.addVideo(videoPath, point);
-
-            log("view x= "+point[0]+" y= "+point[1]);
         }
     };
 
@@ -127,8 +192,9 @@ public class FragmentVideosGallery extends Fragment {
         @Override
         protected Void doInBackground(Integer... value) {
             boolean subFolder = true;
-            String folderPath = mListFolder.get(value[0]);
-            if (folderPath.equals(mStoragePath)){
+            String folderPath = galleryState == GalleryState.VIDEO_SUBFOLDER ?
+                    mListFolder.get(value[0]) : mListFolderSd.get(value[0]);
+            if (folderPath.equals(mStoragePath) || folderPath.equals(mSdPath)){
                 subFolder = false;
             }
             loadAllVideo(new File(folderPath), mListVideo, subFolder);
@@ -160,7 +226,7 @@ public class FragmentVideosGallery extends Fragment {
         }
     }
 
-    private class AsyncTaskScanFolder extends AsyncTask<Void, Void, Void> {
+    private class AsyncTaskScanFolderVideo extends AsyncTask<Void, Void, Void> {
         long start;
         @Override
         protected void onPreExecute() {
@@ -170,12 +236,15 @@ public class FragmentVideosGallery extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            int begin = galleryState == GalleryState.VIDEO_FOLDER_SD ? 0 : 1;
+            ArrayList<String> listFolder = galleryState == GalleryState.VIDEO_FOLDER_SD
+                    ? mListFolderSd : mListFolder;
 
-            for (int i=0; i<mListFolder.size(); i++) {
-                boolean scanSubFolder = !mListFolder.get(i).equals(mStoragePath);
+            for (int i = begin; i < listFolder.size(); i++) {
+                boolean scanSubFolder = i != begin;
                 mCountSubFolder = 0;
-                if (!isVideoFolder(new File(mListFolder.get(i)), scanSubFolder)){
-                    mListFolder.remove(i);
+                if (!isVideoFolder(new File(listFolder.get(i)), scanSubFolder)){
+                    listFolder.remove(i);
                     i--;
                 }
             }
@@ -185,11 +254,12 @@ public class FragmentVideosGallery extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            log(mListFirstVideo.size() + "");
             mFolderAdapter.notifyDataSetChanged();
         }
     }
 
-    private void listFolderFrom(File fileDirectory){
+    private void listFolderFrom(File fileDirectory, ArrayList<String> listFolder){
         File[] listFile = fileDirectory.listFiles();
         if (listFile == null) {
             return;
@@ -198,7 +268,7 @@ public class FragmentVideosGallery extends Fragment {
             if (file.isDirectory()) {
                 String name = file.getName();
                 if (name.charAt(0) != '.'){
-                    mListFolder.add(file.getAbsolutePath());
+                    listFolder.add(file.getAbsolutePath());
                 }
             }
         }
@@ -221,7 +291,11 @@ public class FragmentVideosGallery extends Fragment {
                 }
             } else {
                 if (matchFile(file)) {
-                    mListFirstVideo.add(file.getAbsolutePath());
+                    if (galleryState == GalleryState.VIDEO_FOLDER) {
+                        mListFirstVideo.add(file.getAbsolutePath());
+                    } else {
+                        mListFirstVideoSd.add(file.getAbsolutePath());
+                    }
                     result = true;
                 }
             }
@@ -254,21 +328,55 @@ public class FragmentVideosGallery extends Fragment {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
 
-            String name, videoPath;
-            int iconId ;
-            if (mIsSubFolder) {
-                videoPath = mListVideo.get(position);
-                name = new File(videoPath).getName();
-                iconId = R.drawable.ic_video;
-            } else {
-                videoPath = mListFirstVideo.get(position);
-                name = new File(mListFolder.get(position)).getName();
-                iconId = R.drawable.ic_folder;
+            switch (galleryState) {
+                case VIDEO_FOLDER:
+                    setLayoutVideoFolder(viewHolder, position);
+                    break;
+                case VIDEO_FOLDER_SD:
+                    setLayoutVideoFolderSd(viewHolder, position);
+                    break;
+                case VIDEO_SUBFOLDER:
+                case VIDEO_SUBFOLDER_SD:
+                    setLayoutVideo(viewHolder, position);
+                    break;
             }
+            return convertView;
+        }
+
+        private void setLayoutVideoFolder(ViewHolder viewHolder, int position) {
+            if (mHasSdCard && position == 0) {
+                viewHolder.iconFolder.setImageBitmap(null);
+                viewHolder.textView.setText("Sd Card");
+                viewHolder.imageView.setImageResource(R.drawable.ic_sd_card);
+            } else {
+                String videoPath = mListFirstVideo.get(position);
+                String name = new File(mListFolder.get(position)).getName();
+                int iconId = R.drawable.ic_folder;
+                viewHolder.iconFolder.setImageResource(iconId);
+                viewHolder.textView.setText(name);
+                Glide.with(mActivity).load(videoPath).centerCrop().into(viewHolder.imageView);
+            }
+        }
+
+        private void setLayoutVideoFolderSd(ViewHolder viewHolder, int position){
+            String videoPath = mListFirstVideoSd.get(position);
+            String name = new File(mListFolderSd.get(position)).getName();
+            if (position == 0 && mListFolderSd.get(0).equals(mSdPath)) {
+                name = "0";
+            }
+            int iconId = R.drawable.ic_folder;
             viewHolder.iconFolder.setImageResource(iconId);
             viewHolder.textView.setText(name);
             Glide.with(mActivity).load(videoPath).centerCrop().into(viewHolder.imageView);
-            return convertView;
+        }
+
+        private void setLayoutVideo(ViewHolder viewHolder, int position) {
+            String videoPath = mListVideo.get(position);
+            String name = new File(videoPath).getName();
+            int iconId = R.drawable.ic_video;
+            viewHolder.iconFolder.setImageResource(iconId);
+            viewHolder.textView.setText(name);
+            Glide.with(mActivity).load(videoPath).centerCrop().into(viewHolder.imageView);
         }
 
         class ViewHolder {

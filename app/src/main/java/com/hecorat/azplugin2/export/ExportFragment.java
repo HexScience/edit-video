@@ -64,6 +64,8 @@ public class ExportFragment extends Fragment implements DialogClickListener{
     private LinearLayout mLayoutQualityVideo;
     private CheckBox mCheckboxRatio;
 
+    private ExportTask mExportTask;
+
     public String mOutputPath;
     private String[] mFilesInFolder;
     public String mExtension;
@@ -280,7 +282,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         } else {
             mExtension = ".gif";
         }
-        String outputName = mActivity.mProjectName;
+        String outputName = mActivity.mProjectName + Utils.getNameExtension();
         String outName = outputName + mExtension;
         boolean unique;
         mFilesInFolder = new File(Utils.getOutputFolder()).list();
@@ -406,7 +408,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
             String name = mEditText.getText().toString() + mExtension;
             for (String fileName : mFilesInFolder) {
                 if (name.equals(fileName)) {
-                    DialogConfirm.newInstance(mActivity, ExportFragment.this, DialogClickListener.OVERWRITE_FILE)
+                    DialogConfirm.newInstance(mActivity, ExportFragment.this, DialogClickListener.OVERWRITE_FILE, "")
                             .show(mActivity.getSupportFragmentManager(), "overwrite file");
                     return;
                 }
@@ -438,7 +440,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
     }
 
     @Override
-    public void onPositiveClick(int dialogId) {
+    public void onPositiveClick(int dialogId, String detail) {
         switch (dialogId) {
             case DialogClickListener.OVERWRITE_FILE:
 //                mActivity.hideStatusBar();
@@ -464,12 +466,16 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         mOutputPath = Utils.getOutputFolder()+"/"+name + mExtension;
         boolean keepRatio = mCheckboxRatio.isChecked();
 
-        ExportTask exportTask = new ExportTask(mActivity, mActivity.mVideoList, mActivity.mImageList,
+        mExportTask = new ExportTask(mActivity, mActivity.mVideoList, mActivity.mImageList,
                 mActivity.mTextList, mActivity.mAudioList, name, quality, keepRatio);
-        exportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        mExportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_EXPORT, Constants.ACTION_CLICK_EXPORT);
+    }
+
+    public void onBroadcastReceived(Intent intent, String action) {
+        mExportTask.onBroadcastReceived(intent, action);
     }
 
     public void setExportProgress(int value) {

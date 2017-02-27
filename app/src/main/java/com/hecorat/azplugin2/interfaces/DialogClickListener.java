@@ -14,6 +14,6 @@ public interface DialogClickListener {
     int OVERWRITE_FILE = 6;
     int WARNING_DURATION_GIF = 7;
 
-    void onPositiveClick(int dialogId);
+    void onPositiveClick(int dialogId, String detail);
     void onNegativeClick(int dialogId);
 }

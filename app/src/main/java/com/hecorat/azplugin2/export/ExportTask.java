@@ -1,13 +1,12 @@
 package com.hecorat.azplugin2.export;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import com.hecorat.azplugin2.R;
-import com.hecorat.azplugin2.database.VideoObject;
 import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.main.Constants;
@@ -27,13 +26,16 @@ import java.util.LinkedList;
  */
 
 class ExportTask extends AsyncTask<Void, Void, Void> {
+    private ExportFragment mExportFragment;
+
     private ArrayList<VideoTL> mListVideo;
     private ArrayList<ExtraTL> mListImage, mListText;
     private ArrayList<AudioTL> mListAudio;
     private MainActivity mActivity;
     private String mName;
     private String mTempVideo;
-    private ExportFragment mExportFragment;
+    private String mOutputPath;
+    private String mOutputDir;
 
     private long startTime;
     private int mVideoDurationSec;
@@ -43,9 +45,10 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
     private boolean mExportVideo;
     private boolean mOnlyOneVideo;
     private boolean mKeepRatio;
+    private boolean mCopyingFile;
 
     ExportTask(MainActivity context, ArrayList<VideoTL> listVideo, ArrayList<ExtraTL> listImage,
-                      ArrayList<ExtraTL> listText, ArrayList<AudioTL> listAudio, String name, float quality, boolean keepRatio) {
+               ArrayList<ExtraTL> listText, ArrayList<AudioTL> listAudio, String name, float quality, boolean keepRatio) {
         mActivity = context;
         mExportFragment = mActivity.mExportFragment;
         mListVideo = listVideo;
@@ -80,12 +83,12 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
                 && mListVideo.size() == 1;
     }
 
-    private void updateAllList(){
+    private void updateAllList() {
         float layoutScale = mActivity.getLayoutVideoScale(mQuality);
         AnalyticsHelper.getInstance()
-                .sendCustomDimension(mActivity, Constants.DIMENSION_OUTPUT_QUALITY, (int)mQuality + "");
+                .sendCustomDimension(mActivity, Constants.DIMENSION_OUTPUT_QUALITY, (int) mQuality + "");
         mVideoDurationSec = 0;
-        for (int i=0; i<mListVideo.size(); i++){
+        for (int i = 0; i < mListVideo.size(); i++) {
             VideoHolder videoHolder = mListVideo.get(i).updateVideoHolder();
             mVideoDurationSec += videoHolder.durationSec;
         }
@@ -95,24 +98,24 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
 
         mActivity.setWaterMarkEndTime(mVideoDurationSec * 1000 + 500);
 
-        for (int i=0; i<mListAudio.size(); i++){
+        for (int i = 0; i < mListAudio.size(); i++) {
             mListAudio.get(i).updateAudioHolder();
         }
 
-        for (int i=0; i<mListImage.size(); i++){
+        for (int i = 0; i < mListImage.size(); i++) {
             mListImage.get(i).updateImageHolder(layoutScale);
         }
 
-        for (int i=0; i<mListText.size(); i++){
+        for (int i = 0; i < mListText.size(); i++) {
             mListText.get(i).updateTextHolder(layoutScale);
         }
     }
 
-    private void copyImageToStorage(String path){
+    private void copyImageToStorage(String path) {
         Bitmap bitmap = BitmapFactory.decodeResource(mActivity.getResources(), R.raw.background);
         int height = (int) mQuality;
-        int width = (int) (mQuality*16/9);
-        if (width%2 !=0 ){
+        int width = (int) (mQuality * 16 / 9);
+        if (width % 2 != 0) {
             width++;
         }
         Bitmap scaleBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
@@ -152,8 +155,8 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         LinkedList<String> command = new LinkedList<>();
         String input = Utils.getTempFolder() + "/" + mTempVideo + ".mp4";
         String palette = Utils.getTempFolder() + "/" + System.currentTimeMillis() + ".png";
-        String output = Utils.getOutputFolder() + "/" + mName + ".gif";
-        String filter = "[0:v]fps=" + mFps + ",scale=" + (int)mQuality + ":-1:" +
+        mOutputPath = mOutputDir + "/" + mName + ".gif";
+        String filter = "[0:v]fps=" + mFps + ",scale=" + (int) mQuality + ":-1:" +
                 "flags=lanczos,palettegen";
         if (mOnlyOneVideo) {
             VideoHolder video = mListVideo.get(0).videoHolder;
@@ -172,7 +175,7 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         ffmpeg.executeFFmpegCommand(command);
 
         command = new LinkedList<>();
-        filter = "fps=" + mFps + ",scale=" + (int)mQuality
+        filter = "fps=" + mFps + ",scale=" + (int) mQuality
                 + ":-1:flags=lanczos [x]; [x][1:v] paletteuse";
         if (mOnlyOneVideo) {
             VideoHolder video = mListVideo.get(0).videoHolder;
@@ -191,19 +194,18 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         command.add("-loop");
         command.add(String.valueOf(mLoop));
         command.add("-y");
-        command.add(output);
+        command.add(mOutputPath);
         ffmpeg.executeFFmpegCommand(command);
     }
 
-    private LinkedList<String> getExportVideoCommand(){
+    private LinkedList<String> getExportVideoCommand() {
         LinkedList<String> command = new LinkedList<>();
 
-        String output = "";
         if (mExportVideo) {
-            output = Utils.getOutputFolder() + "/"+mName+".mp4";
+            mOutputPath = mOutputDir + "/" + mName + ".mp4";
         } else {
             mTempVideo = System.currentTimeMillis() + "";
-            output = Utils.getTempFolder() + "/" + mTempVideo + ".mp4";
+            mOutputPath = Utils.getTempFolder() + "/" + mTempVideo + ".mp4";
         }
 
         if (!mOnlyOneVideo || !mKeepRatio) {
@@ -290,7 +292,7 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
             command.add("-strict");
             command.add("-2");
             command.add("-y");
-            command.add(output);
+            command.add(mOutputPath);
         } else {
             VideoHolder video = mListVideo.get(0).videoHolder;
             command.add("-ss");
@@ -302,7 +304,7 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
             command.add("-c");
             command.add("copy");
             command.add("-y");
-            command.add(output);
+            command.add(mOutputPath);
         }
         return command;
     }
@@ -312,12 +314,17 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         super.onPreExecute();
         log("Start get info");
         startTime = System.currentTimeMillis();
-        if (!mExportVideo){
+        if (!mExportVideo) {
             if (mOnlyOneVideo) {
                 mExportFragment.setProcessTitle(mActivity.getString(R.string.exporting_gif));
             } else {
                 mExportFragment.setProcessTitle(mActivity.getString(R.string.preparing_video));
             }
+        }
+        if (mActivity.mUseSdCard) {
+            mOutputDir = Utils.getTempFolder();
+        } else {
+            mOutputDir = mActivity.mOutputDirectory;
         }
         new ExportProgress(mActivity, mVideoDurationSec)
                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -327,9 +334,10 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         log("End get info");
-        log("Total Time= "+(System.currentTimeMillis()-startTime));
+        log("Total Time= " + (System.currentTimeMillis() - startTime));
         mActivity.mFinishExport = true;
         mExportFragment.setProcessTitle("");
+        log("mOutputPath: " + mOutputPath);
     }
 
     @Override
@@ -346,10 +354,31 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         } else {
             exportGif(ffmpeg);
         }
+
+        Intent intent = new Intent(Constants.ACTION_COPY_FILE_TO_SDCARD);
+        intent.putExtra(Constants.VIDEO_FILE_PATH, mOutputPath);
+        mActivity.sendBroadcast(intent);
+        mCopyingFile = true;
+        while (mCopyingFile) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         return null;
     }
 
     private void log(String msg) {
         Log.e("Export Task", msg);
+    }
+
+    public void onBroadcastReceived(Intent intent, String action) {
+        switch (action) {
+            case Constants.ACTION_COPY_COMPLETED:
+                mCopyingFile = false;
+                break;
+        }
     }
 }

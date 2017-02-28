@@ -256,6 +256,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private static final int LAYOUT_ANIMATION_DURATION = 100;
     private static final String RECENT_PROJECT_LIST_FG = "recent_project_list_fg";
     private static final String ACTION_CREATE_NEW_PROJECT = "create_new_project";
+    private ArrayList<ProjectObject> mProjectList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -467,7 +468,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    private void dissmissWaitingProgress(){
+    private void dismissWaitingProgress(){
         try {
             mWindowManager.removeView(mProgressBar);
         } catch (Exception e) {
@@ -522,8 +523,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_NEW_PROJECT);
     }
-
-    private ArrayList<ProjectObject> mProjectList;
 
     private void loadRecentProjectsFromDb() {
         CursorLoader cursorLoader = new CursorLoader(mActivity) {
@@ -765,7 +764,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mBtnRemoveWatermark.setVisibility(View.VISIBLE);
             addWaterMark();
         }
-        dissmissWaitingProgress();
+        dismissWaitingProgress();
     }
 
     private void saveLastAccount() {
@@ -1018,7 +1017,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             if (mVideoPath != null) {
                 addVideoTL();
             }
-//            dissmissWaitingProgress();
+//            dismissWaitingProgress();
             mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
@@ -3720,7 +3719,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         int visibility = visible ? View.VISIBLE : View.GONE;
         mBtnDelete.setVisibility(visibility);
     }
-
 
     //spare
     @Override

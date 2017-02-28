@@ -108,6 +108,8 @@ import com.hecorat.azplugin2.video.TrimFragment;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.jar.Attributes;
 
 public class MainActivity extends AppCompatActivity implements VideoTLControl.OnControlTimeLineChanged,
@@ -470,7 +472,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    private void backToRecorderGallery(){
+    private void backToRecorderGallery() {
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.hecorat.screenrecorder.free",
                 "com.hecorat.screenrecorder.free.main.RecordService"));
@@ -507,7 +509,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    private void dissmissWaitingProgress(){
+    private void dissmissWaitingProgress() {
         try {
             mWindowManager.removeView(mProgressBar);
         } catch (Exception e) {
@@ -661,10 +663,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutFloatView.bringToFront();
         mActiveVideoView.setOnClickListener(onHideStatusClick);
         mInActiveVideoView.setOnClickListener(onHideStatusClick);
-        if (mVideoPath != null) {
-            mActiveVideoView.setVideoPath(mVideoPath);
-            mActiveVideoView.seekTo(10);
-        }
     }
 
     View.OnClickListener onBtnCropClick = new View.OnClickListener() {
@@ -1080,14 +1078,30 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     ViewTreeObserver.OnGlobalLayoutListener onLayoutVideoCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override
         public void onGlobalLayout() {
-            log("onLayoutVideoCreated");
+
             mTimeLineVideoHeight = mLayoutVideo.getHeight() - 10;
-            if (mVideoPath != null) {
-                addVideoTL();
-            }
+            new Timer().schedule(new DelayTask(), 100);
             mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
+
+    Handler timerTaskHadler = new Handler();
+
+    private class DelayTask extends TimerTask {
+        @Override
+        public void run() {
+            timerTaskHadler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mVideoPath != null){
+                        addVideoTL();
+                        resetVideoView();
+                        log("DelayTask");
+                    }
+                }
+            });
+        }
+    }
 
 
     public void openProject(ProjectObject projectObject) {
@@ -1125,6 +1139,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             int[] point = new int[2];
             mVideoViewLayout.getLocationOnScreen(point);
             mVideoViewLeft = point[0];
+            log("onVideoViewLayoutCreated");
             mVideoViewLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
@@ -1872,7 +1887,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     }
                     int scrollPosition = mScrollView.getScrollX();
                     mTLPositionInMs = scrollPosition * Constants.SCALE_VALUE;
-
                     // update VideoView
                     VideoTL videoTL = null;
                     int timelineId = 0;
@@ -2230,6 +2244,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         updateVideoViewSize(mActiveVideoView, videoTL);
         mCurrentVideoId = mCountVideo - 1;
         fixIfVideoHasNoAudio(videoTL);
+        setActiveVideoViewVisible(true);
 
         mSelectedVideoTL = videoTL;
         updateBtnExportVisible();
@@ -3811,7 +3826,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void setVideoRatio() {
         ViewGroup.LayoutParams params = mVideoViewLayout.getLayoutParams();
-        int height = (int) (Utils.getScreenWidth() * 0.6);
+        int height = (int) (Utils.getScreenWidth(mActivity) * 0.6);
+        log("Width = " + Utils.getScreenWidth(mActivity));
         params.height = height;
         mVideoViewHeight = height;
         params.width = (int) (params.height * 1.77);

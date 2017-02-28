@@ -3,6 +3,7 @@ package com.hecorat.azplugin2.helper;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -14,6 +15,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.support.v4.provider.DocumentFile;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.hecorat.azplugin2.database.ProjectObject;
@@ -72,8 +74,16 @@ public class Utils {
         return bitmap;
     }
 
-    public static int getScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    public static int getScreenWidth(Context context) {
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        int value;
+        if (context.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE){
+            value = metrics.heightPixels;
+        } else {
+            value = metrics.widthPixels;
+        }
+        return value;
     }
 
     public static int getScreenHeight() {

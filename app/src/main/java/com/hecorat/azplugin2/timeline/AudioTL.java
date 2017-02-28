@@ -38,7 +38,6 @@ public class AudioTL extends AppCompatImageView {
     public int leftMargin;
     public float volume, volumePreview;
     public int orderInList;
-    public int projectId;
     public boolean isExists;
     public int background, nameColor;
     private float range=0;
@@ -65,7 +64,6 @@ public class AudioTL extends AppCompatImageView {
     public AudioTL(Context context, String audioPath, int height, int leftMargin) {
         super(context);
         mActivity = (MainActivity) context;
-        projectId = mActivity.mProjectId;
         this.audioPath = audioPath;
         audioPreview = audioPath;//spare
         audioHolder = new AudioHolder();
@@ -116,7 +114,6 @@ public class AudioTL extends AppCompatImageView {
     }
 
     public void restoreAudioObject(AudioObject audio) {
-        projectId = audio.projectId;
         startTimeMs = Integer.parseInt(audio.startTime);
         endTimeMs = Integer.parseInt(audio.endTime);
         left = Integer.parseInt(audio.left);
@@ -134,7 +131,6 @@ public class AudioTL extends AppCompatImageView {
 
     public AudioObject getAudioObject() {
         AudioObject audioObject = new AudioObject();
-        audioObject.projectId = projectId;
         audioObject.path = audioPath;
         audioObject.startTime = startTimeMs + "";
         audioObject.endTime = endTimeMs + "";

@@ -8,6 +8,7 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
@@ -87,6 +88,7 @@ import com.hecorat.azplugin2.filemanager.FragmentImagesGallery;
 import com.hecorat.azplugin2.filemanager.FragmentVideosGallery;
 import com.hecorat.azplugin2.filemanager.GalleryState;
 import com.hecorat.azplugin2.helper.AnalyticsHelper;
+import com.hecorat.azplugin2.helper.NameDialog;
 import com.hecorat.azplugin2.helper.Utils;
 import com.hecorat.azplugin2.interfaces.DialogClickListener;
 import com.hecorat.azplugin2.preview.CustomVideoView;
@@ -106,10 +108,12 @@ import com.hecorat.azplugin2.video.TrimFragment;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.jar.Attributes;
 
 public class MainActivity extends AppCompatActivity implements VideoTLControl.OnControlTimeLineChanged,
         ExtraTLControl.OnExtraTimeLineControlChanged, AudioTLControl.OnAudioControlTimeLineChanged,
-        ColorPickerView.OnColorChangedListener, DialogClickListener, ProjectListDialog.Callback {
+        ColorPickerView.OnColorChangedListener, DialogClickListener, ProjectListDialog.Callback,
+        NameDialog.DialogClickListener {
     private RelativeLayout mVideoViewLayout;
     private RelativeLayout mLayoutVideo, mLayoutImage, mLayoutText, mLayoutAudio;
     private RelativeLayout mTimeLineVideo, mTimeLineImage, mTimeLineText, mTimeLineAudio;
@@ -231,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private boolean mOpenLayoutCropVideo;
     private boolean mOpenLayoutSetting;
     public boolean mUseSdCard;
+    private int mInitProjectId;
 
     private static final int TIMELINE_VIDEO = 0;
     private static final int TIMELINE_EXTRA = 1;
@@ -445,6 +450,41 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     };
 
+    @Override
+    public void onPositiveClick(String name, int type) {
+        switch (type) {
+            case NameDialog.SAVE_PROJECT:
+                mProjectTable.updateValue(mProjectId, ProjectTable.PROJECT_NAME, name);
+                new SaveProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                backToRecorderGallery();
+                break;
+            case NameDialog.CREATE_PROJECT:
+                saveProject(mProjectId);
+                mProjectId = (int) mProjectTable.insertValue(name,
+                        System.currentTimeMillis() + "");
+                mProjectName = name;
+                resetActivity();
+                resetTempListLayout();
+                addWaterMark();
+                break;
+        }
+    }
+
+    private void backToRecorderGallery(){
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName("com.hecorat.screenrecorder.free",
+                "com.hecorat.screenrecorder.free.main.RecordService"));
+        intent.putExtra(Constants.COMMAND, Constants.COMMAND_OPEN_GALLERY);
+        startService(intent);
+        finish();
+        AnalyticsHelper.getInstance()
+                .send(mActivity, Constants.CATEGORY_CLICK_BACK, Constants.ACTION_CLICK_BUTTON_BACK);
+    }
+
+    @Override
+    public void onNegativeClick() {
+    }
+
     private void showWaitingProgress() {
         mProgressBar = new ProgressBar(this);
         mProgressBar.setIndeterminate(false);
@@ -481,14 +521,12 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mVideoPath = intent.getStringExtra(Constants.VIDEO_FILE_PATH);
             mUseSdCard = intent.getBooleanExtra(Constants.USE_SD_CARD, false);
             mOutputDirectory = intent.getStringExtra(Constants.DIRECTORY);
+            mIsVip = intent.getBooleanExtra(Constants.IS_VIP, false);
             if (mVideoPath == null) {
                 return;
             }
             String videoName = new File(mVideoPath).getName();
             mProjectName = videoName.substring(0, videoName.length() - 4);
-            log("video path: " + mVideoPath);
-            log("use sd card = " + mUseSdCard);
-            log("output directory: " + mOutputDirectory);
         }
     }
 
@@ -726,7 +764,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     };
 
     private void checkVip() {
-        mIabController = new IabController(this);
+        onCheckVipCompleted(mIsVip);
+        log("isVip = " + mIsVip);
+//        mIabController = new IabController(this);
     }
 
     public void checkVipWithoutInternet() {
@@ -754,16 +794,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void onCheckVipCompleted(boolean isVip) {
-        mIsVip = isVip;
+//        mIsVip = isVip;
         Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), isVip).apply();
         if (isVip) {
-            saveLastAccount();
+//            saveLastAccount();
             mBtnRemoveWatermark.setVisibility(View.GONE);
             findViewById(R.id.text_pro_1).setVisibility(View.GONE);
             findViewById(R.id.text_pro_2).setVisibility(View.GONE);
         } else {
             mBtnRemoveWatermark.setVisibility(View.VISIBLE);
-            addWaterMark();
         }
         dissmissWaitingProgress();
     }
@@ -805,7 +844,22 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 deleteAudioTimeLine();
                 updateBtnExportVisible();
                 break;
+            case DialogClickListener.SAVE_PROJECT:
+                if (mProjectId != mInitProjectId) {
+                    new SaveProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    backToRecorderGallery();
+                    return;
+                }
+                NameDialog.newInstance(mActivity, mActivity, NameDialog.SAVE_PROJECT, mProjectName)
+                        .show(getSupportFragmentManager(), "save project");
+                break;
         }
+    }
+
+    private void createProject() {
+        slideLayoutSettingIn(false);
+        NameDialog.newInstance(mActivity, mActivity, NameDialog.CREATE_PROJECT, Utils.getTime())
+                .show(getSupportFragmentManager(), "create project");
     }
 
     private void startDonate(String detail) {
@@ -817,6 +871,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     @Override
     public void onNegativeClick(int dialogId) {
+        if (mProjectId == mInitProjectId) {
+            mProjectTable.deleteProject(mProjectId);
+        }
+        deleteProjectIfEmpty(mProjectId);
+        backToRecorderGallery();
     }
 
     private void initFontManager() {
@@ -831,9 +890,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         protected Void doInBackground(Void... voids) {
             mFontPath = FontManager.getFontPaths(mActivity);
             mFontAdapter = new FontAdapter(mActivity, android.R.layout.simple_spinner_item, mFontPath);
-            for (String font : mFontPath) {
-                log(font);
-            }
             return null;
         }
 
@@ -842,7 +898,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             super.onPostExecute(aVoid);
             mFontSpinner.setAdapter(mFontAdapter);
             mFontSpinner.setOnItemSelectedListener(onFontSelectedListener);
-            mFontSpinner.setPrompt("hello");
+            addWaterMark();
         }
     }
 
@@ -884,6 +940,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mImageTable.createTable();
         mTextTable.createTable();
         mAudioTable.createTable();
+
+        mInitProjectId = (int) mProjectTable.insertValue(mProjectName, System.currentTimeMillis() + "");
+        mProjectId = mInitProjectId;
+        mProjectTable.updateValue(mProjectId, ProjectTable.PROJECT_FIRST_VIDEO, mVideoPath);
     }
 
     public void resetActivity() {
@@ -1014,11 +1074,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         public void onGlobalLayout() {
             log("onLayoutVideoCreated");
             mTimeLineVideoHeight = mLayoutVideo.getHeight() - 10;
-//            addVideoControler();
             if (mVideoPath != null) {
                 addVideoTL();
             }
-//            dissmissWaitingProgress();
             mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
@@ -1142,7 +1200,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     View.OnClickListener onBtnAddNewProjectClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-//
+            createProject();
         }
     };
 
@@ -1582,34 +1640,34 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mTextTable.deleteTextOf(projectId);
     }
 
-    public void saveProject() {
-        deleteAllObjects(mProjectId);
-        saveVideoObjects();
-        saveAudioObjects();
-        saveImageObjects();
-        saveTextObjects();
-        deleteProjectIfEmpty();
+    public void saveProject(int projectId) {
+        deleteAllObjects(projectId);
+        saveVideoObjects(projectId);
+        saveAudioObjects(projectId);
+        saveImageObjects(projectId);
+        saveTextObjects(projectId);
+        deleteProjectIfEmpty(projectId);
     }
 
-    private void deleteProjectIfEmpty() {
+    private void deleteProjectIfEmpty(int projectId) {
         if (mVideoList.isEmpty() && mImageList.isEmpty()
                 && mAudioList.isEmpty()) {
             if (mIsVip && mTextList.isEmpty() || !mIsVip && mTextList.size() == 1) {
-                mProjectTable.deleteProject(mProjectId);
+                mProjectTable.deleteProject(projectId);
             }
         }
     }
 
     public void exportVideo(boolean exportVideo) {
         mExportFragment = ExportFragment.newInstance(mActivity, exportVideo);
-        mActivity.getSupportFragmentManager().beginTransaction().replace(R.id.layout_fragment, mExportFragment).commit();
+        mActivity.getSupportFragmentManager().beginTransaction()
+                .replace(R.id.layout_fragment, mExportFragment).commit();
         setLayoutFragmentVisible(true);
         mOpenLayoutExport = true;
     }
 
     @Override
     protected void onDestroy() {
-        log("on destroy");
         stopThreadPreview();
         stopMediaPlayer();
         Utils.deleteTempFiles();
@@ -2108,21 +2166,20 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    public void saveVideoObjects() {
+    public void saveVideoObjects(int projectId) {
         getVideoOrder();
         for (VideoTL videoTL : mVideoList) {
             VideoObject videoObject = videoTL.getVideoObject();
-            mVideoTable.insertValue(videoObject);
+            mVideoTable.insertValue(videoObject, projectId);
         }
         if (mVideoList.size() > 0) {
             VideoObject videoObject = mVideoList.get(0).getVideoObject();
-            mProjectTable.updateValue(mProjectId, ProjectTable.PROJECT_FIRST_VIDEO, videoObject.path);
+            mProjectTable.updateValue(projectId, ProjectTable.PROJECT_FIRST_VIDEO, videoObject.path);
         }
     }
 
     public void restoreAllVideoTL(int projectId) {
         ArrayList<VideoObject> list = mVideoTable.getData(projectId);
-        log("List Video = " + list.size());
         if (list.size() < 1) {
             return;
         }
@@ -2236,24 +2293,21 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    public void saveTextObjects() {
+    public void saveTextObjects(int projectId) {
         getTextOrder();
-        int i = 0;
-        if (!mIsVip) {
-            i = 1;
-        }
+        int i = mIsVip ? 0 : 1;
         while (i < mTextList.size()) {
             ExtraTL extraTL = mTextList.get(i);
             TextObject text = extraTL.getTextObject();
-            mTextTable.insertValue(text);
+            mTextTable.insertValue(text, projectId);
             i++;
         }
     }
 
     private class SaveProjectTask extends AsyncTask<Void, Void, Void> {
         @Override
-        protected Void doInBackground(Void... voids) {
-            saveProject();
+        protected Void doInBackground(Void... params) {
+            saveProject(mProjectId);
             return null;
         }
     }
@@ -2275,11 +2329,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    public void saveImageObjects() {
+    public void saveImageObjects(int projectId) {
         getImageOrder();
         for (ExtraTL extraTL : mImageList) {
             ImageObject image = extraTL.getImageObject();
-            mImageTable.insertValue(image);
+            mImageTable.insertValue(image, projectId);
         }
     }
 
@@ -2604,7 +2658,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        mIabController.handleActivityResult(requestCode, resultCode, data);
+//        mIabController.handleActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
             case Constants.REQUEST_CODE_PURCHASE:
@@ -2692,11 +2746,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         return false;
     }
 
-    public void saveAudioObjects() {
+    public void saveAudioObjects(int projectId) {
         getAudioOrder();
         for (AudioTL audioTL : mAudioList) {
             AudioObject audio = audioTL.getAudioObject();
-            mAudioTable.insertValue(audio);
+            mAudioTable.insertValue(audio, projectId);
         }
     }
 
@@ -2915,10 +2969,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     View.OnClickListener onBtnBackClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            finish();
-            setResult(RESULT_OK);
-            AnalyticsHelper.getInstance()
-                    .send(mActivity, Constants.CATEGORY_CLICK_BACK, Constants.ACTION_CLICK_BUTTON_BACK);
+            DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.SAVE_PROJECT, "")
+                    .show(getSupportFragmentManager(), "save project");
+
         }
     };
 
@@ -3459,7 +3512,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         if (!mOpenLayoutProject) {
             pausePreview();
-            saveProject();
+            new SaveProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             openLayoutProject();
             hideAllFloatNControlers();
             log("openLayoutProject");
@@ -3720,7 +3773,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         int visibility = visible ? View.VISIBLE : View.GONE;
         mBtnDelete.setVisibility(visibility);
     }
-
 
     //spare
     @Override

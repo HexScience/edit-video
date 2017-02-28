@@ -55,10 +55,10 @@ public class ImageTable {
         sqLiteDatabase.execSQL(sql);
     }
 
-    public void insertValue(ImageObject image){
+    public void insertValue(ImageObject image, int projectId){
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(PROJECT_ID, image.projectId);
+        contentValues.put(PROJECT_ID, projectId);
         contentValues.put(PATH, image.path);
         contentValues.put(LEFT, image.left);
         contentValues.put(RIGHT, image.right);
@@ -88,7 +88,6 @@ public class ImageTable {
             while (cursor.moveToNext()) {
                 ImageObject image = new ImageObject();
                 image.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(ID)));
-                image.projectId = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
                 image.path = cursor.getString(cursor.getColumnIndex(PATH));
                 image.left = cursor.getString(cursor.getColumnIndex(LEFT));
                 image.right = cursor.getString(cursor.getColumnIndex(RIGHT));

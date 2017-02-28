@@ -37,7 +37,6 @@ public class ExtraTL extends AppCompatImageView {
     public boolean isImage;
     public boolean inLayoutImage;
     public int leftMarginTimeLine;
-    public int projectId;
     public int orderInLayout, orderInList;
     public boolean isExists;
     public int background;
@@ -61,7 +60,6 @@ public class ExtraTL extends AppCompatImageView {
     public ExtraTL(Context context, String pathOrText, int height, int leftMargin, boolean isImage) {
         super(context);
         mActivity = (MainActivity) context;
-        projectId = mActivity.mProjectId;
         durationImage = Constants.DEFAULT_DURATION;
         this.height = height;
         background = ContextCompat.getColor(mActivity, R.color.background_timeline);
@@ -167,7 +165,6 @@ public class ExtraTL extends AppCompatImageView {
     }
 
     public void restoreTextTL(TextObject textObject) {
-        projectId = textObject.projectId;
         text = textObject.text;
         left = Integer.parseInt(textObject.left);
         right = Integer.parseInt(textObject.right);
@@ -180,7 +177,6 @@ public class ExtraTL extends AppCompatImageView {
 
     public TextObject getTextObject() {
         TextObject textObject = new TextObject();
-        textObject.projectId = projectId;
         textObject.text = text;
         textObject.left = left + "";
         textObject.right = right + "";
@@ -201,7 +197,6 @@ public class ExtraTL extends AppCompatImageView {
     }
 
     public void restoreImageTL(ImageObject image){
-        projectId = image.projectId;
         left = Integer.parseInt(image.left);
         right = Integer.parseInt(image.right);
         inLayoutImage = Integer.parseInt(image.inLayoutImage) == 1;
@@ -213,7 +208,6 @@ public class ExtraTL extends AppCompatImageView {
 
     public ImageObject getImageObject() {
         ImageObject image = new ImageObject();
-        image.projectId = projectId;
         image.path = imagePath;
         image.left = left + "";
         image.right = right + "";

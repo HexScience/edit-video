@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -135,6 +136,8 @@ public class ProjectListDialog extends DialogFragment {
             holder.mImgPopup.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    log("project name: " + project.name);
+                    log("project id: " + project.id);
                     PopupMenu popup = new PopupMenu(mActivity, holder.mImgPopup);
                     popup.getMenuInflater().inflate(R.menu.recent_project_popup_menu, popup.getMenu());
                     popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -261,5 +264,8 @@ public class ProjectListDialog extends DialogFragment {
                             })
                     .show();
         }
+    }
+    private void log(String msg) {
+        Log.e("ProjectListDialog", msg);
     }
 }

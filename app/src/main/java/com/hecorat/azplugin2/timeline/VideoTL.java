@@ -52,7 +52,6 @@ public class VideoTL extends AppCompatImageView {
     public int mBorderColor;
     public boolean isHighLight;
     public int orderInList;
-    public int projectId;
     public boolean isExists;
     public float leftSide, rightSide, bottomSide, topSide;
     private int videoWidth, videoHeight;
@@ -64,7 +63,6 @@ public class VideoTL extends AppCompatImageView {
     public VideoTL(Context context, String videoPath, int height) {
         super(context);
         mActivity = (MainActivity) context;
-        projectId = mActivity.mProjectId;
         MARGIN_LEFT_TIME_LINE = mActivity.mLeftMarginTimeLine;
         this.videoPath = videoPath;
         originVideoPath = videoPath;
@@ -138,7 +136,6 @@ public class VideoTL extends AppCompatImageView {
     }
 
     public void restoreVideoObject(VideoObject video) {
-        projectId = video.projectId;
         startTimeMs = Integer.parseInt(video.startTime);
         endTimeMs = Integer.parseInt(video.endTime);
         left = Integer.parseInt(video.left);
@@ -149,14 +146,11 @@ public class VideoTL extends AppCompatImageView {
         bottomSide = Float.parseFloat(video.bottomSide);
         topSide = Float.parseFloat(video.topSide);
         videoRatio = (rightSide - leftSide) / (topSide - bottomSide) * originVideoRatio;
-        log("originVideoRatio = " + originVideoRatio);
-        log("videoRatio = " + videoRatio);
         drawTimeLineWith(startTimeMs, endTimeMs);
     }
 
     public VideoObject getVideoObject() {
         VideoObject videoObject = new VideoObject();
-        videoObject.projectId = projectId;
         videoObject.path = originVideoPath;
         videoObject.startTime = startTimeMs + "";
         videoObject.endTime = endTimeMs + "";

@@ -5,7 +5,7 @@ package com.hecorat.azplugin2.database;
  */
 
 public class VideoObject {
-    public int id, projectId;
+    public int id;
     public String path, startTime, endTime, left,
             orderInList, volume, volumePreview,
             leftSide, rightSide, bottomSide, topSide;
@@ -15,7 +15,6 @@ public class VideoObject {
     public VideoObject(int projectId, String path, String startTime,
                        String endTime, String left, String orderInList,
                         String volume, String volumePreview){
-        this.projectId = projectId;
         this.path = path;
         this.startTime = startTime;
         this.endTime = endTime;

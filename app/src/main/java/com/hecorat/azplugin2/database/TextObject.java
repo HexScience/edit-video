@@ -5,7 +5,7 @@ package com.hecorat.azplugin2.database;
  */
 
 public class TextObject {
-    public int id, projectId;
+    public int id;
     public String text, left, right, inLayoutImage, orderInLayout, orderInList;
     public String x, y, scale, rotation, size, fontPath, fontColor, boxColor, fontId;
 
@@ -15,7 +15,6 @@ public class TextObject {
                       String inLayoutImage, String orderInLayout, String orderInList,
                       String x, String y, String scale, String rotation, String size,
                       String fontPath, String fontColor, String boxColor) {
-        this.projectId = projectId;
         this.text = text;
         this.left = left;
         this.right = right;

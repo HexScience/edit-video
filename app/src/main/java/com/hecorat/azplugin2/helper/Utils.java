@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -41,6 +42,12 @@ import static com.hecorat.azplugin2.database.ProjectTable.PROJECT_NAME;
  * Created by bkmsx on 11/11/2016.
  */
 public class Utils {
+
+    public static String getTime(){
+        return new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault())
+                .format(Calendar.getInstance().getTime());
+    }
+
     public static void writeToFile(File fileTxt, String data) {
         try {
             FileWriter out = new FileWriter(fileTxt);

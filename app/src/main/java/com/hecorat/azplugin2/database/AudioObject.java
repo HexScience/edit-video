@@ -5,7 +5,7 @@ package com.hecorat.azplugin2.database;
  */
 
 public class AudioObject {
-    public int id, projectId;
+    public int id;
     public String path, startTime, endTime, left,
             orderInList, volume, volumePreview;
 
@@ -14,7 +14,6 @@ public class AudioObject {
     public AudioObject(int projectId, String path, String startTime,
                        String endTime, String left, String order,
                        String volume, String volumePreview){
-        this.projectId = projectId;
         this.path = path;
         this.startTime = startTime;
         this.endTime = endTime;

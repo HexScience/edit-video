@@ -661,6 +661,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutFloatView.bringToFront();
         mActiveVideoView.setOnClickListener(onHideStatusClick);
         mInActiveVideoView.setOnClickListener(onHideStatusClick);
+        if (mVideoPath != null) {
+            mActiveVideoView.setVideoPath(mVideoPath);
+            mActiveVideoView.seekTo(10);
+        }
     }
 
     View.OnClickListener onBtnCropClick = new View.OnClickListener() {
@@ -871,11 +875,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     @Override
     public void onNegativeClick(int dialogId) {
-        if (mProjectId == mInitProjectId) {
-            mProjectTable.deleteProject(mProjectId);
+        switch (dialogId) {
+            case DialogClickListener.SAVE_PROJECT:
+                if (mProjectId == mInitProjectId) {
+                    mProjectTable.deleteProject(mProjectId);
+                }
+                deleteProjectIfEmpty(mProjectId);
+                backToRecorderGallery();
+                break;
         }
-        deleteProjectIfEmpty(mProjectId);
-        backToRecorderGallery();
     }
 
     private void initFontManager() {
@@ -2986,6 +2994,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     };
 
     private boolean upLevelFileManager() {
+        if (!mOpenFileManager) {
+            return false;
+        }
         switch (mFragmentCode) {
             case VIDEO_TAB:
                 if (mFragmentVideosGallery.galleryState
@@ -3467,58 +3478,46 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public void onBackPressed() {
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_CLICK_BACK, Constants.ACTION_CLICK_NAVIGATION_BACK);
-
-        if (onBackClick()) {
-            return;
-        }
-        super.onBackPressed();
+        onBackClick();
     }
 
-    private boolean onBackClick() {
+    private void onBackClick() {
         if (mOpenLayoutExport) {
             if (mExportFragment.mExporting) {
                 log("mExportFragment.mExporting");
-                return true;
+                return;
             }
         }
 
         if (mOpenLayoutExport) {
             closeLayoutExport();
             log("closeLayoutExport");
-            return true;
+            return;
         }
 
         if (mOpenLayoutTrimVideo) {
             closeLayoutTrimVideo();
             log("closeLayoutTrimVideo");
-            return true;
+            return;
         }
 
         if (mOpenLayoutAdd) {
             setLayoutAddVisible(false);
             log("setLayoutAddVisible(false)");
-            return true;
+            return;
         }
 
         if (mOpenLayoutEditText) {
             openLayoutEditText(false);
             log("openLayoutEditText(false)");
-            return true;
+            return;
         }
         if (upLevelFileManager()) {
             log("upLevelFileManager");
-            return true;
+            return;
         }
-
-        if (!mOpenLayoutProject) {
-            pausePreview();
-            new SaveProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            openLayoutProject();
-            hideAllFloatNControlers();
-            log("openLayoutProject");
-            return true;
-        }
-        return false;
+        DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.SAVE_PROJECT, "")
+                .show(getSupportFragmentManager(), "save project");
     }
 
     View.OnClickListener onExtraTimeLineClick = new View.OnClickListener() {

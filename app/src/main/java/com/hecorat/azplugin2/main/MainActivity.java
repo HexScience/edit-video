@@ -108,7 +108,6 @@ import com.hecorat.azplugin2.video.TrimFragment;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.jar.Attributes;
 
 public class MainActivity extends AppCompatActivity implements VideoTLControl.OnControlTimeLineChanged,
         ExtraTLControl.OnExtraTimeLineControlChanged, AudioTLControl.OnAudioControlTimeLineChanged,

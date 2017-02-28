@@ -105,4 +105,9 @@
     <string name="dialog_open_project_title">Open project</string>
     <string name="dialog_open_project_mess">Do you want open project "'"%s"'"? All state of current editing project will be saved.</string>
 
+    <string name="dialog_title_save_project">Save Project</string>
+    <string name="dialog_msg_save_project">Do you want to save this project?</string>
+    <string name="btn_no">No</string>
+    <string name="btn_yes">Yes</string>
+
 </resources>

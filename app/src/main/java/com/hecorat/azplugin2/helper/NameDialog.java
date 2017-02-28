@@ -27,14 +27,16 @@ public class NameDialog extends DialogFragment {
 
     DialogClickListener mCallBack;
 
-    public static final int CREATE_PROJECT = 0;
+    public static final int SAVE_PROJECT = 0;
     public static final int RENAME = 1;
+    public static final int CREATE_PROJECT = 2;
 
-    public static NameDialog newInstance(Context context, int type, String initText) {
+    public static NameDialog newInstance(Context context, DialogClickListener listener, int type, String initText) {
         NameDialog nameDialog = new NameDialog();
         nameDialog.mContext = context;
         nameDialog.mType = type;
         nameDialog.mInitText = initText;
+        nameDialog.mCallBack = listener;
         return nameDialog;
     }
     @NonNull
@@ -67,6 +69,7 @@ public class NameDialog extends DialogFragment {
     private String getTitle() {
         switch (mType) {
             case CREATE_PROJECT:
+            case SAVE_PROJECT:
                 return getString(R.string.dialog_title_create_project);
             case RENAME:
                 return getString(R.string.dialog_title_rename);
@@ -75,17 +78,7 @@ public class NameDialog extends DialogFragment {
     }
 
     private String getPositiveBtnText() {
-        switch (mType) {
-            case CREATE_PROJECT:
-                return getString(R.string.ok_btn);
-            case RENAME:
-                return getString(R.string.ok_btn);
-        }
-        return "";
-    }
-
-    public void setOnClickListener(DialogClickListener listener) {
-        mCallBack = listener;
+        return getString(R.string.ok_btn);
     }
 
     public interface DialogClickListener {

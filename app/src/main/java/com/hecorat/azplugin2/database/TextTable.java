@@ -65,10 +65,10 @@ public class TextTable {
         sqLiteDatabase.execSQL(sql);
     }
 
-    public void insertValue(TextObject text){
+    public void insertValue(TextObject text, int projectId){
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(PROJECT_ID, text.projectId);
+        contentValues.put(PROJECT_ID, projectId);
         contentValues.put(TEXT, text.text);
         contentValues.put(LEFT, text.left);
         contentValues.put(RIGHT, text.right);
@@ -103,7 +103,6 @@ public class TextTable {
             while (cursor.moveToNext()) {
                 TextObject text = new TextObject();
                 text.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(ID)));
-                text.projectId = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
                 text.text = cursor.getString(cursor.getColumnIndex(TEXT));
                 text.left = cursor.getString(cursor.getColumnIndex(LEFT));
                 text.right = cursor.getString(cursor.getColumnIndex(RIGHT));

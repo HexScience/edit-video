@@ -90,7 +90,8 @@ public class ProjectTable {
 
     public Cursor queryAllRecentProject() throws SQLException {
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
-        String selection = "SELECT * FROM " + TABLE_NAME;
+        String selection = "SELECT * FROM " + TABLE_NAME + " ORDER BY "
+                + PROJECT_ID + " DESC";
         return database.rawQuery(selection, null);
     }
 

@@ -57,10 +57,10 @@ public class VideoTable {
         sqLiteDatabase.execSQL(sql);
     }
 
-    public void insertValue(VideoObject video){
+    public void insertValue(VideoObject video, int projectId){
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(PROJECT_ID, video.projectId);
+        contentValues.put(PROJECT_ID, projectId);
         contentValues.put(PATH, video.path);
         contentValues.put(START_TIME, video.startTime);
         contentValues.put(END_TIME, video.endTime);
@@ -91,7 +91,6 @@ public class VideoTable {
             while (cursor.moveToNext()) {
                 VideoObject video = new VideoObject();
                 video.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(ID)));
-                video.projectId = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
                 video.path = cursor.getString(cursor.getColumnIndex(PATH));
                 video.startTime = cursor.getString(cursor.getColumnIndex(START_TIME));
                 video.endTime = cursor.getString(cursor.getColumnIndex(END_TIME));
@@ -105,7 +104,10 @@ public class VideoTable {
                 video.topSide = cursor.getString(cursor.getColumnIndex(TOP_SIDE));
                 list.add(video);
             }
-        } finally {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
             cursor.close();
         }
         return list;

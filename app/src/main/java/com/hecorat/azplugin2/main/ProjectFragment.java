@@ -139,8 +139,8 @@ public class ProjectFragment extends DialogFragment implements NameDialog.Dialog
         public void onClick(View view) {
             findMaxIndex();
             String nameProject = "Project_"+(mMaxIndex +1);
-            NameDialog dialog = NameDialog.newInstance(mActivity, NameDialog.CREATE_PROJECT, nameProject);
-            dialog.setOnClickListener(ProjectFragment.this);
+            NameDialog dialog = NameDialog.newInstance(mActivity, ProjectFragment.this,
+                    NameDialog.SAVE_PROJECT, nameProject);
             dialog.show(mActivity.getSupportFragmentManager(), "name project");
         }
     };
@@ -183,7 +183,7 @@ public class ProjectFragment extends DialogFragment implements NameDialog.Dialog
     @Override
     public void onPositiveClick(String name, int type) {
         switch (type) {
-            case NameDialog.CREATE_PROJECT:
+            case NameDialog.SAVE_PROJECT:
                 createNewProject(name);
                 break;
             case NameDialog.RENAME:
@@ -251,8 +251,8 @@ public class ProjectFragment extends DialogFragment implements NameDialog.Dialog
     View.OnClickListener onBtnRenameClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            NameDialog dialog = NameDialog.newInstance(mActivity, NameDialog.RENAME, mSelectProjectName);
-            dialog.setOnClickListener(ProjectFragment.this);
+            NameDialog dialog = NameDialog.newInstance(mActivity, ProjectFragment.this,
+                    NameDialog.RENAME, mSelectProjectName);
             dialog.show(mActivity.getSupportFragmentManager(), "rename");
         }
     };

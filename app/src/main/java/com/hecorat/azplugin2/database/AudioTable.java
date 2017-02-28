@@ -49,10 +49,10 @@ public class AudioTable {
         sqLiteDatabase.execSQL(sql);
     }
 
-    public void insertValue(AudioObject audio){
+    public void insertValue(AudioObject audio, int projectId){
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(PROJECT_ID, audio.projectId);
+        contentValues.put(PROJECT_ID, projectId);
         contentValues.put(PATH, audio.path);
         contentValues.put(START_TIME, audio.startTime);
         contentValues.put(END_TIME, audio.endTime);
@@ -79,7 +79,6 @@ public class AudioTable {
             while (cursor.moveToNext()) {
                 AudioObject audio = new AudioObject();
                 audio.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(ID)));
-                audio.projectId = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
                 audio.path = cursor.getString(cursor.getColumnIndex(PATH));
                 audio.startTime = cursor.getString(cursor.getColumnIndex(START_TIME));
                 audio.endTime = cursor.getString(cursor.getColumnIndex(END_TIME));

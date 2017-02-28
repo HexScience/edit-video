@@ -5,7 +5,7 @@ package com.hecorat.azplugin2.database;
  */
 
 public class ImageObject {
-    public int id, projectId;
+    public int id;
     public String path, left, right, inLayoutImage, orderInLayout, orderInList;
     public String x, y, scale, rotation;
 
@@ -14,7 +14,6 @@ public class ImageObject {
     public ImageObject(int projectId, String path, String left, String right,
                 String inLayoutImage, String orderInLayout, String orderInList,
                 String x, String y, String scale, String rotation) {
-        this.projectId = projectId;
         this.path = path;
         this.left = left;
         this.right = right;

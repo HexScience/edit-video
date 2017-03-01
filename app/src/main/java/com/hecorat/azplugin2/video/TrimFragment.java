@@ -143,7 +143,7 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
     }
 
     private void setLayoutTrimVideo(){
-        float layoutHeight = Utils.getScreenHeight()*0.9f;
+        float layoutHeight = Utils.getScreenHeight(mActivity)*0.9f;
         ViewGroup.LayoutParams layoutParams = mLayoutFragment.getLayoutParams();
         layoutParams.height = (int) layoutHeight;
 

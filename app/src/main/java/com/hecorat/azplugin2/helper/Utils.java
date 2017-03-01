@@ -74,7 +74,7 @@ public class Utils {
         return bitmap;
     }
 
-    public static int getScreenWidth(Context context) {
+    public static int getScreenHeight(Context context) {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         int value;
         if (context.getResources().getConfiguration().orientation
@@ -84,10 +84,6 @@ public class Utils {
             value = metrics.widthPixels;
         }
         return value;
-    }
-
-    public static int getScreenHeight() {
-        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
     public static int dpToPixel(Context context, int dp) {

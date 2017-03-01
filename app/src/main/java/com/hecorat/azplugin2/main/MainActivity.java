@@ -110,7 +110,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.jar.Attributes;
 
 public class MainActivity extends AppCompatActivity implements VideoTLControl.OnControlTimeLineChanged,
         ExtraTLControl.OnExtraTimeLineControlChanged, AudioTLControl.OnAudioControlTimeLineChanged,
@@ -238,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private boolean mOpenLayoutSetting;
     public boolean mUseSdCard;
     private int mInitProjectId;
+    private boolean mOpenFromDialog;
 
     private static final int TIMELINE_VIDEO = 0;
     private static final int TIMELINE_EXTRA = 1;
@@ -473,12 +473,15 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void backToRecorderGallery() {
+        finish();
+        if (mOpenFromDialog) {
+            return;
+        }
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.hecorat.screenrecorder.free",
                 "com.hecorat.screenrecorder.free.main.RecordService"));
         intent.putExtra(Constants.COMMAND, Constants.COMMAND_OPEN_GALLERY);
         startService(intent);
-        finish();
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_CLICK_BACK, Constants.ACTION_CLICK_BUTTON_BACK);
     }
@@ -524,6 +527,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mUseSdCard = intent.getBooleanExtra(Constants.USE_SD_CARD, false);
             mOutputDirectory = intent.getStringExtra(Constants.DIRECTORY);
             mIsVip = intent.getBooleanExtra(Constants.IS_VIP, false);
+            mOpenFromDialog = intent.getBooleanExtra(Constants.OPEN_FROM_DIALOG, true);
             if (mVideoPath == null) {
                 return;
             }
@@ -1103,7 +1107,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-
     public void openProject(ProjectObject projectObject) {
         mProjectId = projectObject.id;
         mProjectName = projectObject.name;
@@ -1426,7 +1429,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             }
         }
     };
-
 
     private void openLayoutTrimVideo() {
         setActiveVideoViewVisible(false);
@@ -3826,8 +3828,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void setVideoRatio() {
         ViewGroup.LayoutParams params = mVideoViewLayout.getLayoutParams();
-        int height = (int) (Utils.getScreenWidth(mActivity) * 0.6);
-        log("Width = " + Utils.getScreenWidth(mActivity));
+        int height = (int) (Utils.getScreenHeight(mActivity) * 0.6);
+        log("Width = " + Utils.getScreenHeight(mActivity));
         params.height = height;
         mVideoViewHeight = height;
         params.width = (int) (params.height * 1.77);

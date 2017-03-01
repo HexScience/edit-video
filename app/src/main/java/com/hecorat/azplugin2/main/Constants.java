@@ -24,6 +24,7 @@ public interface Constants {
     String COMMAND_OPEN_GALLERY = "command open gallery notification";
     String COMMAND = "command";
     String IS_VIP = "is vip";
+    String OPEN_FROM_DIALOG = "open from dialog";
     /**
      * Categories and Actions for Google Analytics
      */

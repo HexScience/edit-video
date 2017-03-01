@@ -158,6 +158,9 @@ public class FragmentImagesGallery extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        if (mView == null) {
+            inflateViews();
+        }
         return mView;
     }
 
@@ -285,13 +288,6 @@ public class FragmentImagesGallery extends Fragment {
     }
 
     private class AsyncTaskScanFolder extends AsyncTask<Void, Void, Void> {
-        long start;
-        @Override
-        protected void onPreExecute() {
-            start = System.currentTimeMillis();
-            super.onPreExecute();
-        }
-
         @Override
         protected Void doInBackground(Void... voids) {
             mListStiker = Utils.listFilesFromAssets(mActivity, STICKER_FOLDER);

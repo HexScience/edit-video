@@ -228,29 +228,30 @@ public class CropFrame extends AppCompatImageView {
         int bigWidth = 14;
         int smallWidth = 8;
         int highLightColor = ContextCompat.getColor(context, R.color.crop_highlight_color);
+        int normalThumbColor = ContextCompat.getColor(context, R.color.normal_thumb_color);
         //thumb TOP_LEFT
-        int colorId = touchPoint == TOP_LEFT ?  highLightColor: Color.WHITE;
+        int colorId = touchPoint == TOP_LEFT ?  highLightColor: normalThumbColor;
         paint.setColor(colorId);
         int thumbWidth = touchPoint == TOP_LEFT ? bigWidth : smallWidth;
         paint.setStrokeWidth(thumbWidth);
         canvas.drawLine(x1, y1 - thumbWidth / 2, x1, y1 + thumbLength, paint);
         canvas.drawLine(x1, y1, x1 + thumbLength, y1, paint);
         // thumb TOP_RIGHT
-        colorId = touchPoint == TOP_RIGHT ?  highLightColor: Color.WHITE;
+        colorId = touchPoint == TOP_RIGHT ?  highLightColor: normalThumbColor;
         paint.setColor(colorId);
         thumbWidth = touchPoint == TOP_RIGHT ? bigWidth : smallWidth;
         paint.setStrokeWidth(thumbWidth);
         canvas.drawLine(x2, y1 - thumbWidth / 2, x2, y1 + thumbLength, paint);
         canvas.drawLine(x2, y1, x2 - thumbLength, y1, paint);
         // thumb BOTTOM_RIGHT
-        colorId = touchPoint == BOTTOM_RIGHT ?  highLightColor: Color.WHITE;
+        colorId = touchPoint == BOTTOM_RIGHT ?  highLightColor: normalThumbColor;
         paint.setColor(colorId);
         thumbWidth = touchPoint == BOTTOM_RIGHT ? bigWidth : smallWidth;
         paint.setStrokeWidth(thumbWidth);
         canvas.drawLine(x2, y2 + thumbWidth / 2, x2, y2 - thumbLength, paint);
         canvas.drawLine(x2, y2, x2 - thumbLength, y2, paint);
         // thumb BOTTOM_LEFT
-        colorId = touchPoint == BOTTOM_LEFT ?  highLightColor: Color.WHITE;
+        colorId = touchPoint == BOTTOM_LEFT ?  highLightColor: normalThumbColor;
         paint.setColor(colorId);
         thumbWidth = touchPoint == BOTTOM_LEFT ? bigWidth : smallWidth;
         paint.setStrokeWidth(thumbWidth);

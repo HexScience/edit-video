@@ -59,7 +59,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.crash.FirebaseCrash;
 import com.hecorat.azplugin2.R;
 import com.hecorat.azplugin2.addimage.FloatImage;
 import com.hecorat.azplugin2.addtext.AlphaColorDrawable;
@@ -1368,7 +1367,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     };
 
-
     private void openLayoutTrimVideo() {
         setActiveVideoViewVisible(false);
         mTrimFragment = TrimFragment.newInstance(mActivity, mSelectedVideoTL);
@@ -2365,6 +2363,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setBtnEditVisible(false);
         setBtnTrimVisible(false);
         setBtnVolumeVisible(false);
+        setBtnCropVisible(false);
         setLayoutExtraToolsVisible(true);
         mSelectedTL = TIMELINE_EXTRA;
     }
@@ -2380,7 +2379,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         int xDes = indicatorCoord[0] - imageCoord[0];
         int yDes = layoutImageCoord[1] - imageCoord[1];
 
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mImageShadowAnimation.getLayoutParams();
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)
+                mImageShadowAnimation.getLayoutParams();
         params.leftMargin = imageCoord[0];
         params.topMargin = imageCoord[1];
         Glide.with(this).load(imagePath).into(mImageShadowAnimation);

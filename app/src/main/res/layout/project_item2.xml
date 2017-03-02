@@ -3,18 +3,39 @@
     android:id="@+id/root_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
+    android:background="@drawable/btn_touch_feedback_rec_nobackground"
     android:clickable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="10dp">
 
-    <ImageView
-        android:id="@+id/img_thumbnail"
-        android:layout_width="80dp"
-        android:layout_height="60dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_default_video_icon" />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/img_thumbnail"
+            android:layout_width="80dp"
+            android:layout_height="60dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_default_video_icon" />
+
+        <ProgressBar
+            android:id="@+id/load_thumbnail_progress"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+        <ImageView
+            android:id="@+id/img_play_fake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_play_circle"
+            android:visibility="gone"/>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/tv_title"
@@ -25,7 +46,6 @@
         android:layout_marginRight="4dp"
         android:layout_marginStart="10dp"
         android:maxLines="2"
-        android:text="@string/default_project_title"
         android:textSize="18sp"
         android:gravity="center_vertical"/>
 

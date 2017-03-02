@@ -24,31 +24,36 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.hecorat.azplugin2.R;
 import com.hecorat.azplugin2.database.ProjectObject;
 import com.hecorat.azplugin2.database.ProjectTable;
 import com.hecorat.azplugin2.helper.AnalyticsHelper;
 import com.hecorat.azplugin2.helper.RecyclerViewItemDivider;
-import com.hecorat.azplugin2.helper.Utils;
 
 import java.util.ArrayList;
+
+import static com.hecorat.azplugin2.main.Constants.DEFAULT_PROJECT_NAME;
 
 /**
  * Created by macos on 22/02/2017.
  */
 
 public class ProjectListDialog extends DialogFragment {
+    private static final String KEY = "current_project_id";
 
     private Activity mActivity;
     private ArrayList<ProjectObject> mProjectList;
     private ProjectTable mProjectTable;
     private ProjectAdapter mAdapter;
     private Callback mCallback;
-    private static final String KEY = "current_project_id";
     private int mCurrentProjectId;
 
     public static ProjectListDialog newInstance(int currentProjectId) {
@@ -106,7 +111,6 @@ public class ProjectListDialog extends DialogFragment {
                 if (mProjectList.size() > 0) mAdapter.notifyDataSetChanged();
             }
         };
-
         cursorLoader.startLoading();
     }
 
@@ -128,16 +132,39 @@ public class ProjectListDialog extends DialogFragment {
         @Override
         public void onBindViewHolder(final ProjectAdapter.ViewHolder holder, final int position) {
             final ProjectObject project = mProjectList.get(position);
+            final String projectName = project.name;
+            final String projectFirstVideo = project.firstVideo;
 
-            Glide.with(mActivity).load(project.firstVideo).into(holder.mImgThumb);
+            if (!TextUtils.isEmpty(projectFirstVideo)) {
+                holder.mLoadThumbProgress.setVisibility(View.VISIBLE);
+                Glide.with(mActivity).load(projectFirstVideo)
+                        .listener(new RequestListener<String, GlideDrawable>() {
+                            @Override
+                            public boolean onException(Exception e, String model,
+                                                       Target<GlideDrawable> target,
+                                                       boolean isFirstResource) {
+                                holder.mLoadThumbProgress.setVisibility(View.GONE);
+                                holder.mImgThumb.setImageResource(R.drawable.ic_default_video_icon);
+                                return true;
+                            }
 
-            holder.mTvTitle.setText(project.name);
+                            @Override
+                            public boolean onResourceReady(GlideDrawable resource, String model,
+                                                           Target<GlideDrawable> target,
+                                                           boolean isFromMemoryCache,
+                                                           boolean isFirstResource) {
+                                holder.mLoadThumbProgress.setVisibility(View.GONE);
+                                holder.mImgPlayFake.setVisibility(View.VISIBLE);
+                                return false;
+                            }
+                        }).into(holder.mImgThumb);
+            }
+
+            holder.mTvTitle.setText(projectName != null ? projectName : DEFAULT_PROJECT_NAME);
 
             holder.mImgPopup.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    log("project name: " + project.name);
-                    log("project id: " + project.id);
                     PopupMenu popup = new PopupMenu(mActivity, holder.mImgPopup);
                     popup.getMenuInflater().inflate(R.menu.recent_project_popup_menu, popup.getMenu());
                     popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -162,6 +189,9 @@ public class ProjectListDialog extends DialogFragment {
                 }
             });
 
+            holder.mRootView.setBackgroundResource(project.id == mCurrentProjectId ?
+                    R.drawable.bg_current_item : R.drawable.btn_touch_feedback_rec_nobackground);
+
             holder.mRootView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -180,12 +210,16 @@ public class ProjectListDialog extends DialogFragment {
             TextView mTvTitle;
             ImageView mImgPopup;
             LinearLayout mRootView;
+            ImageView mImgPlayFake;
+            ProgressBar mLoadThumbProgress;
 
             ViewHolder(View view) {
                 super(view);
                 mImgThumb = (ImageView) view.findViewById(R.id.img_thumbnail);
                 mTvTitle = (TextView) view.findViewById(R.id.tv_title);
                 mImgPopup = (ImageView) view.findViewById(R.id.img_popup_menu);
+                mImgPlayFake = (ImageView) view.findViewById(R.id.img_play_fake);
+                mLoadThumbProgress = (ProgressBar) view.findViewById(R.id.load_thumbnail_progress);
                 mRootView = (LinearLayout) view.findViewById(R.id.root_view);
             }
         }
@@ -196,7 +230,7 @@ public class ProjectListDialog extends DialogFragment {
             AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
             final EditText editText = new EditText(mActivity);
             editText.setText(oldName);
-            editText.setSelection(0, oldName.length());
+            if (!TextUtils.isEmpty(oldName)) editText.setSelection(oldName.length());
             builder.setView(editText)
                     .setTitle(R.string.dialog_title_rename)
                     .setNegativeButton(android.R.string.cancel, null)
@@ -206,19 +240,17 @@ public class ProjectListDialog extends DialogFragment {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
                                     String newName = editText.getText().toString();
-                                    if (oldName.equals(newName)) return;
+                                    if (newName.equals(oldName)) return;
                                     mProjectTable.updateValue(projectId, ProjectTable.PROJECT_NAME, newName);
                                     projectObject.name = newName;
                                     notifyItemChanged(mProjectList.indexOf(projectObject));
-                                    AnalyticsHelper.getInstance()
-                                            .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_RENAME_PROJECT);
+                                    AnalyticsHelper.getInstance().send(mActivity,
+                                            Constants.CATEGORY_PROJECT,
+                                            Constants.ACTION_RENAME_PROJECT);
                                 }
                             });
-
-
             final AlertDialog renameDialog = builder.create();
             renameDialog.show();
-
             editText.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -237,7 +269,6 @@ public class ProjectListDialog extends DialogFragment {
         }
 
         private void onDeleteProjectClicked(final ProjectObject projectObject) {
-
             final int projectId = projectObject.id;
 
             if (projectId == mCurrentProjectId) {
@@ -256,15 +287,18 @@ public class ProjectListDialog extends DialogFragment {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
                                     mProjectTable.deleteProject(projectObject.id);
+                                    notifyItemRemoved(mProjectList.indexOf(projectObject));
                                     mProjectList.remove(projectObject);
-                                    notifyDataSetChanged();
-                                    AnalyticsHelper.getInstance()
-                                            .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_DELETE_PROJECT);
+//                                    notifyDataSetChanged();
+                                    AnalyticsHelper.getInstance().send(mActivity,
+                                            Constants.CATEGORY_PROJECT,
+                                            Constants.ACTION_DELETE_PROJECT);
                                 }
                             })
                     .show();
         }
     }
+
     private void log(String msg) {
         Log.e("ProjectListDialog", msg);
     }

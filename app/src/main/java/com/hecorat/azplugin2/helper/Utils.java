@@ -3,8 +3,8 @@ package com.hecorat.azplugin2.helper;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -14,9 +14,9 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.support.v4.provider.DocumentFile;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
-import com.hecorat.azplugin2.database.ProjectObject;
 import com.hecorat.azplugin2.main.Constants;
 
 import java.io.File;
@@ -32,11 +32,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-
-import static com.hecorat.azplugin2.database.ProjectTable.PROJECT_DATA;
-import static com.hecorat.azplugin2.database.ProjectTable.PROJECT_FIRST_VIDEO;
-import static com.hecorat.azplugin2.database.ProjectTable.PROJECT_ID;
-import static com.hecorat.azplugin2.database.ProjectTable.PROJECT_NAME;
 
 /**
  * Created by bkmsx on 11/11/2016.
@@ -72,8 +67,16 @@ public class Utils {
         return bitmap;
     }
 
-    public static int getScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    public static int getScreenWidth(Context context) {
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        int value;
+        if (context.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE){
+            value = metrics.heightPixels;
+        } else {
+            value = metrics.widthPixels;
+        }
+        return value;
     }
 
     public static int getScreenHeight() {

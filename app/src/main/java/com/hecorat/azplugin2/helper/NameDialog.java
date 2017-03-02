@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -48,6 +49,7 @@ public class NameDialog extends DialogFragment {
         View view = LayoutInflater.from(mContext).inflate(R.layout.edt_name_project, null);
         mEdtName = (EditText) view.findViewById(R.id.edt_name_project);
         mEdtName.setText(mInitText);
+        if(!TextUtils.isEmpty(mInitText)) mEdtName.setSelection(mInitText.length());
 
         builder.setView(view);
         builder.setPositiveButton(getPositiveBtnText(), new DialogInterface.OnClickListener() {

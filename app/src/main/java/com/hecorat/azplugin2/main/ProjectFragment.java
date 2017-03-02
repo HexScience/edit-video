@@ -30,6 +30,7 @@ import java.util.ArrayList;
  * Created by Bkmsx on 12/12/2016.
  */
 
+@SuppressWarnings("unused")
 public class ProjectFragment extends DialogFragment implements NameDialog.DialogClickListener, DialogClickListener {
     MainActivity mActivity;
     public ImageView mBtnAddProject;

@@ -10,13 +10,11 @@ import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -61,6 +59,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.crash.FirebaseCrash;
 import com.hecorat.azplugin2.R;
 import com.hecorat.azplugin2.addimage.FloatImage;
 import com.hecorat.azplugin2.addtext.AlphaColorDrawable;
@@ -81,7 +80,6 @@ import com.hecorat.azplugin2.database.TextTable;
 import com.hecorat.azplugin2.database.VideoObject;
 import com.hecorat.azplugin2.database.VideoTable;
 import com.hecorat.azplugin2.dialogfragment.DialogConfirm;
-import com.hecorat.azplugin2.donate.IabController;
 import com.hecorat.azplugin2.export.ExportFragment;
 import com.hecorat.azplugin2.filemanager.FragmentAudioGallery;
 import com.hecorat.azplugin2.filemanager.FragmentImagesGallery;
@@ -108,6 +106,10 @@ import com.hecorat.azplugin2.video.TrimFragment;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.hecorat.azplugin2.main.Constants.DEFAULT_PROJECT_NAME;
 
 public class MainActivity extends AppCompatActivity implements VideoTLControl.OnControlTimeLineChanged,
         ExtraTLControl.OnExtraTimeLineControlChanged, AudioTLControl.OnAudioControlTimeLineChanged,
@@ -184,7 +186,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public ProjectTable mProjectTable;
     private GalleryPagerAdapter mGalleryPagerAdapter;
     private FloatText mWaterMark;
-    private IabController mIabController;
     private FragmentCrop mFragmentCrop;
 
     private AudioManager mAudioManager;
@@ -259,7 +260,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private static final int ADD_TEXT = 3;
     private static final int LAYOUT_ANIMATION_DURATION = 100;
     private static final String RECENT_PROJECT_LIST_FG = "recent_project_list_fg";
-    private static final String ACTION_CREATE_NEW_PROJECT = "create_new_project";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -469,15 +469,19 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    private void backToRecorderGallery(){
-        Intent intent = new Intent();
-        intent.setComponent(new ComponentName("com.hecorat.screenrecorder.free",
-                "com.hecorat.screenrecorder.free.main.RecordService"));
-        intent.putExtra(Constants.COMMAND, Constants.COMMAND_OPEN_GALLERY);
-        startService(intent);
+    private void backToRecorderGallery() {
+        try{
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName("com.hecorat.screenrecorder.free",
+                    "com.hecorat.screenrecorder.free.main.RecordService"));
+            intent.putExtra(Constants.COMMAND, Constants.COMMAND_OPEN_GALLERY);
+            startService(intent);
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_CLICK_BACK, Constants.ACTION_CLICK_BUTTON_BACK);
+        } catch (SecurityException e){
+            FirebaseCrash.report(new Exception("security error when go back to az"));
+        }
         finish();
-        AnalyticsHelper.getInstance()
-                .send(mActivity, Constants.CATEGORY_CLICK_BACK, Constants.ACTION_CLICK_BUTTON_BACK);
     }
 
     @Override
@@ -506,7 +510,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     }
 
-    private void dissmissWaitingProgress(){
+    private void dismissWaitingProgress() {
         try {
             mWindowManager.removeView(mProgressBar);
         } catch (Exception e) {
@@ -527,59 +531,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             String videoName = new File(mVideoPath).getName();
             mProjectName = videoName.substring(0, videoName.length() - 4);
         }
-    }
-
-    private String getUniqueProjectName() {
-        String startName = "project_";
-        String uniqueName = startName;
-        int i = 0;
-        boolean ok = false;
-        while (!ok) {
-            ok = true;
-            i++;
-            uniqueName = startName + String.valueOf(i);
-            for (ProjectObject projectObject : mProjectList) {
-                if (projectObject.name.equals(startName)) {
-                    ok = false;
-                    break;
-                }
-            }
-        }
-        return uniqueName;
-    }
-
-    private void createNewProject(String name) {
-        mProjectName = name;
-        long id = mActivity.mProjectTable.insertValue(mProjectName,
-                System.currentTimeMillis() + "");
-        mProjectId = (int) id;
-        resetActivity();
-        addWaterMark();
-
-        AnalyticsHelper.getInstance()
-                .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_NEW_PROJECT);
-    }
-
-    private ArrayList<ProjectObject> mProjectList;
-
-    private void loadRecentProjectsFromDb() {
-        CursorLoader cursorLoader = new CursorLoader(mActivity) {
-            @Override
-            public Cursor loadInBackground() {
-                return mProjectTable.queryAllRecentProject();
-            }
-
-            @Override
-            public void deliverResult(Cursor cursor) {
-                super.deliverResult(cursor);
-
-                // init working project here, intercept intent with video path from az,
-                // if no intent or no data intercepted try open project from db, if db empty create
-                // new empty project and let user select video to it
-                mProjectList = mProjectTable.getRecentProjectsFromCursor(cursor);
-            }
-        };
-        cursorLoader.startLoading();
     }
 
     @Override
@@ -619,7 +570,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 return;
             }
             pausePreview();
-            hideAllFloatNControlers();
+            hideAllFloatControllers();
             exportVideo(false);
         }
     };
@@ -660,10 +611,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mLayoutFloatView.bringToFront();
         mActiveVideoView.setOnClickListener(onHideStatusClick);
         mInActiveVideoView.setOnClickListener(onHideStatusClick);
-        if (mVideoPath != null) {
-            mActiveVideoView.setVideoPath(mVideoPath);
-            mActiveVideoView.seekTo(10);
-        }
     }
 
     View.OnClickListener onBtnCropClick = new View.OnClickListener() {
@@ -807,7 +754,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         } else {
             mBtnRemoveWatermark.setVisibility(View.VISIBLE);
         }
-        dissmissWaitingProgress();
+        dismissWaitingProgress();
     }
 
     private void saveLastAccount() {
@@ -973,17 +920,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setBtnEditVisible(false);
         setBtnTrimVisible(false);
         setBtnDeleteVisible(false);
-        setBtnExportVisible(false);
+        setBtnsExportVisible(false);
         mCountVideo = 0;
         mCurrentVideoId = -1;
         mTLPositionInMs = 0;
-    }
-
-    private void openLayoutProject() {
-        setLayoutFragmentVisible(true);
-        ProjectFragment projectFragment = ProjectFragment.newInstance(mActivity);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.layout_fragment, projectFragment).commit();
     }
 
     private void startThreadPreview() {
@@ -1079,14 +1019,30 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     ViewTreeObserver.OnGlobalLayoutListener onLayoutVideoCreated = new ViewTreeObserver.OnGlobalLayoutListener() {
         @Override
         public void onGlobalLayout() {
-            log("onLayoutVideoCreated");
+
             mTimeLineVideoHeight = mLayoutVideo.getHeight() - 10;
-            if (mVideoPath != null) {
-                addVideoTL();
-            }
+            new Timer().schedule(new DelayTask(), 100);
             mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
+
+    Handler timerTaskHadler = new Handler();
+
+    private class DelayTask extends TimerTask {
+        @Override
+        public void run() {
+            timerTaskHadler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mVideoPath != null) {
+                        addVideoTL();
+                        resetVideoView();
+                        log("DelayTask");
+                    }
+                }
+            });
+        }
+    }
 
 
     public void openProject(ProjectObject projectObject) {
@@ -1124,6 +1080,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             int[] point = new int[2];
             mVideoViewLayout.getLocationOnScreen(point);
             mVideoViewLeft = point[0];
+            log("onVideoViewLayoutCreated");
             mVideoViewLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         }
     };
@@ -1489,7 +1446,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             initFileManager();
             openFileManager(true);
             setLayoutAddVisible(false);
-            setBtnExportVisible(false);
+            setBtnsExportVisible(false);
             if (v.equals(mBtnAddVideo)) selectTabLayout(VIDEO_TAB);
             else if (v.equals(mBtnAddImage)) selectTabLayout(IMAGE_TAB);
             else if (v.equals(mBtnAddAudio)) selectTabLayout(AUDIO_TAB);
@@ -1576,7 +1533,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         } else {
             mMaxTimeLineMs = 0;
             mActiveVideoView.stopPlayback();
-            setBtnExportVisible(false);
+            setBtnsExportVisible(false);
             setBtnPlayVisible(false);
         }
         AnalyticsHelper.getInstance()
@@ -1635,7 +1592,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 toast(getString(R.string.toast_file_not_exists_when_click_export));
                 return;
             }
-            hideAllFloatNControlers();
+            hideAllFloatControllers();
             exportVideo(true);
         }
     };
@@ -1653,7 +1610,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         saveAudioObjects(projectId);
         saveImageObjects(projectId);
         saveTextObjects(projectId);
-        deleteProjectIfEmpty(projectId);
+//        deleteProjectIfEmpty(projectId);
     }
 
     private void deleteProjectIfEmpty(int projectId) {
@@ -1855,9 +1812,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             new CustomHorizontalScrollView.OnCustomScrollChanged() {
                 @Override
                 public void onStartScroll() {
-
                     pausePreview();
-
                 }
 
                 @Override
@@ -1871,13 +1826,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     }
                     int scrollPosition = mScrollView.getScrollX();
                     mTLPositionInMs = scrollPosition * Constants.SCALE_VALUE;
-
                     // update VideoView
                     VideoTL videoTL = null;
                     int timelineId = 0;
                     for (int i = 0; i < mVideoList.size(); i++) {
                         videoTL = mVideoList.get(i);
-                        if (mTLPositionInMs >= videoTL.startInTimeLineMs && mTLPositionInMs <= videoTL.endInTimeLineMs) {
+                        if (mTLPositionInMs >= videoTL.startInTimeLineMs
+                                && mTLPositionInMs <= videoTL.endInTimeLineMs) {
                             timelineId = i;
                             break;
                         }
@@ -1885,7 +1840,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     int positionInVideo;
                     if (timelineId > 0) {
                         VideoTL previousTimeLine = mVideoList.get(timelineId - 1);
-                        positionInVideo = mTLPositionInMs - previousTimeLine.endInTimeLineMs + videoTL.startTimeMs;
+                        positionInVideo = mTLPositionInMs - previousTimeLine.endInTimeLineMs
+                                + videoTL.startTimeMs;
                     } else {
                         positionInVideo = mTLPositionInMs + videoTL.startTimeMs;
                     }
@@ -2078,7 +2034,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 mBtnPlay.setImageResource(R.drawable.ic_play);
                 pausePreview();
             } else {
-                hideAllFloatNControlers();
+                hideAllFloatControllers();
 
                 if (checkIfFileNotExists()) {
                     toast(getString(R.string.toast_file_not_exists_when_click_play));
@@ -2092,7 +2048,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     };
 
-    private void hideAllFloatNControlers() {
+    private void hideAllFloatControllers() {
         setFloatImageVisible(null);
         setFloatTextVisible(null);
         setAudioControlVisible(false);
@@ -2229,6 +2185,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         updateVideoViewSize(mActiveVideoView, videoTL);
         mCurrentVideoId = mCountVideo - 1;
         fixIfVideoHasNoAudio(videoTL);
+        setActiveVideoViewVisible(true);
 
         mSelectedVideoTL = videoTL;
         updateBtnExportVisible();
@@ -2239,7 +2196,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setBtnTrimVisible(true);
         highlightSelectedVideoTL();
         setLayoutExtraToolsVisible(true);
-        setBtnCropVisible(true);
+//        setBtnCropVisible(true);
         mSelectedTL = TIMELINE_VIDEO;
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_ADD_FILE, Constants.ACTION_ADD_VIDEO);
@@ -2266,7 +2223,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void setBtnPlayVisible(boolean visible) {
         int visibility = visible ? View.VISIBLE : View.GONE;
-        mBtnPlay.setVisibility(visibility);
+        findViewById(R.id.preview_container).setVisibility(visibility);
     }
 
     public void setBtnEditVisible(boolean visible) {
@@ -2920,7 +2877,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             if (mOpenLayoutAdd) {
                 slideLayoutAddIn(false);
             } else {
-                hideAllFloatNControlers();
+                hideAllFloatControllers();
                 pausePreview();
                 slideLayoutAddIn(true);
             }
@@ -2978,7 +2935,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         public void onClick(View view) {
             DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.SAVE_PROJECT, "")
                     .show(getSupportFragmentManager(), "save project");
-
         }
     };
 
@@ -3559,16 +3515,16 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void updateBtnExportVisible() {
         if (mCountVideo > 1) {
-            setBtnExportVisible(true);
+            setBtnsExportVisible(true);
         } else if (mCountVideo == 1) {
             if (mImageList.size() > 0 || mTextList.size() > 0
                     || mAudioList.size() > 0) {
-                setBtnExportVisible(true);
+                setBtnsExportVisible(true);
             } else {
-                setBtnExportVisible(true);
+                setBtnsExportVisible(true);
             }
         } else {
-            setBtnExportVisible(false);
+            setBtnsExportVisible(false);
         }
     }
 
@@ -3762,9 +3718,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mSelectedVideoTL = null;
     }
 
-    private void setBtnExportVisible(boolean visible) {
+    private void setBtnsExportVisible(boolean visible) {
         int visibility = visible ? View.VISIBLE : View.GONE;
-        mBtnExport.setVisibility(visibility);
+        findViewById(R.id.export_container).setVisibility(visibility);
+        findViewById(R.id.export_gif_container).setVisibility(visibility);
     }
 
     public void setBtnDeleteVisible(boolean visible) {
@@ -3802,15 +3759,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         return leftMargin;
     }
 
-//    public void setBtnEdit(int icon) {
-//        mBtnEdit.setCompoundDrawablesRelativeWithIntrinsicBounds(0, icon, 0, 0);
-//        mBtnEdit.setText((icon == R.drawable.ic_cut) ?
-//                getString(R.string.text_btn_trim) : getString(R.string.text_btn_edit_text));
-//    }
-
     private void setVideoRatio() {
         ViewGroup.LayoutParams params = mVideoViewLayout.getLayoutParams();
-        int height = (int) (Utils.getScreenWidth() * 0.6);
+        int height = (int) (Utils.getScreenWidth(mActivity) * 0.6);
+        log("Width = " + Utils.getScreenWidth(mActivity));
         params.height = height;
         mVideoViewHeight = height;
         params.width = (int) (params.height * 1.77);
@@ -3913,11 +3865,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle(getResources().getString(R.string.dialog_open_project_title))
-                    .setMessage(getString(R.string.dialog_open_project_mess, projectName))
+                    .setMessage(getString(R.string.dialog_open_project_mess, projectName == null ?
+                            DEFAULT_PROJECT_NAME : projectName))
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
+                                    saveProject(mProjectId);
                                     openProject(projectObject);
                                 }
                             });
@@ -3926,5 +3880,4 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_PROJECT, Constants.ACTION_OPEN_PROJECT);
     }
-
 }

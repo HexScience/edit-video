@@ -57,7 +57,7 @@ public class FragmentCrop extends Fragment implements View.OnClickListener{
         btnPlay.setOnClickListener(this);
 
         ViewGroup.LayoutParams mainLayoutParams = mainlayout.getLayoutParams();
-        mainLayoutParams.height = (int) (Utils.getScreenHeight() * 0.98f);
+        mainLayoutParams.height = (int) (Utils.getScreenHeight(mainActivity) * 0.98f);
         ViewGroup.LayoutParams layoutVideoViewParams = layoutVideoView.getLayoutParams();
         layoutVideoViewParams.height = (int) (mainLayoutParams.height * 0.75f);
         layoutVideoViewParams.width = (int) (layoutVideoViewParams.height * videoTL.originVideoRatio);

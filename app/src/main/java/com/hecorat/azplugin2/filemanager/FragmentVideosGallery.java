@@ -85,11 +85,12 @@ public class FragmentVideosGallery extends Fragment {
         mFolderName = mActivity.getString(R.string.video_tab_title);
     }
 
-
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        if (mView == null) {
+            inflateViews();
+        }
         return mView;
     }
 
@@ -175,7 +176,29 @@ public class FragmentVideosGallery extends Fragment {
         mListFolderSd.add(mSdPath);
         listFolderFrom(new File(mSdPath), mListFolderSd);
 
-        new AsyncTaskScanFolderVideo().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new AsyncTaskScanFolderSd().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private class AsyncTaskScanFolderSd extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            for (int i = 0; i < mListFolderSd.size(); i++) {
+                boolean scanSubFolder = i != 0;
+                mCountSubFolder = 0;
+                if (!isVideoFolder(new File(mListFolderSd.get(i)), scanSubFolder)){
+                    mListFolderSd.remove(i);
+                    i--;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mFolderAdapter.notifyDataSetChanged();
+        }
     }
 
     AdapterView.OnItemClickListener onVideoClickListener = new AdapterView.OnItemClickListener() {
@@ -227,24 +250,14 @@ public class FragmentVideosGallery extends Fragment {
     }
 
     private class AsyncTaskScanFolderVideo extends AsyncTask<Void, Void, Void> {
-        long start;
-        @Override
-        protected void onPreExecute() {
-            start = System.currentTimeMillis();
-            super.onPreExecute();
-        }
-
         @Override
         protected Void doInBackground(Void... voids) {
-            int begin = galleryState == GalleryState.VIDEO_FOLDER_SD ? 0 : 1;
-            ArrayList<String> listFolder = galleryState == GalleryState.VIDEO_FOLDER_SD
-                    ? mListFolderSd : mListFolder;
-
-            for (int i = begin; i < listFolder.size(); i++) {
+            int begin = mHasSdCard ? 1 : 0;
+            for (int i = begin; i < mListFolder.size(); i++) {
                 boolean scanSubFolder = i != begin;
                 mCountSubFolder = 0;
-                if (!isVideoFolder(new File(listFolder.get(i)), scanSubFolder)){
-                    listFolder.remove(i);
+                if (!isVideoFolder(new File(mListFolder.get(i)), scanSubFolder)){
+                    mListFolder.remove(i);
                     i--;
                 }
             }
@@ -254,7 +267,6 @@ public class FragmentVideosGallery extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            log(mListFirstVideo.size() + "");
             mFolderAdapter.notifyDataSetChanged();
         }
     }

@@ -236,6 +236,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private boolean mOpenLayoutSetting;
     public boolean mUseSdCard;
     private int mInitProjectId;
+    private boolean mOpenFromDialog;
 
     private static final int TIMELINE_VIDEO = 0;
     private static final int TIMELINE_EXTRA = 1;
@@ -470,18 +471,17 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void backToRecorderGallery() {
-        try{
-            Intent intent = new Intent();
-            intent.setComponent(new ComponentName("com.hecorat.screenrecorder.free",
-                    "com.hecorat.screenrecorder.free.main.RecordService"));
-            intent.putExtra(Constants.COMMAND, Constants.COMMAND_OPEN_GALLERY);
-            startService(intent);
-            AnalyticsHelper.getInstance()
-                    .send(mActivity, Constants.CATEGORY_CLICK_BACK, Constants.ACTION_CLICK_BUTTON_BACK);
-        } catch (SecurityException e){
-            FirebaseCrash.report(new Exception("security error when go back to az"));
-        }
         finish();
+        if (mOpenFromDialog) {
+            return;
+        }
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName("com.hecorat.screenrecorder.free",
+                "com.hecorat.screenrecorder.free.main.RecordService"));
+        intent.putExtra(Constants.COMMAND, Constants.COMMAND_OPEN_GALLERY);
+        startService(intent);
+        AnalyticsHelper.getInstance()
+                .send(mActivity, Constants.CATEGORY_CLICK_BACK, Constants.ACTION_CLICK_BUTTON_BACK);
     }
 
     @Override
@@ -525,6 +525,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mUseSdCard = intent.getBooleanExtra(Constants.USE_SD_CARD, false);
             mOutputDirectory = intent.getStringExtra(Constants.DIRECTORY);
             mIsVip = intent.getBooleanExtra(Constants.IS_VIP, false);
+            mOpenFromDialog = intent.getBooleanExtra(Constants.OPEN_FROM_DIALOG, true);
             if (mVideoPath == null) {
                 return;
             }
@@ -1043,7 +1044,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             });
         }
     }
-
 
     public void openProject(ProjectObject projectObject) {
         mProjectId = projectObject.id;
@@ -1610,7 +1610,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         saveAudioObjects(projectId);
         saveImageObjects(projectId);
         saveTextObjects(projectId);
-//        deleteProjectIfEmpty(projectId);
+        deleteProjectIfEmpty(projectId);
     }
 
     private void deleteProjectIfEmpty(int projectId) {
@@ -2035,7 +2035,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 pausePreview();
             } else {
                 hideAllFloatControllers();
-
                 if (checkIfFileNotExists()) {
                     toast(getString(R.string.toast_file_not_exists_when_click_play));
                     return;
@@ -2196,7 +2195,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setBtnTrimVisible(true);
         highlightSelectedVideoTL();
         setLayoutExtraToolsVisible(true);
-//        setBtnCropVisible(true);
+        setBtnCropVisible(true);
         mSelectedTL = TIMELINE_VIDEO;
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_ADD_FILE, Constants.ACTION_ADD_VIDEO);
@@ -3761,8 +3760,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     private void setVideoRatio() {
         ViewGroup.LayoutParams params = mVideoViewLayout.getLayoutParams();
-        int height = (int) (Utils.getScreenWidth(mActivity) * 0.6);
-        log("Width = " + Utils.getScreenWidth(mActivity));
+        int height = (int) (Utils.getScreenHeight(mActivity) * 0.6);
+        log("Width = " + Utils.getScreenHeight(mActivity));
         params.height = height;
         mVideoViewHeight = height;
         params.width = (int) (params.height * 1.77);

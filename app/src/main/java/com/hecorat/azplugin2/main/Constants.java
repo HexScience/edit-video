@@ -25,6 +25,8 @@ public interface Constants {
     String COMMAND = "command";
     String IS_VIP = "is vip";
     String OPEN_FROM_DIALOG = "open from dialog";
+    String FRAGMENT_CODE = "fragment code";
+    int GALLERY_CODE = 1;
     /**
      * Categories and Actions for Google Analytics
      */

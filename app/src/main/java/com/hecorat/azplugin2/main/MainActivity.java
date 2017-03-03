@@ -479,9 +479,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.hecorat.screenrecorder.free",
-                "com.hecorat.screenrecorder.free.main.RecordService"));
-        intent.putExtra(Constants.COMMAND, Constants.COMMAND_OPEN_GALLERY);
-        startService(intent);
+                "com.hecorat.screenrecorder.free.preferences.MainSettings"));
+        intent.putExtra(Constants.FRAGMENT_CODE, Constants.GALLERY_CODE);
+        startActivity(intent);
         AnalyticsHelper.getInstance()
                 .send(mActivity, Constants.CATEGORY_CLICK_BACK, Constants.ACTION_CLICK_BUTTON_BACK);
     }

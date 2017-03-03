@@ -58,9 +58,10 @@
 
                 <ImageView
                     android:layout_width="@dimen/layer_icon_dimension"
-                    android:layout_height="@dimen/layer_icon_dimension"
+                    android:layout_height="25dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_image_layer" />
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_layers" />
             </LinearLayout>
 
             <View
@@ -76,9 +77,10 @@
 
                 <ImageView
                     android:layout_width="@dimen/layer_icon_dimension"
-                    android:layout_height="@dimen/layer_icon_dimension"
+                    android:layout_height="25dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_text_layer" />
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_layers" />
             </LinearLayout>
 
             <View

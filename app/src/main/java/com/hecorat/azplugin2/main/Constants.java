@@ -120,4 +120,6 @@ public interface Constants {
     String SD_CARD = "Sd Card";
     String SLASH = " / ";
     String STORAGE_NAME = "0";
+    String DEFAULT_PROJECT_NAME = "No_name";
+
 }

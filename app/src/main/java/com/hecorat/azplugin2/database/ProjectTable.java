@@ -17,7 +17,7 @@ public class ProjectTable {
     private String TABLE_NAME = "Project";
     public static final String PROJECT_ID = "Id";
     public static final String PROJECT_NAME = "Name";
-    public static final String PROJECT_DATA = "Data";
+    public static final String PROJECT_DATE = "Data";
     public static final String PROJECT_FIRST_VIDEO = "FirstVideo";
     private DBHelper mDbHelper;
 
@@ -31,7 +31,7 @@ public class ProjectTable {
                 PROJECT_ID + " integer primary key, " +
                 PROJECT_NAME + " text, " +
                 PROJECT_FIRST_VIDEO + " text, " +
-                PROJECT_DATA + " text)";
+                PROJECT_DATE + " text)";
         sqLiteDatabase.execSQL(sql);
     }
 
@@ -41,11 +41,11 @@ public class ProjectTable {
         sqLiteDatabase.execSQL(sql);
     }
 
-    public long insertValue(String name, String data) {
+    public long insertValue(String name, String date) {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(PROJECT_NAME, name);
-        contentValues.put(PROJECT_DATA, data);
+        contentValues.put(PROJECT_DATE, date);
         contentValues.put(PROJECT_FIRST_VIDEO, "");
         return sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
     }
@@ -74,7 +74,7 @@ public class ProjectTable {
                 ProjectObject project = new ProjectObject();
                 project.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
                 project.name = cursor.getString(cursor.getColumnIndex(PROJECT_NAME));
-                project.data = cursor.getString(cursor.getColumnIndex(PROJECT_DATA));
+                project.data = cursor.getString(cursor.getColumnIndex(PROJECT_DATE));
                 project.firstVideo = cursor.getString(cursor.getColumnIndex(PROJECT_FIRST_VIDEO));
                 list.add(project);
             }
@@ -102,7 +102,7 @@ public class ProjectTable {
                 ProjectObject project = new ProjectObject();
                 project.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(PROJECT_ID)));
                 project.name = cursor.getString(cursor.getColumnIndex(PROJECT_NAME));
-                project.data = cursor.getString(cursor.getColumnIndex(PROJECT_DATA));
+                project.data = cursor.getString(cursor.getColumnIndex(PROJECT_DATE));
                 project.firstVideo = cursor.getString(cursor.getColumnIndex(PROJECT_FIRST_VIDEO));
                 recentProjectsList.add(project);
             } while (cursor.moveToNext());

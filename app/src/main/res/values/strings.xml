@@ -99,11 +99,11 @@
     <string name="recent_project_action_open">Open</string>
     <string name="recent_project_action_rename">Rename</string>
     <string name="recent_project_action_delete">Delete</string>
-    <string name="default_project_title">project_0</string>
     <string name="toast_open_current_project">You currently working on this project</string>
-    <string name="toast_delete_current_project">You can not delete this project</string>
+    <string name="toast_delete_current_project">You cannot delete current editing project</string>
     <string name="dialog_open_project_title">Open project</string>
-    <string name="dialog_open_project_mess">Do you want open project "'"%s"'"? All state of current editing project will be saved.</string>
+    <string name="dialog_open_project_mess">Do you want open project "'"%s"'" ? All state of current editing project will be saved.</string>
+
     <string name="dialog_title_save_project">Save Project</string>
     <string name="dialog_msg_save_project">Do you want to save this project?</string>
     <string name="btn_no">No</string>

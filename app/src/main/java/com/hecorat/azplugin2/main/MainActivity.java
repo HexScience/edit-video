@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private TextView mBtnReport;
     private RelativeLayout.LayoutParams mVideoViewParam;
     private ImageView mBtnSetting;
-    private TextView mBtnRemoveWatermark;
+    private TextView mBtnUpgrade;
     private RelativeLayout mLayoutSetting;
     private ImageView mBtnExportGif;
     private FrameLayout mBtnTrimContainer;
@@ -341,7 +341,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mBtnReport = (TextView) findViewById(R.id.btn_report);
         mBtnCrop = (TextView) findViewById(R.id.btn_crop);
         mBtnSetting = (ImageView) findViewById(R.id.btn_setting);
-        mBtnRemoveWatermark = (TextView) findViewById(R.id.btn_upgrade);
+        mBtnUpgrade = (TextView) findViewById(R.id.btn_upgrade);
         mBtnExportGif = (ImageView) findViewById(R.id.btn_gif);
         mBtnTrimContainer = (FrameLayout) findViewById(R.id.btn_trim_container);
 
@@ -393,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mBtnUpLevel.setOnClickListener(onBtnUpLevelClick);
         mTopLayout.setOnClickListener(onHideStatusClick);
         mBtnSetting.setOnClickListener(onBtnSettingClick);
-        mBtnRemoveWatermark.setOnClickListener(onBtnRemoveWatermarkClick);
+        mBtnUpgrade.setOnClickListener(onBtnUpgradeClick);
         mBtnReport.setOnClickListener(onBtnReportClick);
         mBtnCrop.setOnClickListener(onBtnCropClick);
         mBtnExportGif.setOnClickListener(onBtnExportGifClick);
@@ -586,11 +586,12 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     };
 
-    View.OnClickListener onBtnRemoveWatermarkClick = new View.OnClickListener() {
+    View.OnClickListener onBtnUpgradeClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             slideLayoutSettingIn(false);
-            askDonate();
+            startDonate(Constants.EVENT_ACTION_DIALOG_FROM_WATERMARK);
+//            askDonate();
         }
     };
 
@@ -748,11 +749,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), isVip).apply();
         if (isVip) {
 //            saveLastAccount();
-            mBtnRemoveWatermark.setVisibility(View.GONE);
+            mBtnUpgrade.setVisibility(View.GONE);
             findViewById(R.id.text_pro_1).setVisibility(View.GONE);
             findViewById(R.id.text_pro_2).setVisibility(View.GONE);
         } else {
-            mBtnRemoveWatermark.setVisibility(View.VISIBLE);
+            mBtnUpgrade.setVisibility(View.VISIBLE);
         }
         dismissWaitingProgress();
     }
@@ -2578,7 +2579,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     public void removeWaterMark() {
         mIsVip = true;
-        mBtnRemoveWatermark.setVisibility(View.GONE);
+        mBtnUpgrade.setVisibility(View.GONE);
         Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), true).apply();
         mLayoutFloatView.removeView(mWaterMark);
         mTextList.remove(mWaterMark.timeline);

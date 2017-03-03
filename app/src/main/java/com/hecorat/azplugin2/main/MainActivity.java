@@ -921,6 +921,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         setBtnTrimVisible(false);
         setBtnDeleteVisible(false);
         setBtnsExportVisible(false);
+        setBtnCropVisible(false);
         mCountVideo = 0;
         mCurrentVideoId = -1;
         mTLPositionInMs = 0;

@@ -435,8 +435,9 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         int fps = getFps(mSeekbarFps.getProgress());
         int loop = getLoop(mSeekbarLoop.getProgress());
         mOutputPath = Utils.getOutputFolder() + "/" + name + mExtension;
-        new ExportTask(mActivity, mActivity.mVideoList, mActivity.mImageList, mActivity.mTextList,
-                mActivity.mAudioList, name, quality, fps, loop).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        mExportTask = new ExportTask(mActivity, mActivity.mVideoList, mActivity.mImageList, mActivity.mTextList,
+                mActivity.mAudioList, name, quality, fps, loop);
+        mExportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override

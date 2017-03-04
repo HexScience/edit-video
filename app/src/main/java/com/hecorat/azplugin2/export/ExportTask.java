@@ -312,7 +312,6 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        log("Start get info");
         startTime = System.currentTimeMillis();
         if (!mExportVideo) {
             if (mOnlyOneVideo) {
@@ -333,10 +332,9 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        log("End get info");
-        log("Total Time= " + (System.currentTimeMillis() - startTime));
         mActivity.mFinishExport = true;
         mExportFragment.setProcessTitle("");
+        Utils.sendMediaScannerBroadcast(mActivity, mOutputPath);
         log("mOutputPath: " + mOutputPath);
     }
 
@@ -368,6 +366,10 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         }
 
         return null;
+    }
+
+    public String getOutputPath() {
+        return mOutputPath;
     }
 
     private void log(String msg) {

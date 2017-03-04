@@ -35,7 +35,8 @@ public class NotificationHelper {
             } else {
                 intent.setDataAndType(Uri.fromFile(videoFile), "image/gif");
             }
-
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             PendingIntent pendingIntent = PendingIntent
                     .getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
             mNotifyBuilder.setProgress(0, 0, false)

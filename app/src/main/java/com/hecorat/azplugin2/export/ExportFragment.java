@@ -495,7 +495,6 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         } else if (value < 100){
             mCircleProgressBar.setText(value+"%");
             mCircleProgressBar.setTextSize(70);
-
         } else {
             mCircleProgressBar.setText("Completing..");
             mCircleProgressBar.setTextSize(50);

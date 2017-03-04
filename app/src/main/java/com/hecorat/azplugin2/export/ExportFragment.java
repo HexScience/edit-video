@@ -66,7 +66,6 @@ public class ExportFragment extends Fragment implements DialogClickListener{
 
     private ExportTask mExportTask;
 
-    public String mOutputPath;
     private String[] mFilesInFolder;
     public String mExtension;
 
@@ -319,7 +318,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
     View.OnClickListener onBtnShareClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            MediaScannerConnection.scanFile(mActivity, new String[] {mOutputPath}, null,
+            MediaScannerConnection.scanFile(mActivity, new String[] {mExportTask.getOutputPath()}, null,
                     onScanCompletedListener);
             AnalyticsHelper.getInstance()
                     .send(mActivity, Constants.CATEGORY_EXPORT, Constants.ACTION_SHARE_VIDEO);
@@ -351,13 +350,14 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         @Override
         public void onClick(View view) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            File videoFile = new File(mOutputPath);
+            File videoFile = new File(mExportTask.getOutputPath());
             if (mExportVideo) {
                 intent.setDataAndType(Uri.fromFile(videoFile), "video/mp4");
             } else {
                 intent.setDataAndType(Uri.fromFile(videoFile), "image/gif");
             }
-
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             try {
                 mActivity.startActivity(intent);
             } catch (ActivityNotFoundException e) {
@@ -434,7 +434,6 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         int quality = getScale(mSeekbarScale.getProgress());
         int fps = getFps(mSeekbarFps.getProgress());
         int loop = getLoop(mSeekbarLoop.getProgress());
-        mOutputPath = Utils.getOutputFolder() + "/" + name + mExtension;
         mExportTask = new ExportTask(mActivity, mActivity.mVideoList, mActivity.mImageList, mActivity.mTextList,
                 mActivity.mAudioList, name, quality, fps, loop);
         mExportTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -464,7 +463,6 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         RadioButton radioButton = (RadioButton) mLayoutQuality.findViewById(id);
         int quality = Integer.parseInt(radioButton.getTag().toString());
         String name = mEditText.getText().toString();
-        mOutputPath = Utils.getOutputFolder()+"/"+name + mExtension;
         boolean keepRatio = mCheckboxRatio.isChecked();
 
         mExportTask = new ExportTask(mActivity, mActivity.mVideoList, mActivity.mImageList,
@@ -500,7 +498,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
             mCircleProgressBar.setTextSize(50);
         }
         if (mExporting) {
-            NotificationHelper.updateNotification(mActivity, value, mOutputPath, mExportVideo);
+            NotificationHelper.updateNotification(mActivity, value, mExportTask.getOutputPath(), mExportVideo);
         }
     }
 
@@ -520,7 +518,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
             }
             mLayoutAfterExport.setVisibility(View.VISIBLE);
             mTextViewTip.setVisibility(View.INVISIBLE);
-            NotificationHelper.updateNotification(mActivity, -1, mOutputPath, mExportVideo);
+            NotificationHelper.updateNotification(mActivity, -1, mExportTask.getOutputPath(), mExportVideo);
 
             AnalyticsHelper.getInstance()
                     .send(mActivity, Constants.CATEGORY_EXPORT, Constants.ACTION_EXPORT_SUCCESSFUL);

@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -98,6 +99,12 @@ public class Utils {
             arrayList.add(directory + "/" + fileName);
         }
         return arrayList;
+    }
+
+    public static void sendMediaScannerBroadcast(Context context,
+                                                 String filePath) {
+        MediaScannerConnection.scanFile(context.getApplicationContext(),
+                new String[]{filePath}, null, null);
     }
 
     public static void copyFileFromAssets(Context context, String input, String output) {

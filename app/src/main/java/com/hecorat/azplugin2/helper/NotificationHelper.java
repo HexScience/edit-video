@@ -41,7 +41,7 @@ public class NotificationHelper {
                     .getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
             mNotifyBuilder.setProgress(0, 0, false)
                     .setSmallIcon(R.drawable.ic_notification_exporting_6)
-                    .setContentTitle(context.getString(R.string.app_name))
+                    .setContentTitle(context.getString(R.string.screen_recorder_name))
                     .setContentText(context.getString(R.string.export_completed))
                     .setVibrate(new long[]{0L, 500L})
                     .setOngoing(false)
@@ -53,7 +53,7 @@ public class NotificationHelper {
         } else {
             mNotifyBuilder.setProgress(100, 100, true)
                     .setContentTitle("")
-                    .setContentText("Completing..");
+                    .setContentText(context.getString(R.string.export_completing));
         }
         mNotificationManager.notify(notifyID, mNotifyBuilder.build());
     }

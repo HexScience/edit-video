@@ -2,13 +2,11 @@ package com.hecorat.azplugin2.export;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -117,7 +115,8 @@ public class ExportFragment extends Fragment implements DialogClickListener{
             mTextViewNameTitle.setText(mActivity.getString(R.string.video_name_title));
             boolean onlyOneVideo = mActivity.mVideoList.size() == 1 && mActivity.mImageList.isEmpty() &&
                         mActivity.mTextList.isEmpty() && mActivity.mAudioList.isEmpty();
-            if (!onlyOneVideo) {
+            VideoHolder video = mActivity.mVideoList.get(0).updateVideoHolder();
+            if (!onlyOneVideo || video.crop || video.changeVolume) {
                 mCheckboxRatio.setVisibility(View.GONE);
                 setRadioGroupEnable(true);
             } else {
@@ -300,10 +299,6 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         mEditText.setText(outputName);
     }
 
-    private void log(String msg) {
-        Log.e("Export Fragment", msg);
-    }
-
     View.OnClickListener onBtnCancelClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -318,8 +313,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
     View.OnClickListener onBtnShareClick = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            MediaScannerConnection.scanFile(mActivity, new String[] {mExportTask.getOutputPath()}, null,
-                    onScanCompletedListener);
+            shareVideo(Uri.fromFile(new File((mExportTask.getOutputPath()))));
             AnalyticsHelper.getInstance()
                     .send(mActivity, Constants.CATEGORY_EXPORT, Constants.ACTION_SHARE_VIDEO);
         }
@@ -337,14 +331,6 @@ public class ExportFragment extends Fragment implements DialogClickListener{
         sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         mActivity.startActivity(Intent.createChooser(sendIntent, "Email:"));
     }
-
-    MediaScannerConnection.OnScanCompletedListener onScanCompletedListener = new MediaScannerConnection.OnScanCompletedListener() {
-
-        @Override
-        public void onScanCompleted(String path, Uri uri) {
-            shareVideo(uri);
-        }
-    };
 
     View.OnClickListener onBtnWatchVideoClick = new View.OnClickListener() {
         @Override

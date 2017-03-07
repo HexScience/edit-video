@@ -1,6 +1,5 @@
 package com.hecorat.azplugin2.preview;
 
-import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -17,28 +16,27 @@ import javax.microedition.khronos.opengles.GL10;
  * Created by bkmsx on 2/14/2017.
  */
 
-public class CustomRenderer implements GLSurfaceView.Renderer {
-    int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
+class CustomRenderer implements GLSurfaceView.Renderer {
+    private static final int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
 
-    FloatBuffer vertexBuffer, textureBuffer;
-    int textureId;
-    float[] mvpMatrix = new float[16], textureMatrix = new float[16];
-    int programHandle;
-    boolean stop;
+    private FloatBuffer vertexBuffer, textureBuffer;
+    private float[] mvpMatrix = new float[16], textureMatrix = new float[16];
+    private int programHandle;
+    private boolean stop;
 
-    OnSurfaceTextureListener callback;
-    SurfaceTexture surfaceTexture;
+    private OnSurfaceTextureListener callback;
+    private SurfaceTexture surfaceTexture;
 
-    CustomRenderer(Context context, OnSurfaceTextureListener listener) {
+    CustomRenderer(OnSurfaceTextureListener listener) {
         callback = listener;
         stop = false;
     }
 
-    public void reset() {
+    void reset() {
         stop = false;
     }
 
-    public void stop() {
+    void stop() {
         stop = true;
     }
 
@@ -57,7 +55,7 @@ public class CustomRenderer implements GLSurfaceView.Renderer {
         vertexBuffer.put(vertexCoords).position(0);
     }
 
-    public void setupVideoSize(float left, float right, float bottom, float top) {
+    void setupVideoSize(float left, float right, float bottom, float top) {
         float[] textureCoords = new float[] {
                 left, top,
                 left, bottom,
@@ -76,32 +74,19 @@ public class CustomRenderer implements GLSurfaceView.Renderer {
         setupVideoSize(0, 1, 0, 1);
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
-        textureId = textures[0];
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, textureId);
+        GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, textures[0]);
 
         GLES20.glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
         GLES20.glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
 
-        surfaceTexture = new SurfaceTexture(textureId);
+        surfaceTexture = new SurfaceTexture(textures[0]);
         callback.onSurfaceTextureCreated(surfaceTexture);
     }
 
-    public void clear(){
-        GLES20.glDeleteTextures(1, new int[] {textureId}, 0);
-    }
-
-    public void setupProgram(Effects type) {
+    private void setupProgram() {
         String vertexCode = Shader.VERTEX_CODE;
-        String fragmentCode = "";
-        switch (type) {
-            case NORMAL:
-                fragmentCode = Shader.FRAGMENT_CODE_NORMAL;
-                break;
-            case NEGATIVE:
-                fragmentCode = Shader.FRAGMENT_CODE_NEGATIVE;
-                break;
-        }
+        String fragmentCode = Shader.FRAGMENT_CODE;
         programHandle = GLES20.glCreateProgram();
         int vertexShader = getShader(GLES20.GL_VERTEX_SHADER, vertexCode);
         int fragmentShader = getShader(GLES20.GL_FRAGMENT_SHADER, fragmentCode);
@@ -121,7 +106,7 @@ public class CustomRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         setupVertex();
         setupTexture();
-        setupProgram(Effects.NORMAL);
+        setupProgram();
     }
 
     @Override

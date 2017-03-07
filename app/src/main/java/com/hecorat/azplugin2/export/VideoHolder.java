@@ -10,4 +10,5 @@ public class VideoHolder {
     public float volume;
     public int left, top, width, height;
     public float ratio;
+    public boolean crop, changeVolume;
 }

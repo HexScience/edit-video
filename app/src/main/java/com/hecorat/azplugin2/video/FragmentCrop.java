@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,10 +102,6 @@ public class FragmentCrop extends Fragment implements View.OnClickListener{
         }
     };
 
-    private void log(String msg){
-        Log.e("FragmentCrop", msg);
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -138,7 +133,7 @@ public class FragmentCrop extends Fragment implements View.OnClickListener{
         }
     }
 
-    class TaskUpdateSeekbar extends AsyncTask<Void, Void, Void> {
+    private class TaskUpdateSeekbar extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
             while (play) {

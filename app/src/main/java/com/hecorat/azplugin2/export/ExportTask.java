@@ -37,7 +37,6 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
     private String mOutputPath;
     private String mOutputDir;
 
-    private long startTime;
     private int mVideoDurationSec;
     private float mQuality;
     private int mFps;
@@ -46,6 +45,8 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
     private boolean mOnlyOneVideo;
     private boolean mKeepRatio;
     private boolean mCopyingFile;
+
+    private FFmpeg mFFmpeg;
 
     ExportTask(MainActivity context, ArrayList<VideoTL> listVideo, ArrayList<ExtraTL> listImage,
                ArrayList<ExtraTL> listText, ArrayList<AudioTL> listAudio, String name, float quality, boolean keepRatio) {
@@ -72,12 +73,13 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         mListVideo = listVideo;
         mListImage = listImage;
         mListText = listText;
-        mListAudio = new ArrayList<>();
+        mListAudio = listAudio;
         mQuality = quality;
         mName = name;
         mFps = fps;
         mLoop = loop;
         mExportVideo = false;
+        mKeepRatio = true;
         updateAllList();
         mOnlyOneVideo = mListImage.isEmpty() && mListText.isEmpty()
                 && mListVideo.size() == 1;
@@ -138,53 +140,120 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         }
     }
 
-    private void exportVideo(FFmpeg ffmpeg) {
-        ffmpeg.executeFFmpegCommand(getExportVideoCommand());
-    }
-
-    private void exportGif(FFmpeg ffmpeg) {
-        if (!mOnlyOneVideo) {
-            exportVideo(ffmpeg);
-            publishProgress();
+    private void exportVideoSlow() {
+        if (mExportVideo) {
+            mOutputPath = mOutputDir + "/" + mName + ".mp4";
+        } else {
+            mTempVideo = System.currentTimeMillis() + "";
+            mOutputPath = Utils.getTempFolder() + "/" + mTempVideo + ".mp4";
         }
-        createGif(ffmpeg);
+
+        LinkedList<String> command = new LinkedList<>();
+        String inputBackground = Utils.getTempFolder() + "/background.png";
+        copyImageToStorage(inputBackground);
+
+        String inVideo = "[v]";
+        String outVideo = "[outVideo]";
+        String outAudio = "[outAudio];";
+        int order = 1;
+        String filter = MergeFilter.getFilter(mListVideo, (int) mQuality, order);
+        if (mListImage.size() == 0 && mListText.size() == 0) {
+            outVideo = "[v]";
+            outAudio = "[outAudio]";
+        }
+
+        int audioPosition = order + mListVideo.size();
+        filter += AudioFilter.getFilter(1f, outAudio, mListAudio, audioPosition);
+        if (mListImage.size() > 0) {
+            outVideo = "[inText];";
+            if (mListText.size() == 0) {
+                outVideo = "[inText]";
+            }
+            int imagePosition = audioPosition + mListAudio.size();
+            filter += ImageFilter.getFilter(inVideo, outVideo, mListImage, imagePosition);
+        }
+        if (mListText.size() > 0) {
+            inVideo = "[inText]";
+            outVideo = "[outVideo]";
+            if (mListImage.size() == 0) {
+                inVideo = "[v]";
+            }
+            filter += TextFilter.getFilter(inVideo, outVideo, mListText);
+        }
+        outAudio = "[outAudio]";
+        command.add("-loop");
+        command.add("1");
+        command.add("-i");
+        command.add(inputBackground);
+        for (int i = 0; i < mListVideo.size(); i++) {
+            VideoHolder video = mListVideo.get(i).videoHolder;
+            command.add("-ss");
+            command.add(video.startTimeSecond + "");
+            command.add("-t");
+            command.add(video.durationSec + "");
+            command.add("-i");
+            command.add(video.videoPath);
+        }
+        for (int i = 0; i < mListAudio.size(); i++) {
+            AudioHolder audio = mListAudio.get(i).audioHolder;
+            command.add("-ss");
+            command.add(audio.startTimeMs + "");
+            command.add("-t");
+            command.add(audio.durationSec + "");
+            command.add("-i");
+            command.add(audio.audioPath);
+        }
+        for (int i = 0; i < mListImage.size(); i++) {
+            command.add("-i");
+            command.add(mListImage.get(i).imagePath);
+        }
+        command.add("-filter_complex");
+        command.add(filter);
+        command.add("-map");
+        command.add(outVideo);
+        command.add("-map");
+        command.add(outAudio);
+        command.add("-format");
+        command.add("yuva420p");
+        command.add("-preset");
+        command.add("ultrafast");
+        command.add("-video_track_timescale");
+        command.add("90k");
+        command.add("-b:v");
+        command.add("2000k");
+        command.add("-c:v");
+        command.add("libx264");
+        command.add("-bufsize");
+        command.add("64k");
+        command.add("-c:a");
+        command.add("aac");
+        command.add("-bsf");
+        command.add("aac_adtstoasc");
+        command.add("-strict");
+        command.add("-2");
+        command.add("-y");
+        command.add(mOutputPath);
+        mFFmpeg.executeFFmpegCommand(command);
     }
 
-    private void createGif(FFmpeg ffmpeg) {
-
+    private void exportGifSlow() {
         LinkedList<String> command = new LinkedList<>();
         String input = Utils.getTempFolder() + "/" + mTempVideo + ".mp4";
         String palette = Utils.getTempFolder() + "/" + System.currentTimeMillis() + ".png";
         mOutputPath = mOutputDir + "/" + mName + ".gif";
         String filter = "[0:v]fps=" + mFps + ",scale=" + (int) mQuality + ":-1:" +
                 "flags=lanczos,palettegen";
-        if (mOnlyOneVideo) {
-            VideoHolder video = mListVideo.get(0).videoHolder;
-            command.add("-ss");
-            command.add(video.startTimeSecond + "");
-            command.add("-t");
-            command.add(video.durationSec + "");
-            input = video.videoPath;
-        }
         command.add("-i");
         command.add(input);
         command.add("-vf");
         command.add(filter);
         command.add("-y");
         command.add(palette);
-        ffmpeg.executeFFmpegCommand(command);
+        mFFmpeg.executeFFmpegCommand(command);
 
         command = new LinkedList<>();
         filter = "fps=" + mFps + ",scale=" + (int) mQuality
                 + ":-1:flags=lanczos [x]; [x][1:v] paletteuse";
-        if (mOnlyOneVideo) {
-            VideoHolder video = mListVideo.get(0).videoHolder;
-            command.add("-ss");
-            command.add(video.startTimeSecond + "");
-            command.add("-t");
-            command.add(video.durationSec + "");
-            input = video.videoPath;
-        }
         command.add("-i");
         command.add(input);
         command.add("-i");
@@ -195,126 +264,95 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         command.add(String.valueOf(mLoop));
         command.add("-y");
         command.add(mOutputPath);
-        ffmpeg.executeFFmpegCommand(command);
+        mFFmpeg.executeFFmpegCommand(command);
     }
 
-    private LinkedList<String> getExportVideoCommand() {
+    private void exportVideoFast() {
+        mOutputPath = mOutputDir + "/" + mName + ".mp4";
         LinkedList<String> command = new LinkedList<>();
+        VideoHolder video = mListVideo.get(0).videoHolder;
+        command.add("-ss");
+        command.add(video.startTimeSecond + "");
+        command.add("-t");
+        command.add(video.durationSec + "");
+        command.add("-i");
+        command.add(video.videoPath);
+        command.add("-c");
+        command.add("copy");
+        command.add("-y");
+        command.add(mOutputPath);
+        mFFmpeg.executeFFmpegCommand(command);
+    }
 
-        if (mExportVideo) {
-            mOutputPath = mOutputDir + "/" + mName + ".mp4";
-        } else {
-            mTempVideo = System.currentTimeMillis() + "";
-            mOutputPath = Utils.getTempFolder() + "/" + mTempVideo + ".mp4";
-        }
+    private void exportGifFast() {
+        LinkedList<String> command = new LinkedList<>();
+        VideoHolder video = mListVideo.get(0).videoHolder;
+        String input = video.videoPath;
+        String palette = Utils.getTempFolder() + "/" + System.currentTimeMillis() + ".png";
+        mOutputPath = mOutputDir + "/" + mName + ".gif";
+        String filter = "[0:v]fps=" + mFps + ",scale=" + (int) mQuality + ":-1:" +
+                "flags=lanczos,palettegen";
+        command.add("-ss");
+        command.add(video.startTimeSecond + "");
+        command.add("-t");
+        command.add(video.durationSec + "");
+        command.add("-i");
+        command.add(input);
+        command.add("-vf");
+        command.add(filter);
+        command.add("-y");
+        command.add(palette);
+        mFFmpeg.executeFFmpegCommand(command);
 
-        if (!mOnlyOneVideo || !mKeepRatio) {
-            String inputBackground = Utils.getTempFolder() + "/background.png";
-            copyImageToStorage(inputBackground);
+        command = new LinkedList<>();
+        filter = "fps=" + mFps + ",scale=" + (int) mQuality
+                + ":-1:flags=lanczos [x]; [x][1:v] paletteuse";
 
-            String inVideo = "[v]";
-            String outVideo = "[outVideo]";
-            String outAudio = "[outAudio];";
-            int order = 1;
-            String filter = MergeFilter.getFilter(mListVideo, (int) mQuality, order);
-            if (mListImage.size() == 0 && mListText.size() == 0) {
-                outVideo = "[v]";
-                outAudio = "[outAudio]";
-            }
+        command.add("-ss");
+        command.add(video.startTimeSecond + "");
+        command.add("-t");
+        command.add(video.durationSec + "");
+        command.add("-i");
+        command.add(input);
+        command.add("-i");
+        command.add(palette);
+        command.add("-lavfi");
+        command.add(filter);
+        command.add("-loop");
+        command.add(String.valueOf(mLoop));
+        command.add("-y");
+        command.add(mOutputPath);
+        mFFmpeg.executeFFmpegCommand(command);
+    }
 
-            int audioPosition = order + mListVideo.size();
-            filter += AudioFilter.getFilter(1f, outAudio, mListAudio, audioPosition);
-            if (mListImage.size() > 0) {
-                outVideo = "[inText];";
-                if (mListText.size() == 0) {
-                    outVideo = "[inText]";
-                }
-                int imagePosition = audioPosition + mListAudio.size();
-                filter += ImageFilter.getFilter(inVideo, outVideo, mListImage, imagePosition);
-            }
-            if (mListText.size() > 0) {
-                inVideo = "[inText]";
-                outVideo = "[outVideo]";
-                if (mListImage.size() == 0) {
-                    inVideo = "[v]";
-                }
-                filter += TextFilter.getFilter(inVideo, outVideo, mListText);
-            }
-            outAudio = "[outAudio]";
-            command.add("-loop");
-            command.add("1");
-            command.add("-i");
-            command.add(inputBackground);
-            for (int i = 0; i < mListVideo.size(); i++) {
-                VideoHolder video = mListVideo.get(i).videoHolder;
-                command.add("-ss");
-                command.add(video.startTimeSecond + "");
-                command.add("-t");
-                command.add(video.durationSec + "");
-                command.add("-i");
-                command.add(video.videoPath);
-            }
-            for (int i = 0; i < mListAudio.size(); i++) {
-                AudioHolder audio = mListAudio.get(i).audioHolder;
-                command.add("-ss");
-                command.add(audio.startTimeMs + "");
-                command.add("-t");
-                command.add(audio.durationSec + "");
-                command.add("-i");
-                command.add(audio.audioPath);
-            }
-            for (int i = 0; i < mListImage.size(); i++) {
-                command.add("-i");
-                command.add(mListImage.get(i).imagePath);
-            }
-            command.add("-filter_complex");
-            command.add(filter);
-            command.add("-map");
-            command.add(outVideo);
-            command.add("-map");
-            command.add(outAudio);
-            command.add("-format");
-            command.add("yuva420p");
-            command.add("-preset");
-            command.add("ultrafast");
-            command.add("-video_track_timescale");
-            command.add("90k");
-            command.add("-b:v");
-            command.add("2000k");
-            command.add("-c:v");
-            command.add("libx264");
-            command.add("-bufsize");
-            command.add("64k");
-            command.add("-c:a");
-            command.add("aac");
-            command.add("-bsf");
-            command.add("aac_adtstoasc");
-            command.add("-strict");
-            command.add("-2");
-            command.add("-y");
-            command.add(mOutputPath);
-        } else {
-            VideoHolder video = mListVideo.get(0).videoHolder;
-            command.add("-ss");
-            command.add(video.startTimeSecond + "");
-            command.add("-t");
-            command.add(video.durationSec + "");
-            command.add("-i");
-            command.add(video.videoPath);
-            command.add("-c");
-            command.add("copy");
-            command.add("-y");
-            command.add(mOutputPath);
-        }
-        return command;
+    private void exportVideoCrop() {
+        LinkedList<String> command = new LinkedList<>();
+        VideoHolder video = mListVideo.get(0).videoHolder;
+        mTempVideo = System.currentTimeMillis() + "";
+        mOutputPath = Utils.getTempFolder() + "/" + mTempVideo + ".mp4";
+        String filter = "[0:v]crop=" + video.width + ":" + video.height +
+                ":" + video.left + ":" + video.top;
+        command.add("-ss");
+        command.add(video.startTimeSecond + "");
+        command.add("-t");
+        command.add(video.durationSec + "");
+        command.add("-i");
+        command.add(video.videoPath);
+        command.add("-filter_complex");
+        command.add(filter);
+        command.add("-preset");
+        command.add("ultrafast");
+        command.add("-y");
+        command.add(mOutputPath);
+        mFFmpeg.executeFFmpegCommand(command);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        startTime = System.currentTimeMillis();
         if (!mExportVideo) {
-            if (mOnlyOneVideo) {
+            VideoHolder video = mListVideo.get(0).videoHolder;
+            if (mOnlyOneVideo && !video.crop) {
                 mExportFragment.setProcessTitle(mActivity.getString(R.string.exporting_gif));
             } else {
                 mExportFragment.setProcessTitle(mActivity.getString(R.string.preparing_video));
@@ -346,13 +384,35 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
-        FFmpeg ffmpeg = FFmpeg.getInstance(mActivity);
-        if (mExportVideo) {
-            exportVideo(ffmpeg);
+        mFFmpeg = FFmpeg.getInstance(mActivity);
+        VideoHolder video = mListVideo.get(0).videoHolder;
+        if (mActivity.mIsVip && mOnlyOneVideo && mKeepRatio) {
+            if (mExportVideo) {
+                if (video.crop || video.changeVolume) {
+                    exportVideoSlow();
+                } else {
+                    exportVideoFast();
+                }
+            } else {
+                if (video.crop) {
+                    exportVideoCrop();
+                    publishProgress();
+                    exportGifSlow();
+                } else {
+                    exportGifFast();
+                }
+            }
         } else {
-            exportGif(ffmpeg);
+            if (mExportVideo) {
+                exportVideoSlow();
+            } else {
+                exportVideoSlow();
+                publishProgress();
+                exportGifSlow();
+            }
         }
 
+        //need mOutputPath;
         Intent intent = new Intent(Constants.ACTION_COPY_FILE_TO_SDCARD);
         intent.putExtra(Constants.VIDEO_FILE_PATH, mOutputPath);
         mActivity.sendBroadcast(intent);
@@ -364,11 +424,10 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
                 e.printStackTrace();
             }
         }
-
         return null;
     }
 
-    public String getOutputPath() {
+    String getOutputPath() {
         return mOutputPath;
     }
 
@@ -376,7 +435,7 @@ class ExportTask extends AsyncTask<Void, Void, Void> {
         Log.e("Export Task", msg);
     }
 
-    public void onBroadcastReceived(Intent intent, String action) {
+    void onBroadcastReceived(Intent intent, String action) {
         switch (action) {
             case Constants.ACTION_COPY_COMPLETED:
                 mCopyingFile = false;

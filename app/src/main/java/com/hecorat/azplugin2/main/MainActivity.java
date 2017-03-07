@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private int mTimeLineImageHeight = 70;
     private int mFragmentCode;
     private boolean mOpenFileManager;
-    public boolean mOpenImageSubFolder, mOpenAudioSubFolder;
+    public boolean mOpenImageSubFolder;
     private boolean mRunThread;
     private int mCurrentVideoId, mTLPositionInMs;
     private int mPreviewStatus;
@@ -231,7 +231,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private boolean mFirstAnchor;
     private int mDragAnchor;
     private int mVideoViewHeight;
-    private boolean mOpenLayoutCropVideo;
     private boolean mOpenLayoutSetting;
     public boolean mUseSdCard;
     private int mInitProjectId;
@@ -523,7 +522,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mVideoPath = intent.getStringExtra(Constants.VIDEO_FILE_PATH);
             mUseSdCard = intent.getBooleanExtra(Constants.USE_SD_CARD, false);
             mOutputDirectory = intent.getStringExtra(Constants.DIRECTORY);
-            mIsVip = intent.getBooleanExtra(Constants.IS_VIP, false);
+//            mIsVip = intent.getBooleanExtra(Constants.IS_VIP, false);
+            mIsVip = true;
             mOpenFromDialog = intent.getBooleanExtra(Constants.OPEN_FROM_DIALOG, true);
             if (mVideoPath == null) {
                 return;
@@ -549,7 +549,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
-
 
     View.OnClickListener onBtnExportGifClick = new View.OnClickListener() {
         @Override
@@ -621,7 +620,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     };
 
     public void openLayoutCropVideo(boolean open) {
-        mOpenLayoutCropVideo = open;
         if (open) {
             mFragmentCrop = FragmentCrop.newInstance(mActivity, mSelectedVideoTL);
             getSupportFragmentManager().beginTransaction()
@@ -1167,18 +1165,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
     };
 
-    private void setToolbarVisible(View view, boolean show) {
-        view.setVisibility(show ? View.VISIBLE : View.GONE);
-        TranslateAnimation animation;
-        if (show) {
-            animation = new TranslateAnimation(-Utils.dpToPixel(this, 50), 0, 0, 0);
-        } else {
-            animation = new TranslateAnimation(0, -Utils.dpToPixel(this, 50), 0, 0);
-        }
-        animation.setDuration(LAYOUT_ANIMATION_DURATION);
-        view.startAnimation(animation);
-    }
-
     View.OnClickListener onBtnCloseColorPickerClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -1362,7 +1348,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         public void onClick(View v) {
             if (mSelectedTL == TIMELINE_VIDEO) {
                 openLayoutTrimVideo();
-//                mActiveVideoView.changeFilter(Effects.NEGATIVE);
             }
         }
     };
@@ -2975,11 +2960,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 break;
         }
 
-        if (mOpenFileManager) {
-            openFileManager(false);
-            return true;
-        }
-        return false;
+        openFileManager(false);
+        return true;
     }
 
     ViewPager.OnPageChangeListener onViewPagerChanged = new ViewPager.OnPageChangeListener() {

@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.hecorat.azplugin2.R;
 import com.hecorat.azplugin2.helper.Utils;
+import com.hecorat.azplugin2.main.Constants;
 import com.hecorat.azplugin2.main.MainActivity;
 
 import java.io.File;
@@ -120,7 +121,7 @@ public class FragmentVideosGallery extends Fragment {
                 mFolderAdapter = new VideoGalleryAdapter(mActivity, R.layout.folder_gallery_layout, mListFirstVideoSd);
                 mGridView.setAdapter(mFolderAdapter);
                 mGridView.setOnItemClickListener(onFolderClickListener);
-                mFolderName = getString(R.string.video_tab_title) + " / Sd Card";
+                mFolderName = getString(R.string.video_tab_title) + Constants.SLASH + Constants.SD_CARD;
                 mActivity.setFolderName(mFolderName);
                 mActivity.setBtnUpLevelVisible(true);
                 break;
@@ -130,7 +131,6 @@ public class FragmentVideosGallery extends Fragment {
     AdapterView.OnItemClickListener onFolderClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            log("onFolderClickListener i = " + i);
             if (mHasSdCard && i == 0 && galleryState == GalleryState.VIDEO_FOLDER) {
                 setupLayoutSdFolder();
                 return;
@@ -138,7 +138,7 @@ public class FragmentVideosGallery extends Fragment {
 
             mListVideo.clear();
             mActivity.setBtnUpLevelVisible(true);
-            String name = "";
+            String name;
             if (galleryState == GalleryState.VIDEO_FOLDER) {
                 galleryState = GalleryState.VIDEO_SUBFOLDER;
                 name = new File(mListFolder.get(i)).getName();
@@ -146,12 +146,12 @@ public class FragmentVideosGallery extends Fragment {
                 galleryState = GalleryState.VIDEO_SUBFOLDER_SD;
                 String folderPath = mListFolderSd.get(i);
                 if (folderPath.equals(mSdPath)) {
-                    name = "0";
+                    name = Constants.STORAGE_NAME;
                 } else {
                     name = new File(folderPath).getName();
                 }
             }
-            mFolderName += " / " + name;
+            mFolderName += Constants.SLASH + name;
             mActivity.setFolderName(mFolderName);
             new AsyncTaskScanFile().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
 
@@ -171,7 +171,7 @@ public class FragmentVideosGallery extends Fragment {
         mGridView.setOnItemClickListener(onFolderClickListener);
 
         mActivity.setBtnUpLevelVisible(true);
-        mFolderName += "/Sd Card";
+        mFolderName += Constants.SLASH + Constants.SD_CARD;
         mActivity.setFolderName(mFolderName);
         mListFolderSd.add(mSdPath);
         listFolderFrom(new File(mSdPath), mListFolderSd);
@@ -358,7 +358,7 @@ public class FragmentVideosGallery extends Fragment {
         private void setLayoutVideoFolder(ViewHolder viewHolder, int position) {
             if (mHasSdCard && position == 0) {
                 viewHolder.iconFolder.setImageBitmap(null);
-                viewHolder.textView.setText("Sd Card");
+                viewHolder.textView.setText(Constants.SD_CARD);
                 viewHolder.imageView.setImageResource(R.drawable.ic_sd_card);
             } else {
                 String videoPath = mListFirstVideo.get(position);
@@ -374,7 +374,7 @@ public class FragmentVideosGallery extends Fragment {
             String videoPath = mListFirstVideoSd.get(position);
             String name = new File(mListFolderSd.get(position)).getName();
             if (position == 0 && mListFolderSd.get(0).equals(mSdPath)) {
-                name = "0";
+                name = Constants.STORAGE_NAME;
             }
             int iconId = R.drawable.ic_folder;
             viewHolder.iconFolder.setImageResource(iconId);

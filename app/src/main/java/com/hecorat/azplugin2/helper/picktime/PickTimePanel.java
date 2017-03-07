@@ -62,7 +62,7 @@ public class PickTimePanel extends LinearLayout implements View.OnClickListener,
         }
         else if (v.equals(textMax)) {
             DialogTimePicker.newInstance(getContext(), timeDataMax, timeDataDuration, this)
-                    .show(activity.getSupportFragmentManager(), "pick time min");
+                    .show(activity.getSupportFragmentManager(), "pick time max");
         }
         AnalyticsHelper.getInstance()
                 .send(activity, Constants.CATEGORY_VIDEO, Constants.ACTION_PICK_TIME_VIDEO);

@@ -121,5 +121,4 @@ public interface Constants {
     String SLASH = " / ";
     String STORAGE_NAME = "0";
     String DEFAULT_PROJECT_NAME = "No_name";
-
 }

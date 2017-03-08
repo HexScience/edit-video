@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.hecorat.azplugin2.R;
 import com.hecorat.azplugin2.interfaces.DialogClickListener;
+import com.hecorat.azplugin2.main.Constants;
 
 /**
  * Created by bkmsx on 1/3/2017.
@@ -24,7 +25,9 @@ public class DialogConfirm extends DialogFragment {
     Context mContext;
     String mDetail;
 
-    public static DialogConfirm newInstance(Context context, DialogClickListener listener, int type, String detail) {
+    public static DialogConfirm newInstance(Context context,
+                                            DialogClickListener listener,
+                                            int type, String detail) {
         DialogConfirm dialogConfirm = new DialogConfirm();
         dialogConfirm.mContext = context;
         dialogConfirm.mCallback = listener;
@@ -82,7 +85,6 @@ public class DialogConfirm extends DialogFragment {
             builder.setNeutralButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-
                 }
             });
         }
@@ -98,8 +100,28 @@ public class DialogConfirm extends DialogFragment {
         switch (mType) {
             case DialogClickListener.ASK_DONATE:
                 dialogData.iconId = R.drawable.ic_dialog_donate;
-                dialogData.titleId = R.string.dialog_ask_premium_title;
-                dialogData.messageId = R.string.dialog_ask_premium_message;
+                int messageId;
+                int titleId;
+                switch (mDetail){
+                    case Constants.EVENT_ACTION_DIALOG_FROM_NEW_TRIM:
+                        titleId = R.string.dialog_ask_premium_title;
+                        messageId = R.string.dialog_ask_premium_trim_message;
+                        break;
+                    case Constants.EVENT_ACTION_DIALOG_FROM_NEW_GIF:
+                        titleId = R.string.dialog_ask_premium_title;
+                        messageId = R.string.dialog_ask_premium_gif_message;
+                        break;
+                    case Constants.EVENT_ACTION_DIALOG_FROM_WATERMARK:
+                        titleId = R.string.dialog_ask_premium_remove_watermark_title;
+                        messageId = R.string.dialog_ask_premium_remove_watermark_message;
+                        break;
+                    default:
+                        titleId = R.string.dialog_ask_premium_title;
+                        messageId = R.string.dialog_ask_premium_remove_watermark_message;
+                        break;
+                }
+                dialogData.titleId = titleId ;
+                dialogData.messageId = messageId;
                 break;
             case DialogClickListener.DELETE_VIDEO:
                 dialogData.iconId = R.drawable.ic_delete_2;

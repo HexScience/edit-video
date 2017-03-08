@@ -69,14 +69,18 @@ public class NameDialog extends DialogFragment {
     }
 
     private String getTitle() {
+        String title = "";
         switch (mType) {
             case CREATE_PROJECT:
             case SAVE_PROJECT:
-                return getString(R.string.dialog_title_create_project);
+                title = getString(R.string.dialog_title_new_project_name);
+                break;
             case RENAME:
-                return getString(R.string.dialog_title_rename);
+                title = getString(R.string.dialog_title_rename_project);
+                break;
+            default: break;
         }
-        return "";
+        return title;
     }
 
     private String getPositiveBtnText() {

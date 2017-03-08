@@ -11,14 +11,17 @@
     <string name="confirm_export_title">Confirm Export</string>
     <string name="confirm_export_msg">Do you want to export video now?</string>
     <string name="export_progress_msg">Export video</string>
-    <string name="dialog_title_create_project">Create Project</string>
-    <string name="dialog_title_rename">Rename Project</string>
+    <string name="dialog_title_new_project_name">Enter Project Name</string>
+    <string name="dialog_title_rename_project">Enter New Name</string>
     <string name="positive_btn_text_create_project">Create Project</string>
     <string name="toast_file_not_exists_when_click_play">Some file is not exists, please remove it before playing</string>
     <string name="toast_file_not_exists_when_click_export">Some file is not exists, please remove it before exporting</string>
     <string name="spinner_text">Aa Bb Cc</string>
-    <string name="dialog_ask_premium_title">Remove Watermark</string>
-    <string name="dialog_ask_premium_message">Please upgrade to remove watermark and use all premium features.</string>
+    <string name="dialog_ask_premium_remove_watermark_title">Remove watermark</string>
+    <string name="dialog_ask_premium_title">Pro feature</string>
+    <string name="dialog_ask_premium_remove_watermark_message">Please upgrade to remove watermark and use all premium features.</string>
+    <string name="dialog_ask_premium_trim_message">This feature is used to trim or cut middle videos.\n\nDo you want to use it?</string>
+    <string name="dialog_ask_premium_gif_message">GIF converter is used to export recorded videos to GIF files.\n\nDo you want to use it?</string>
     <string name="no_internet_connection">No internet connection</string>
     <string name="purchase_failed">Purchase failed</string>
     <string name="purchase_success">Thank you for donate</string>
@@ -103,6 +106,9 @@
     <string name="toast_delete_current_project">You cannot delete current editing project</string>
     <string name="dialog_open_project_title">Open project</string>
     <string name="dialog_open_project_mess">Do you want open project "'"%s"'" ? All state of current editing project will be saved.</string>
+    <string name="toast_add_video_fail">Opp! an error corrupted when adding this video, please try again or select other one video</string>
+    <string name="toast_add_audio_fail">Opp! an error corrupted when adding this audio, please try again or select other one audio</string>
+    <string name="toast_no_email_apps_installed">There are no email apps installed</string>
 
     <string name="dialog_title_save_project">Save Project</string>
     <string name="dialog_msg_save_project">Do you want to save this project?</string>

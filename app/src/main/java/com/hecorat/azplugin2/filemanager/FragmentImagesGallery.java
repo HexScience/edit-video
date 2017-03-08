@@ -390,7 +390,7 @@ public class FragmentImagesGallery extends Fragment {
             iconFolder.setVisibility(View.VISIBLE);
             int stickerPosition = mHasSdCard ? 1 : 0;
             if (mHasSdCard && position == 0) {
-                textView.setText("Sd Card");
+                textView.setText(Constants.SD_CARD);
                 imageView.setImageResource(R.drawable.ic_sd_card);
                 iconFolder.setVisibility(View.INVISIBLE);
             } else if (position == stickerPosition) {
@@ -411,7 +411,7 @@ public class FragmentImagesGallery extends Fragment {
             TextView textView = (TextView) convertView.findViewById(R.id.text_view);
             String folder = mListFolderSd.get(position);
             if (folder.equals(mSdPath)) {
-                textView.setText("0");
+                textView.setText(Constants.STORAGE_NAME);
             } else {
                 String name = new File(folder).getName();
                 textView.setText(name);
@@ -429,7 +429,6 @@ public class FragmentImagesGallery extends Fragment {
             textView.setVisibility(View.GONE);
             Uri uri = Uri.parse(ASSETS_PATH + mListStiker.get(position));
             Glide.with(mActivity).load(uri).centerCrop().into(imageView);
-
             return convertView;
         }
 

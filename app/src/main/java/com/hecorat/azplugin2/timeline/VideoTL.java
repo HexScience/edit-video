@@ -243,6 +243,8 @@ public class VideoTL extends AppCompatImageView {
         videoHolder.width = (int) (videoWidth * (rightSide - leftSide));
         videoHolder.height = (int) (videoHeight * (topSide - bottomSide));
         videoHolder.ratio = videoRatio;
+        videoHolder.changeVolume = volume != 1;
+        videoHolder.crop = (rightSide - leftSide) != 1 || (topSide - bottomSide) != 1;
         return videoHolder;
     }
 

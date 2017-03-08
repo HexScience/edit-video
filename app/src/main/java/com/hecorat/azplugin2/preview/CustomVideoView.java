@@ -5,13 +5,7 @@ import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
-import android.os.Environment;
-import android.util.Log;
 import android.view.Surface;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.VideoView;
 
 /**
  * Created by bkmsx on 2/14/2017.
@@ -27,26 +21,13 @@ public class CustomVideoView extends GLSurfaceView implements CustomRenderer.OnS
         super(context);
         this.context = context;
         setEGLContextClientVersion(2);
-        customRenderer = new CustomRenderer(context, this);
+        customRenderer = new CustomRenderer(this);
         setRenderer(customRenderer);
-    }
-
-    public CustomRenderer getCustomRenderer() {
-        return customRenderer;
     }
 
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surfaceTexture) {
         surface = new Surface(surfaceTexture);
-    }
-
-    public void changeFilter(final Effects type) {
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                customRenderer.setupProgram(type);
-            }
-        });
     }
 
     public void setVideoSize(float left, float right, float bottom, float top) {
@@ -85,11 +66,7 @@ public class CustomVideoView extends GLSurfaceView implements CustomRenderer.OnS
     }
 
     public boolean isPlaying() {
-        if (mediaPlayer != null) {
-            return mediaPlayer.isPlaying();
-        } else {
-            return false;
-        }
+        return mediaPlayer != null && mediaPlayer.isPlaying();
     }
 
     public void start() {
@@ -111,9 +88,5 @@ public class CustomVideoView extends GLSurfaceView implements CustomRenderer.OnS
             mediaPlayer = null;
         }
         customRenderer.stop();
-    }
-
-    private void log(String msg) {
-        Log.e("CustomVideoView", msg);
     }
 }

@@ -20,12 +20,6 @@ public class VideoMetaData {
     private String codecVideo, tbnVideo, bitrateVideo, framerateVideo, width, height;
     private  String bitrateAudio, sampleAudio, codecAudio, audioChannels;
     private static String fileString;
-    private static final int VIDEO_CODEC = 0;
-    private static final int VIDEO_TBN = 1;
-    private static final int AUDIO_CODEC = 2;
-    private static final int WIDTH = 3;
-    private static final int HEIGHT = 4;
-    private static final int VIDEO_FIRST = 5;
 
 
     public static VideoMetaData getMetaData(Context context, String videoPath){
@@ -38,25 +32,6 @@ public class VideoMetaData {
         }
 
         return getTrack();
-    }
-
-    public boolean cmp(VideoMetaData metaData, int property) {
-        switch (property) {
-            case VIDEO_CODEC:
-                return codecVideo.equals(metaData.codecVideo);
-            case VIDEO_TBN:
-                return tbnVideo.equals(metaData.tbnVideo);
-            case WIDTH:
-                return width.equals(metaData.width);
-            case HEIGHT:
-                return height.equals(metaData.height);
-            case AUDIO_CODEC:
-                return codecAudio.equals(metaData.codecAudio);
-            case VIDEO_FIRST:
-                return videoFirst == metaData.videoFirst;
-            default:
-                return false;
-        }
     }
 
     private static VideoMetaData getTrack() {
@@ -151,21 +126,6 @@ public class VideoMetaData {
         } catch (StringIndexOutOfBoundsException e) {
             return null;
         }
-    }
-
-    public static void logData(VideoMetaData videoMetaData){
-        log("Video first: "+videoMetaData.videoFirst);
-        log("Has audio: "+videoMetaData.hasAudio);
-        log("Video Codec: "+videoMetaData.codecVideo);
-        log("Video Tbn: "+videoMetaData.tbnVideo);
-        log("Video Width: "+videoMetaData.width);
-        log("Video Height: "+videoMetaData.height);
-        log("Video Bitrate: "+videoMetaData.bitrateVideo);
-        log("Video Framerate: "+videoMetaData.framerateVideo);
-        log("Audio Codec: "+videoMetaData.codecAudio);
-        log("Audio Channel: "+videoMetaData.audioChannels);
-        log("Audio Bitrate: "+ videoMetaData.bitrateAudio);
-        log("Audio Sample: "+videoMetaData.sampleAudio);
     }
 
     public static void log(String msg) {

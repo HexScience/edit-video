@@ -10,24 +10,19 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.MediaScannerConnection;
-import android.net.Uri;
 import android.os.Environment;
-import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
-import android.support.v4.provider.DocumentFile;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.hecorat.azplugin2.main.Constants;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -124,7 +119,7 @@ public class Utils {
             out.flush();
             out.close();
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 
@@ -197,58 +192,5 @@ public class Utils {
         String sdDir = listDir[1].getAbsolutePath();
         int index = sdDir.indexOf("/Android/data");
         return sdDir.substring(0, index);
-    }
-
-    public static boolean moveFile(Context context, String src, String dst,
-                                   boolean useUri, boolean isVideo) {
-        if (useUri) {
-            try {
-                FileInputStream is = new FileInputStream(src);
-                FileChannel srcChannel = is.getChannel();
-                String outputName = "hello.mp4";
-                DocumentFile outputDir = DocumentFile.fromTreeUri(context,
-                        Uri.parse(dst));
-                String mediaType = isVideo ? "video/mp4" : "image/gif";
-                DocumentFile outputFile = outputDir.createFile(mediaType,
-                        outputName.substring(0, outputName.length() - 4));
-                ParcelFileDescriptor parcelFd;
-
-                parcelFd = context.getContentResolver().openFileDescriptor(
-                        outputFile.getUri(), "rw");
-                FileOutputStream os = new FileOutputStream(
-                        parcelFd.getFileDescriptor());
-                FileChannel dstChannel = os.getChannel();
-
-                dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
-
-                srcChannel.close();
-                is.close();
-                dstChannel.close();
-                os.close();
-                parcelFd.closeWithError("error");
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-        } else {
-            try {
-                FileInputStream is = new FileInputStream(src);
-                FileChannel srcChannel = is.getChannel();
-
-                FileOutputStream os = new FileOutputStream(dst);
-                FileChannel dstChannel = os.getChannel();
-                dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
-                srcChannel.close();
-                is.close();
-                dstChannel.close();
-                os.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-
-        }
-        return true;
     }
 }

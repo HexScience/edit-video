@@ -701,6 +701,49 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
+    View.OnClickListener onBtnExportGifClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mVideoList.isEmpty()) {
+                return;
+            }
+            int duration = mVideoList.get(mCountVideo - 1).endInTimeLineMs / 1000;
+            if (duration > 20) {
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.WARNING_DURATION_GIF, "")
+                        .show(getSupportFragmentManager(), "warning gif duration");
+                return;
+            }
+            if (!mIsVip) {
+                DialogConfirm.newInstance(mActivity, mActivity, DialogClickListener.ASK_DONATE,
+                        Constants.EVENT_ACTION_DIALOG_FROM_NEW_GIF)
+                        .show(getSupportFragmentManager(), "donate");
+                return;
+            }
+            pausePreview();
+            hideAllFloatControllers();
+            exportVideo(false);
+        }
+    };
+
+    View.OnClickListener onBtnSettingClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mOpenLayoutSetting) {
+                slideLayoutSettingIn(false);
+            } else {
+                slideLayoutSettingIn(true);
+            }
+        }
+    };
+
+    View.OnClickListener onBtnRemoveWatermarkClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            slideLayoutSettingIn(false);
+            askDonate();
+        }
+    };
+
     private void initVideoView() {
         mVideoView1 = new CustomVideoView(this);
         mVideoView2 = new CustomVideoView(this);
@@ -1029,6 +1072,94 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         return Math.round(volume * 100);
     }
 
+    View.OnClickListener onBtnVolumeClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            int volume;
+            if (mSelectedTL == TIMELINE_VIDEO) {
+                volume = convertVolumeToInt(mSelectedVideoTL.volume);
+                AnalyticsHelper.getInstance()
+                        .send(mActivity, Constants.CATEGORY_VIDEO, Constants.ACTION_CHANGE_VOLUME_VIDEO);
+            } else {
+                volume = convertVolumeToInt(mSelectedAudioTL.volume);
+                AnalyticsHelper.getInstance()
+                        .send(mActivity, Constants.CATEGORY_AUDIO, Constants.ACTION_CHANGE_VOLUME_AUDIO);
+            }
+            VolumeEditor.newInstance(mActivity, volume).show(getFragmentManager(), "volume");
+            pausePreview();
+        }
+    };
+
+    View.OnClickListener onBtnAddNewProjectClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            createProject();
+        }
+    };
+
+    View.OnClickListener onBtnCloseColorPickerClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            showColorPicker(false, true);
+        }
+    };
+
+    TextView.OnEditorActionListener onEditColorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                int color = convertToIntegerColor(mEdtColorHex.getText().toString());
+                mColorPicker.setColor(color);
+                setColorForViews(color);
+                mEdtColorHex.clearFocus();
+
+                AnalyticsHelper.getInstance()
+                        .send(mActivity, Constants.CATEGORY_TEXT, Constants.ACTION_CHANGE_HEX_COLOR);
+            }
+            return false;
+        }
+    };
+
+    View.OnClickListener onLayoutBtnTextBgrColorClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mShowColorPicker) {
+                if (!mChooseTextColor) {
+                    showColorPicker(false, true);
+                } else {
+                    mChooseTextColor = false;
+                    showColorPicker(true, false);
+                }
+            } else {
+                mChooseTextColor = false;
+                showColorPicker(true, true);
+            }
+
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_TEXT, Constants.ACTION_CHANGE_TEXT_BACKGROUND);
+        }
+    };
+
+    View.OnClickListener onLayoutBtnTextColorClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mShowColorPicker) {
+                if (mChooseTextColor) {
+                    showColorPicker(false, true);
+                } else {
+                    mChooseTextColor = true;
+                    showColorPicker(true, false);
+                }
+            } else {
+                mChooseTextColor = true;
+                showColorPicker(true, true);
+            }
+
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_TEXT, Constants.ACTION_CHANGE_TEXT_COLOR);
+        }
+    };
+
     private void showColorPicker(boolean show, boolean animation) {
         mShowColorPicker = show;
         if (show) {
@@ -1091,6 +1222,61 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
         return resultColor;
     }
+
+    AdapterView.OnItemSelectedListener onFontSelectedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            String font = mFontPath.get(position);
+            if (mSelectedExtraTL != null) {
+                mSelectedExtraTL.floatText.setFont(font, position);
+            }
+            mFontAdapter.setSelectedItem(position);
+            AnalyticsHelper.getInstance()
+                    .send(mActivity, Constants.CATEGORY_TEXT, Constants.ACTION_CHANGE_TEXT_FONT);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    };
+
+    TextView.OnEditorActionListener onEditTextActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                String text = mEditText.getText().toString();
+                mSelectedExtraTL.setText(text);
+                mSelectedExtraTL.floatText.setText(text);
+                mEditText.clearFocus();
+
+                AnalyticsHelper.getInstance()
+                        .send(mActivity, Constants.CATEGORY_TEXT, Constants.ACTION_CHANGE_TEXT);
+            }
+            return false;
+        }
+    };
+
+    View.OnClickListener onBtnEditClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mOpenLayoutEditText) {
+                openLayoutEditText(false);
+            } else {
+                initFontManager();
+                openLayoutEditText(true);
+            }
+        }
+    };
+
+    View.OnClickListener onBtnTrimClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mSelectedTL == TIMELINE_VIDEO) {
+                openLayoutTrimVideo();
+            }
+        }
+    };
 
     private void openLayoutTrimVideo() {
         setActiveVideoViewVisible(false);
@@ -2506,10 +2692,12 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         if (mOpenLayoutEditText) {
             openLayoutEditText(false);
+            log("openLayoutEditText(false)");
             return;
         }
 
         if (upLevelFileManager()) {
+            log("upLevelFileManager");
             return;
         }
 

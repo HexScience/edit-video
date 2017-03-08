@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.SeekBar;
@@ -53,10 +52,8 @@ public class VolumeEditor extends DialogFragment {
         builder.setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-//                mActivity.hideStatusBar();
             }
         });
-        builder.setOnKeyListener(onKeyListener);
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
         return dialog;
@@ -78,16 +75,6 @@ public class VolumeEditor extends DialogFragment {
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
 
-        }
-    };
-
-    DialogInterface.OnKeyListener onKeyListener = new DialogInterface.OnKeyListener() {
-        @Override
-        public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-            if (keyCode == KeyEvent.KEYCODE_BACK){
-//                mActivity.hideStatusBar();
-            }
-            return false;
         }
     };
 }

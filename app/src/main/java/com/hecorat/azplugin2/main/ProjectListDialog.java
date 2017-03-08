@@ -231,7 +231,7 @@ public class ProjectListDialog extends DialogFragment {
             editText.setText(oldName);
             if (!TextUtils.isEmpty(oldName)) editText.setSelection(oldName.length());
             builder.setView(editText)
-                    .setTitle(R.string.dialog_title_rename)
+                    .setTitle(R.string.dialog_title_rename_project)
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok,
                             new DialogInterface.OnClickListener() {
@@ -277,7 +277,7 @@ public class ProjectListDialog extends DialogFragment {
             }
 
             AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-            builder.setTitle(R.string.dialog_title_rename)
+            builder.setTitle(R.string.dialog_title_delete_project)
                     .setMessage(R.string.dialog_msg_delete_project)
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok,
@@ -297,5 +297,4 @@ public class ProjectListDialog extends DialogFragment {
                     .show();
         }
     }
-
 }

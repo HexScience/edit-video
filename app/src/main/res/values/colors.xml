@@ -25,4 +25,5 @@
     <color name="crop_frame_stroke">#9ee3de40</color>
     <color name="crop_highlight_color">#f94403</color>
     <color name="normal_thumb_color">#f4e005</color>
+    <color name="dark_blue">#033556</color>
 </resources>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:id="@+id/layout_edit_text"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_edit_text"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:visibility="gone"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:visibility="gone">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -47,9 +47,9 @@
                     android:id="@+id/btn_close_colorpicker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
                     android:layout_marginBottom="20dp"
                     android:layout_marginStart="20dp"
-                    android:layout_centerVertical="true"
                     android:background="#857e7e"
                     android:text="@string/ok_btn" />
 
@@ -57,23 +57,23 @@
                     android:id="@+id/text_hashtag"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/btn_close_colorpicker"
                     android:layout_marginStart="5dp"
                     android:text="@string/hash_tag"
-                    android:layout_below="@+id/btn_close_colorpicker"
                     android:textColor="#222222" />
 
                 <EditText
                     android:id="@+id/edt_color_hex"
                     android:layout_width="0dp"
-                    app:layout_widthPercent="35%"
                     android:layout_height="30dp"
+                    android:layout_alignBaseline="@+id/text_hashtag"
                     android:layout_marginEnd="5dp"
                     android:layout_toEndOf="@+id/text_hashtag"
-                    android:layout_alignBaseline="@+id/text_hashtag"
                     android:background="@drawable/edittext_border"
                     android:imeOptions="actionDone"
                     android:inputType="text"
-                    android:labelFor="@+id/edt_color_hex" />
+                    android:labelFor="@+id/edt_color_hex"
+                    app:layout_widthPercent="35%" />
 
                 <com.hecorat.azplugin2.addtext.ColorPickerView
                     android:id="@+id/color_picker"
@@ -82,7 +82,7 @@
                     android:layout_marginEnd="20dp"
                     android:layout_toEndOf="@id/edt_color_hex"
                     android:layerType="software"
-                    android:tag="portrait"/>
+                    android:tag="portrait" />
             </android.support.percent.PercentRelativeLayout>
         </RelativeLayout>
 
@@ -91,7 +91,8 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="4dp">
 
             <RelativeLayout
                 android:id="@+id/layout_text_color"
@@ -99,15 +100,13 @@
                 android:layout_height="0dp"
                 android:layout_marginBottom="@dimen/margin_bottom_edittext"
                 android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:gravity="center_vertical">
 
                 <ImageView
                     android:id="@+id/indicator_textcolor"
                     android:layout_width="@dimen/indicator_text_color"
                     android:layout_height="@dimen/indicator_text_color"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="5dp"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_left_arrow"
                     android:visibility="invisible" />
@@ -136,7 +135,7 @@
                         android:layout_height="@dimen/dimen_btn_text_background"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="40dp"
+                        android:layout_marginEnd="30dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_text_background" />
                 </RelativeLayout>
@@ -150,15 +149,13 @@
                 android:layout_marginBottom="@dimen/margin_bottom_edittext"
                 android:layout_weight="1"
                 android:clickable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:gravity="center_vertical">
 
                 <ImageView
                     android:id="@+id/indicator_textbackground"
                     android:layout_width="@dimen/indicator_text_color"
                     android:layout_height="@dimen/indicator_text_color"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="5dp"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_left_arrow"
                     android:visibility="invisible" />
@@ -187,7 +184,7 @@
                         android:layout_height="@dimen/dimen_btn_text_background"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="40dp"
+                        android:layout_marginEnd="30dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_text_background" />
                 </RelativeLayout>
@@ -199,23 +196,41 @@
                 android:layout_height="0dp"
                 android:layout_below="@+id/layout_background"
                 android:layout_marginBottom="@dimen/margin_bottom_edittext"
+                android:layout_marginStart="30dp"
                 android:layout_weight="1"
-                android:gravity="center_horizontal">
+                android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
                     android:text="@string/font_title" />
 
                 <Spinner
                     android:id="@+id/font_spinner"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
                     android:layout_marginStart="10dp"
+                    android:layout_weight="1"
                     android:gravity="center_horizontal" />
-
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/btn_ok_edit_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/layout_font"
+                android:background="@drawable/btn_ok_touch_feedback"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="8dp"
+                android:paddingBottom="4dp"
+                android:paddingEnd="12dp"
+                android:clickable="true"
+                android:paddingStart="12dp"
+                android:paddingTop="4dp"
+                android:text="@string/ok_btn" />
         </android.support.percent.PercentRelativeLayout>
     </LinearLayout>
 </LinearLayout>

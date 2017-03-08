@@ -58,5 +58,4 @@ public class FontAdapter extends ArrayAdapter<String> {
         textView.setTypeface(typeface);
         return view;
     }
-
 }

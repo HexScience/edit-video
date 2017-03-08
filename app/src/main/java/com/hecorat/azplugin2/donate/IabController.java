@@ -20,6 +20,7 @@ import java.util.ArrayList;
  * Created by bkmsx on 1/6/2017.
  */
 
+@SuppressWarnings("unused")
 public class IabController {
     private MainActivity mainActivity;
     private IabHelper mIabHelper;

@@ -245,9 +245,9 @@
         android:id="@+id/top_layout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/video_view_height"
-        android:background="#1e1e1e"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
+        android:background="#1e1e1e">
 
         <RelativeLayout
             android:id="@+id/video_view_layout"
@@ -292,24 +292,32 @@
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/text_size_btn_toolbar" />
 
-            <ImageView
-                android:id="@+id/btn_add"
-                android:layout_width="@dimen/toolbar_icon_dimension"
-                android:layout_height="@dimen/toolbar_icon_dimension"
-                android:layout_marginTop="@dimen/margin_top_toolbar"
-                android:background="@drawable/btn_touch_feedback_oval"
-                android:clickable="true"
-                android:contentDescription="@null"
-                android:padding="@dimen/toolbar_icon_padding"
-                android:src="@drawable/ic_add_media" />
-
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/btn_add_container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_top_text_btn_toolbar"
-                android:text="@string/text_btn_add"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/text_size_btn_toolbar" />
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/btn_add"
+                    android:layout_width="@dimen/toolbar_icon_dimension"
+                    android:layout_height="@dimen/toolbar_icon_dimension"
+                    android:layout_marginTop="@dimen/margin_top_toolbar"
+                    android:background="@drawable/btn_touch_feedback_oval"
+                    android:clickable="true"
+                    android:contentDescription="@null"
+                    android:padding="@dimen/toolbar_icon_padding"
+                    android:src="@drawable/ic_add_media" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_top_text_btn_toolbar"
+                    android:text="@string/text_btn_add"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/text_size_btn_toolbar" />
+            </LinearLayout>
 
             <ImageView
                 android:id="@+id/btn_undo"
@@ -352,7 +360,6 @@
             </LinearLayout>
         </LinearLayout>
 
-
         <LinearLayout
             android:id="@+id/right_toolbar"
             android:layout_width="@dimen/main_toolbar_width"
@@ -363,24 +370,32 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/btn_setting"
-                android:layout_width="@dimen/toolbar_icon_dimension"
-                android:layout_height="@dimen/toolbar_icon_dimension"
-                android:layout_marginTop="@dimen/margin_top_toolbar"
-                android:background="@drawable/btn_touch_feedback_oval"
-                android:clickable="true"
-                android:contentDescription="@null"
-                android:padding="@dimen/toolbar_icon_padding"
-                android:src="@drawable/ic_more" />
-
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/btn_setting_container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_top_text_btn_toolbar"
-                android:text="@string/text_btn_setting"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/text_size_btn_toolbar" />
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/btn_setting"
+                    android:layout_width="@dimen/toolbar_icon_dimension"
+                    android:layout_height="@dimen/toolbar_icon_dimension"
+                    android:layout_marginTop="@dimen/margin_top_toolbar"
+                    android:background="@drawable/btn_touch_feedback_oval"
+                    android:clickable="true"
+                    android:contentDescription="@null"
+                    android:padding="@dimen/toolbar_icon_padding"
+                    android:src="@drawable/ic_more" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_top_text_btn_toolbar"
+                    android:text="@string/text_btn_setting"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/text_size_btn_toolbar" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/export_container"
@@ -417,10 +432,12 @@
                 android:gravity="center_horizontal"
                 android:orientation="vertical"
                 android:visibility="gone">
+
                 <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margin_top_toolbar">
+
                     <ImageView
                         android:id="@+id/btn_gif"
                         android:layout_width="@dimen/toolbar_icon_dimension"
@@ -586,7 +603,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_toEndOf="@+id/left_toolbar"
-            android:background="#033556"
+            android:background="@color/dark_blue"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:paddingTop="@dimen/explain_layout_padding_top"
@@ -660,7 +677,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@+id/left_toolbar"
-            android:background="#033556"
+            android:background="@color/dark_blue"
             android:paddingTop="@dimen/explain_layout_padding_top"
             android:visibility="gone">
 
@@ -770,25 +787,24 @@
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:layout_toStartOf="@+id/right_toolbar"
-            android:background="#033556"
+            android:background="@color/dark_blue"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:paddingTop="@dimen/explain_layout_padding_top"
             android:visibility="gone">
 
             <TextView
-                android:id="@+id/btn_report"
+                android:id="@+id/btn_upgrade"
                 android:layout_width="@dimen/icon_with_text_dimen"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
                 android:layout_margin="2dp"
                 android:background="@drawable/btn_touch_feedback_rec_nobackground"
                 android:clickable="true"
                 android:drawablePadding="@dimen/icon_and_text_padding"
-                android:drawableTop="@drawable/ic_feedback"
+                android:drawableTop="@drawable/ic_upgrade"
                 android:gravity="center"
                 android:padding="8dp"
-                android:text="@string/text_btn_feedback"
+                android:text="@string/text_btn_upgrade"
                 android:textSize="@dimen/text_below_icon_size" />
 
             <TextView
@@ -796,7 +812,7 @@
                 android:layout_width="@dimen/icon_with_text_dimen"
                 android:layout_height="wrap_content"
                 android:layout_margin="2dp"
-                android:layout_toEndOf="@+id/btn_report"
+                android:layout_toEndOf="@+id/btn_upgrade"
                 android:background="@drawable/btn_touch_feedback_rec_nobackground"
                 android:clickable="true"
                 android:drawablePadding="@dimen/icon_and_text_padding"
@@ -812,7 +828,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/btn_new_project"
                 android:layout_margin="2dp"
-                android:layout_toEndOf="@+id/btn_report"
+                android:layout_toEndOf="@+id/btn_upgrade"
                 android:background="@drawable/btn_touch_feedback_rec_nobackground"
                 android:clickable="true"
                 android:drawablePadding="@dimen/icon_and_text_padding"
@@ -823,27 +839,36 @@
                 android:textSize="@dimen/text_below_icon_size" />
 
             <TextView
-                android:id="@+id/btn_upgrade"
+                android:id="@+id/btn_report"
                 android:layout_width="@dimen/icon_with_text_dimen"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/btn_recent_projects"
+                android:layout_gravity="center"
                 android:layout_margin="2dp"
-                android:layout_toEndOf="@+id/btn_report"
+                android:layout_toEndOf="@+id/btn_upgrade"
                 android:background="@drawable/btn_touch_feedback_rec_nobackground"
                 android:clickable="true"
                 android:drawablePadding="@dimen/icon_and_text_padding"
-                android:drawableTop="@drawable/ic_upgrade"
+                android:drawableTop="@drawable/ic_feedback"
                 android:gravity="center"
                 android:padding="8dp"
-                android:text="@string/text_btn_upgrade"
+                android:text="@string/text_btn_feedback"
                 android:textSize="@dimen/text_below_icon_size" />
 
         </RelativeLayout>
 
     </RelativeLayout>
+
     <FrameLayout
         android:id="@+id/layout_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/layout_waiting"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#222222" />
+
 </RelativeLayout>

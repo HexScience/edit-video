@@ -1111,12 +1111,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         updateSystemVolume();
     }
 
-    public void onIncreaseVolumeTaskCompleted(boolean isVideo) {
-        if (!isVideo) {
-            changeAudio(mCurrentAudioTL, mSeekTimeAudio);
-        }
-    }
-
     private float convertVolumeToFloat(int volume) {
         float value = (float) volume / 100f;
         if (value > 1.1) {

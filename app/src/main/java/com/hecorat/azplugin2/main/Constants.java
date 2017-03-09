@@ -24,7 +24,11 @@ public interface Constants {
     String COMMAND_OPEN_GALLERY = "command open gallery notification";
     String COMMAND = "command";
     String IS_VIP = "is vip";
-    String OPEN_FROM_DIALOG = "open from dialog";
+    String OPEN_EDITOR_ACTION_FROM_WHERE = "open_from";
+    String OPEN_EDITOR_FROM_DIALOG = "from_dialog";
+    String OPEN_EDITOR_FROM_VIDEO_GALLERY = "from_video_gallery";
+    String OPEN_EDITOR_FROM_FLOATING_CONTROLLER = "from_floating_controller";
+
     String FRAGMENT_CODE = "fragment code";
     int GALLERY_CODE = 1;
     /**

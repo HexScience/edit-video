@@ -81,7 +81,7 @@ public class ExportFragment extends Fragment implements DialogClickListener{
     }
 
     private void inflateView() {
-        mView = LayoutInflater.from(mActivity).inflate(R.layout.export_fragment, null);
+        mView = LayoutInflater.from(mActivity).inflate(R.layout.fragment_export, null);
         mCircleProgressBar = (CircleProgressView) mView.findViewById(R.id.export_progress);
         mBtnBack = (Button) mView.findViewById(R.id.btn_back);
         mBtnExport = (Button) mView.findViewById(R.id.btn_export);

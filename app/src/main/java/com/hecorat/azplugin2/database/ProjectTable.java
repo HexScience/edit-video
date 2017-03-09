@@ -64,6 +64,11 @@ public class ProjectTable {
         sqLiteDatabase.execSQL(sql);
     }
 
+    public void deleteAllProject()throws SQLException {
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        database.delete(TABLE_NAME, null, null);
+    }
+
     public ArrayList<ProjectObject> getData() {
         SQLiteDatabase sqLiteDatabase = mDbHelper.getReadableDatabase();
         ArrayList<ProjectObject> list = new ArrayList<>();

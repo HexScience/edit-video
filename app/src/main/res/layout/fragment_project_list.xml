@@ -1,0 +1,86 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cardview_dark_background"
+    android:orientation="vertical"
+    tools:context=".main.MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#212121">
+
+        <ImageView
+            android:id="@+id/btn_go_back"
+            android:layout_width="@dimen/projects_fragment_menu_icon_dimen"
+            android:layout_height="@dimen/projects_fragment_menu_icon_dimen"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:layout_marginEnd="10dp"
+            android:padding="4dp"
+
+            android:background="@drawable/btn_touch_feedback_oval_nobackground"
+            android:src="@drawable/ic_back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/btn_go_back"
+            android:gravity="center_vertical"
+            android:text="@string/recent_project_dialog_title"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+
+        <ImageView
+            android:id="@+id/btn_add_project"
+            android:layout_width="@dimen/projects_fragment_menu_icon_dimen"
+            android:layout_height="@dimen/projects_fragment_menu_icon_dimen"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:layout_marginEnd="10dp"
+            android:padding="4dp"
+            android:layout_toStartOf="@+id/btn_menu_more"
+            android:background="@drawable/btn_touch_feedback_oval_nobackground"
+            android:src="@drawable/ic_add" />
+
+        <ImageView
+            android:id="@+id/btn_menu_more"
+            android:layout_width="@dimen/projects_fragment_menu_icon_dimen"
+            android:layout_height="@dimen/projects_fragment_menu_icon_dimen"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
+            android:padding="8dp"
+
+            android:clickable="true"
+            android:background="@drawable/btn_touch_feedback_oval_nobackground"
+            android:src="@drawable/ic_menu_3dots" />
+    </RelativeLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/project_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:scrollbars="vertical"
+            app:layoutManager="GridLayoutManager"
+            app:spanCount="2"
+            tools:listitem="@layout/project_item"
+            android:padding="10dp"/>
+        <TextView
+            android:id="@+id/txt_empty_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/empty_list_project"
+            android:textSize="16sp"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+
+</LinearLayout>

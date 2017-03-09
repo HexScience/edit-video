@@ -12,7 +12,7 @@
     <application
         android:allowBackup="true"
         android:name=".main.AnalyticsApplication"
-        android:icon="@mipmap/icon_launcher_1"
+        android:icon="@mipmap/icon_launcher_4"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">

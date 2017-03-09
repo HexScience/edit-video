@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AZ Video Editor</string>
+    <string name="app_name">AZ Screen Recorder</string>
     <string name="screen_recorder_name">AZ Screen Recorder</string>
     <string name="video_tab_title">Videos</string>
     <string name="image_tab_title">Images</string>
@@ -110,10 +110,18 @@
     <string name="dialog_open_project_mess">Do you want open project "'"%s"'" ? All state of current editing project will be saved.</string>
     <string name="toast_add_video_fail">Opp! an error corrupted when adding this video, please try again or select other one video</string>
     <string name="toast_add_audio_fail">Opp! an error corrupted when adding this audio, please try again or select other one audio</string>
+    <string name="toast_preparing_project_fail">There is an error corrupted when start new editor, please try again or use old editor</string>
     <string name="toast_no_email_apps_installed">There are no email apps installed</string>
 
     <string name="dialog_title_save_project">Save Project</string>
     <string name="dialog_msg_save_project">Do you want to save this project?</string>
     <string name="btn_no">No</string>
     <string name="btn_yes">Yes</string>
+    <string name="btn_done">Done</string>
+    <string name="action_clear_all_projects">Clear All Projects</string>
+    <string name="toast_project_list_empty">List projects is empty</string>
+    <string name="toast_delete_project">%d project have been deleted</string>
+    <string name="toast_delete_projects">%d projects have been deleted</string>
+    <string name="empty_list_project">List recent projects is empty, please use add button to create a new project</string>
+
 </resources>

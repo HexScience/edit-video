@@ -30,8 +30,10 @@
 
 
     <dimen name="margin_top_seekbar_gif">18dp</dimen>
-    <item name="weigh_title_quality_gif" type="dimen" format="float">1.0</item>
-    <item name="weigh_seekbar_quality_gif" type="dimen" format="float">5</item>
-    <item name="weigh_value_quality_gif" type="dimen" format="float">1.5</item>
+    <item name="weigh_title_quality_gif" format="float" type="dimen">1.0</item>
+    <item name="weigh_seekbar_quality_gif" format="float" type="dimen">5</item>
+    <item name="weigh_value_quality_gif" format="float" type="dimen">1.5</item>
     <dimen name="text_size_quality_gif">14sp</dimen>
+    <dimen name="projects_fragment_menu_icon_dimen">50dp</dimen>
+
 </resources>

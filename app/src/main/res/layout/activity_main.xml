@@ -308,7 +308,7 @@
                     android:clickable="true"
                     android:contentDescription="@null"
                     android:padding="@dimen/toolbar_icon_padding"
-                    android:src="@drawable/ic_add_media" />
+                    android:src="@drawable/ic_add" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -518,7 +518,7 @@
                         android:paddingStart="20dp"
                         android:text="@string/video_tab_title"
                         android:textColor="@android:color/white"
-                        android:textSize="17sp" />
+                        android:textSize="18sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -575,13 +575,20 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@drawable/btn_touch_feedback_rec"
-                    android:gravity="center_horizontal">
+                    android:gravity="center">
 
-                    <ImageView
+                    <!--<ImageView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--android:contentDescription="@null"-->
+                        <!--android:src="@drawable/ic_accept" />-->
+                    <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_accept" />
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_done"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:textAllCaps="true"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -863,12 +870,6 @@
         android:id="@+id/layout_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone" />
-
-    <FrameLayout
-        android:id="@+id/layout_waiting"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#222222" />
+        android:background="#202020" />
 
 </RelativeLayout>

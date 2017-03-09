@@ -53,7 +53,7 @@ public class TrimFragment extends Fragment implements RangeSeekBar.OnSeekBarChan
     }
 
     private void inflateViews() {
-        mView = LayoutInflater.from(mActivity).inflate(R.layout.trim_fragment, null);
+        mView = LayoutInflater.from(mActivity).inflate(R.layout.fragment_trim, null);
         mVideoView = (VideoView) mView.findViewById(R.id.video_view);
         mLayoutSeekbar = (FrameLayout) mView.findViewById(R.id.layout_seekbar);
         mLayoutVideoView = (RelativeLayout) mView.findViewById(R.id.videoview_layout);

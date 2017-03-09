@@ -50,6 +50,7 @@ public class FloatImage extends AppCompatImageView {
     public float widthScale, heightScale;
     public boolean isCompact;
     public boolean drawBorder;
+    public boolean isWaterMark;
 
     public static final int MAX_DIMENSION = 300;
     public static final int ROTATE_CONSTANT = 30;
@@ -57,12 +58,13 @@ public class FloatImage extends AppCompatImageView {
 
     FloatImage(Context context) {super(context);}
 
-    public FloatImage(Context context, Bitmap bitmap) {
+    public FloatImage(Context context, Bitmap bitmap, boolean isWaterMark) {
         super(context);
         mActivity = (MainActivity) context;
-        boolean maxWidth = bitmap.getWidth()>bitmap.getHeight();
-        width = maxWidth? MAX_DIMENSION: MAX_DIMENSION*bitmap.getWidth()/bitmap.getHeight();
-        height = maxWidth? MAX_DIMENSION*bitmap.getHeight()/bitmap.getWidth():MAX_DIMENSION;
+        this.isWaterMark = isWaterMark;
+        boolean maxWidth = bitmap.getWidth() > bitmap.getHeight();
+        width = maxWidth ? MAX_DIMENSION : MAX_DIMENSION * bitmap.getWidth() / bitmap.getHeight();
+        height = maxWidth ? MAX_DIMENSION * bitmap.getHeight() / bitmap.getWidth() : MAX_DIMENSION;
         widthScale = width;
         heightScale = height;
         x = INIT_X;
@@ -84,7 +86,12 @@ public class FloatImage extends AppCompatImageView {
         topLeftPoint = new float[2];
         bottomRightPoint = new float[2];
 
-        rotateBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_rotate);
+        if (isWaterMark) {
+            rotateBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_remove_watermark);
+        } else {
+            rotateBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_rotate);
+        }
+
         scaleBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_scale);
         mainBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
         paint = new Paint();
@@ -98,6 +105,12 @@ public class FloatImage extends AppCompatImageView {
 
         matrix = new Matrix();
         dashPathEffect = new DashPathEffect(new float[] {8,6}, 0);
+    }
+
+    public void setWaterMarkPosition(float x, float y) {
+        this.x = x;
+        this.y = y;
+        invalidate();
     }
 
     public void restoreState(ImageObject image) {
@@ -261,6 +274,9 @@ public class FloatImage extends AppCompatImageView {
         canvas.restore();
 
         canvas.drawBitmap(rotateBitmap, (int) rotatePoint[0]-ROTATE_CONSTANT, (int) rotatePoint[1]-ROTATE_CONSTANT, paint);
+        if (isWaterMark) {
+            return;
+        }
         canvas.drawBitmap(scaleBitmap, (int) scalePoint[0] - ROTATE_CONSTANT, (int) scalePoint[1]-ROTATE_CONSTANT, paint);
     }
 
@@ -299,7 +315,7 @@ public class FloatImage extends AppCompatImageView {
                         isTouch = true;
                     }
 
-                    if (!isTouch || !drawBorder) {
+                    if (!isTouch || !drawBorder || isWaterMark) {
                         return false;
                     }
 
@@ -320,7 +336,9 @@ public class FloatImage extends AppCompatImageView {
                     break;
                 case MotionEvent.ACTION_UP:
                     if (!isTouch){
-                        if (touch != 0) {
+                        if (touch == 3 && isWaterMark && drawBorder){
+                            mActivity.askDonate();
+                        } else if (touch != 0) {
                             performClick();
                         } else {
                             mActivity.setFloatImageVisible(oldX, oldY);
@@ -336,21 +354,26 @@ public class FloatImage extends AppCompatImageView {
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-//            mActivity.hideStatusBar();
             if (drawBorder) {
                 drawBorder(false);
-                mActivity.setExtraControlVisible(false);
-                mActivity.slideExtraToolsIn(false);
+                if (!isWaterMark) {
+                    mActivity.setExtraControlVisible(false);
+                    mActivity.slideExtraToolsIn(false);
+                }
             } else {
                 drawBorder(true);
-                mActivity.setExtraControlVisible(true);
-                mActivity.restoreExtraControl(timeline);
-                mActivity.setFloatImageVisible(timeline);
-                mActivity.setBtnDeleteVisible(true);
-                mActivity.setBtnEditVisible(false);
-                mActivity.setBtnVolumeVisible(false);
-                mActivity.setBtnCropVisible(false);
-                mActivity.slideExtraToolsIn(true);
+                if (!isWaterMark) {
+                    mActivity.setExtraControlVisible(true);
+                    mActivity.restoreExtraControl(timeline);
+                    mActivity.setFloatImageVisible(timeline);
+                    mActivity.setBtnDeleteVisible(true);
+                    mActivity.setBtnEditVisible(false);
+                    mActivity.setBtnVolumeVisible(false);
+                    mActivity.setBtnCropVisible(false);
+                    mActivity.slideExtraToolsIn(true);
+                } else {
+                    mActivity.slideExtraToolsIn(false);
+                }
                 mActivity.unhighlightVideoTL();
                 mActivity.pausePreview();
             }

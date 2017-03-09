@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public TextTable mTextTable;
     public ProjectTable mProjectTable;
     private GalleryPagerAdapter mGalleryPagerAdapter;
-    private FloatText mWaterMark;
+    private FloatImage mWaterMark;
     private FragmentCrop mFragmentCrop;
 
     private AudioManager mAudioManager;
@@ -223,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public String mProjectName;
     public String mVideoPath, mImagePath, mAudioPath;
     public String mOutputDirectory;
+    private String mWaterMarkPath;
 
     private int mDragCode = DRAG_VIDEO;
     private int mCountVideo = 0;
@@ -368,8 +369,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             } finally {
                 sendBroadcast(new Intent("dismiss_waiting_dialog"));
             }
-        }
-
         super.onConfigurationChanged(newConfig);
     }
 
@@ -767,6 +766,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
+    View.OnClickListener onBtnRemoveWatermarkClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            slideLayoutSettingIn(false);
+            askDonate();
+        }
+    };
+
     private void initVideoView() {
         mVideoView1 = new CustomVideoView(this);
         mVideoView2 = new CustomVideoView(this);
@@ -922,7 +929,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mImageTable.dropTable();
             mTextTable.dropTable();
             mAudioTable.dropTable();
-            Utils.getSharedPref(this).edit().putInt(getString(R.string.db_version), Constants.DB_VERSION).apply();
+            Utils.getSharedPref(this).edit()
+                    .putInt(getString(R.string.db_version), Constants.DB_VERSION).apply();
         }
         mProjectTable.createTable();
         mVideoTable.createTable();
@@ -1213,6 +1221,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public void setLayoutFragmentVisible(boolean visible) {
         int visibility = visible ? View.VISIBLE : View.GONE;
         mLayoutFragment.setVisibility(visibility);
+        mOpenLayoutProject = visible;
     }
 
     public void openLayoutEditText(boolean open) {
@@ -1458,7 +1467,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             if (mTLPositionInMs >= image.startInTimeLineMs && mTLPositionInMs <= image.endInTimeLineMs) {
                 floatImage.setVisibility(View.VISIBLE);
             } else {
-                floatImage.setVisibility(View.GONE);
+                if (!floatImage.isWaterMark) {
+                    floatImage.setVisibility(View.GONE);
+                }
             }
         }
     }
@@ -1797,9 +1808,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     public void setWaterMarkEndTime(int endTime) {
         if (mIsVip) return;
-
-        mTextList.get(0).endInTimeLineMs = endTime;
-        mTextList.get(0).startInTimeLineMs = 0;
+        mImageList.get(0).endInTimeLineMs = endTime;
+        mImageList.get(0).startInTimeLineMs = 0;
     }
 
     private void scrollTo(int time) {
@@ -1916,7 +1926,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_unknow_file);
         }
 
-        FloatImage floatImage = new FloatImage(this, bitmap);
+        FloatImage floatImage = new FloatImage(this, bitmap, false);
         floatImage.restoreState(image);
         extraTL.floatImage = floatImage;
         floatImage.timeline = extraTL;
@@ -1934,7 +1944,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mImageList.add(extraTL);
 
         Bitmap bitmap = BitmapFactory.decodeFile(mImagePath);
-        FloatImage floatImage = new FloatImage(this, bitmap);
+        FloatImage floatImage = new FloatImage(this, bitmap, false);
         extraTL.floatImage = floatImage;
         floatImage.timeline = extraTL;
         mLayoutFloatView.addView(floatImage);
@@ -2139,18 +2149,18 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         if (mIsVip) {
             return;
         }
-        String text = "AZ Video Editor";
         int leftMargin = mLeftMarginTimeLine + mScrollView.getScrollX();
-        ExtraTL extraTL = new ExtraTL(this, text, mTimeLineImageHeight, leftMargin, false);
-        mTextList.add(extraTL);
+        ExtraTL extraTL = new ExtraTL(this, mWaterMarkPath, mTimeLineImageHeight, leftMargin, true);
+        mImageList.add(extraTL);
 
-        mWaterMark = new FloatText(this, text, true);
+        Bitmap bitmap = BitmapFactory.decodeFile(mWaterMarkPath);
+        mWaterMark = new FloatImage(this, bitmap, true);
         mLayoutFloatView.addView(mWaterMark);
-        extraTL.floatText = mWaterMark;
+        extraTL.floatImage = mWaterMark;
         mWaterMark.timeline = extraTL;
 
-        int waterMarkX = mLayoutFloatView.getWidth() - mWaterMark.width - 40;
-        int waterMarkY = mLayoutFloatView.getHeight() - mWaterMark.height - 40;
+        int waterMarkX = mLayoutFloatView.getWidth() - mWaterMark.width - 5;
+        int waterMarkY = mLayoutFloatView.getHeight() - mWaterMark.height - 5;
         mWaterMark.setWaterMarkPosition(waterMarkX, waterMarkY);
         setWaterMarkEndTime(mMaxTimeLineMs);
     }
@@ -2504,11 +2514,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 break;
         }
 
-        if (mOpenFileManager) {
-            openFileManager(false);
-            return true;
-        }
-        return false;
+        openFileManager(false);
+        return true;
     }
 
     private void setHighLightTab(int tab) {
@@ -2923,7 +2930,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             super.onPostExecute(aVoid);
             mFontSpinner.setAdapter(mFontAdapter);
             mFontSpinner.setOnItemSelectedListener(onFontSelectedListener);
-            addWaterMark();
         }
     }
 
@@ -3281,7 +3287,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     mShadowIndicator.setVisibility(View.GONE);
                 }
             }
-
             switch (dragEvent.getAction()) {
                 case DragEvent.ACTION_DRAG_STARTED:
                     mTLShadowParams.leftMargin = mSelectedVideoTL.left;
@@ -3848,6 +3853,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 @Override
                 public void onGlobalLayout() {
                     mLayoutImage.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    mTimeLineImageHeight = mLayoutImage.getHeight() - 10;
+                    addExtraNAudioController();
                     log("onLayoutImageCreated");
                 }
             };
@@ -3857,6 +3864,12 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 @Override
                 public void onGlobalLayout() {
                     mVideoViewLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    int[] point = new int[2];
+                    mVideoViewLayout.getLocationOnScreen(point);
+                    mVideoViewLeft = point[0];
+                    mWaterMarkPath = Utils.getResourceFolder() + "/ic_water_mark.png";
+                    Utils.copyFileFromAssets(mActivity, "images/ic_water_mark.png", mWaterMarkPath);
+                    addWaterMark();
                     log("onVideoViewLayoutCreated");
 //                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 }
@@ -3867,6 +3880,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 @Override
                 public void onGlobalLayout() {
                     mLayoutTimeLine.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    mLeftMarginTimeLine = mLayoutTimeLine.getWidth() / 2 - Utils.dpToPixel(mActivity, 45);
+                    updateLayoutTimeLine();
+                    setTimeMark();
                     log("onLayoutTimeLineCreated");
                 }
             };
@@ -3876,8 +3892,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 @Override
                 public void onGlobalLayout() {
                     mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    mTimeLineVideoHeight = mLayoutVideo.getHeight() - 10;
+                    new Timer().schedule(new DelayTask(), 100);
                     log("onLayoutVideoCreated");
                 }
-            };
-
+            }
 }

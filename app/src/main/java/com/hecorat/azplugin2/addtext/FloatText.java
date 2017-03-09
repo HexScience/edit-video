@@ -486,7 +486,6 @@ public class FloatText extends AppCompatImageView {
     OnClickListener onClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-//            mActivity.hideStatusBar();
         if (drawBorder) {
             drawBorder(false);
             if (!isWaterMark) {

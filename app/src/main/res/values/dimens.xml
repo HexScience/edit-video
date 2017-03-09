@@ -35,5 +35,4 @@
     <item name="weigh_value_quality_gif" format="float" type="dimen">1.5</item>
     <dimen name="text_size_quality_gif">14sp</dimen>
     <dimen name="projects_fragment_menu_icon_dimen">50dp</dimen>
-
 </resources>

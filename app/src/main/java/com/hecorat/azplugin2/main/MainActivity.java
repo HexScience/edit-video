@@ -104,6 +104,7 @@ import com.hecorat.azplugin2.video.TrimFragment;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.hecorat.azplugin2.main.Constants.DEFAULT_PROJECT_NAME;
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private static final int ADD_AUDIO = 1;
     private static final int ADD_IMAGE = 2;
     private static final int ADD_TEXT = 3;
-    private static final int LAYOUT_ANIMATION_DURATION = 100;
+    private static final int LAYOUT_ANIMATION_DURATION = 50;
     private static final String RECENT_PROJECT_LIST_FG = "recent_project_list_fg";
     private static final int INVALID_ID = -1;
 
@@ -353,6 +354,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 setTimeMark();
                 mVideoViewLayout.getLocationOnScreen(point);
                 mVideoViewLeft = point[0];
+                mWaterMarkPath = Utils.getResourceFolder() + "/ic_water_mark.png";
+                Utils.copyFileFromAssets(mActivity, "images/ic_water_mark.png", mWaterMarkPath);
+                addWaterMark();
                 addExtraNAudioController();
 
                 if (OPEN_EDITOR_FROM_FLOATING_CONTROLLER.equals(mOpenFromWhere)) {
@@ -369,7 +373,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             } finally {
                 sendBroadcast(new Intent("dismiss_waiting_dialog"));
             }
-        super.onConfigurationChanged(newConfig);
+            super.onConfigurationChanged(newConfig);
+        }
     }
 
     @Override
@@ -537,7 +542,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         final int projectId = projectObject.id;
         final String projectName = projectObject.name;
 
-        if(mProjectId == INVALID_ID){
+        if (mProjectId == INVALID_ID) {
             openProject(projectObject);
             return;
         }
@@ -549,6 +554,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle(getResources().getString(R.string.dialog_open_project_title))
+                    .setIcon(R.drawable.ic_edit_project)
                     .setMessage(getString(R.string.dialog_open_project_mess, projectName == null ?
                             DEFAULT_PROJECT_NAME : projectName))
                     .setNegativeButton(android.R.string.cancel, null)
@@ -825,7 +831,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
         ProjectFragment fragment = (ProjectFragment) getSupportFragmentManager()
                 .findFragmentByTag(RECENT_PROJECT_LIST_FG);
-        if(fragment!=null) getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+        if (fragment != null)
+            getSupportFragmentManager().beginTransaction().remove(fragment).commit();
 
     }
 
@@ -3896,5 +3903,5 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     new Timer().schedule(new DelayTask(), 100);
                     log("onLayoutVideoCreated");
                 }
-            }
+            };
 }

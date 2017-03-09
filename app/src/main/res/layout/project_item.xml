@@ -69,7 +69,7 @@
             android:clickable="true"
             android:background="@drawable/btn_touch_feedback_rec_nobackground"
             android:layout_toStartOf="@+id/btn_open_project"
-            android:src="@drawable/ic_delete"/>
+            android:src="@drawable/ic_delete_project"/>
 
 
         <ImageView

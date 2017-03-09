@@ -35,7 +35,7 @@ import static com.hecorat.azplugin2.main.Constants.DEFAULT_PROJECT_NAME;
  * Created by macos on 08/03/2017.
  */
 
-public final class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHolder>{
+public final class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHolder> {
 
     private Activity mActivity;
     private ArrayList<ProjectObject> mProjectList;
@@ -201,10 +201,12 @@ public final class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.Vi
         final String oldName = projectObject.name;
         final int projectId = projectObject.id;
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-        final EditText editText = new EditText(mActivity);
+        View attachView = mActivity.getLayoutInflater().inflate(R.layout.edt_name_project, null);
+        final EditText editText = (EditText) attachView.findViewById(R.id.edt_name_project);
         editText.setText(oldName);
         if (!TextUtils.isEmpty(oldName)) editText.setSelection(oldName.length());
-        builder.setView(editText)
+        builder.setView(attachView)
+                .setIcon(R.drawable.ic_rename_project)
                 .setTitle(R.string.dialog_title_rename_project)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok,
@@ -252,6 +254,7 @@ public final class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.Vi
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setTitle(R.string.dialog_title_delete_project)
+                .setIcon(R.drawable.ic_delete_project)
                 .setMessage(R.string.dialog_msg_delete_project)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok,

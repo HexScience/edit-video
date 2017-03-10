@@ -31,7 +31,7 @@ dependencies {
     compile 'com.android.support:percent:25.2.0'
     compile 'com.android.support:recyclerview-v7:25.2.0'
 
-    compile 'com.google.android.gms:play-services-analytics:10.2.0'
+    compile 'com.google.android.gms:play-services-analytics:10.0.1'
 
     compile 'com.google.firebase:firebase-core:10.0.1'
     compile 'com.google.firebase:firebase-crash:10.0.1'

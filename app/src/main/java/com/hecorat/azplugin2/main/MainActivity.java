@@ -365,16 +365,21 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     addVideoTL();
                     resetVideoView();
                     findViewById(R.id.layout_fragment).setVisibility(View.GONE);
+                    new Timer().schedule(new DelayTask(), 100);
                 }
             } catch (Exception e) {
+                sendBroadcast(new Intent("dismiss_waiting_dialog"));
                 Toast.makeText(this, R.string.toast_preparing_project_fail, Toast.LENGTH_LONG).show();
                 FirebaseCrash.report(new Exception("error when start Az Editor"));
                 backToAzRecorderApp();
-            } finally {
-                sendBroadcast(new Intent("dismiss_waiting_dialog"));
             }
-            super.onConfigurationChanged(newConfig);
         }
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onAllProjectsLoaded() {
+        new Timer().schedule(new DelayTask(), 100);
     }
 
     @Override
@@ -771,14 +776,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
-
-    View.OnClickListener onBtnRemoveWatermarkClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            slideLayoutSettingIn(false);
-            askDonate();
-        }
-    };
 
     private void initVideoView() {
         mVideoView1 = new CustomVideoView(this);
@@ -1808,6 +1805,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             AnalyticsHelper.getInstance().send(mActivity, Constants.CATEGORY_ADD_FILE,
                     Constants.ACTION_ADD_VIDEO);
         } catch (Exception e) {
+            //// TODO: 10/03/2017 delete error video
+            FirebaseCrash.report(new Exception("error when adding video"));
             Toast.makeText(this, R.string.toast_add_video_fail,
                     Toast.LENGTH_LONG).show();
         }
@@ -2497,30 +2496,34 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         if (!mOpenFileManager) {
             return false;
         }
-        switch (mFragmentCode) {
-            case VIDEO_TAB:
-                if (mFragmentVideosGallery.galleryState
-                        != GalleryState.VIDEO_FOLDER) {
-                    mFragmentVideosGallery.upLevel();
-                    return true;
-                }
-                break;
-            case IMAGE_TAB:
-                if (mFragmentImagesGallery.galleryState
-                        != GalleryState.IMAGE_FOLDER) {
-                    mFragmentImagesGallery.upLevel();
-                    return true;
-                }
-                break;
-            case AUDIO_TAB:
-                if (mFragmentAudioGallery.galleryState
-                        != GalleryState.AUDIO_FOLDER) {
-                    mFragmentAudioGallery.upLevel();
-                    return true;
-                }
-                break;
+        try {
+            switch (mFragmentCode) {
+                case VIDEO_TAB:
+                    if (mFragmentVideosGallery.galleryState != GalleryState.VIDEO_FOLDER) {
+                        mFragmentVideosGallery.upLevel();
+                        return true;
+                    }
+                    break;
+                case IMAGE_TAB:
+                    if (mFragmentImagesGallery.galleryState != GalleryState.IMAGE_FOLDER) {
+                        mFragmentImagesGallery.upLevel();
+                        return true;
+                    }
+                    break;
+                case AUDIO_TAB:
+                    if (mFragmentAudioGallery.galleryState != GalleryState.AUDIO_FOLDER) {
+                        mFragmentAudioGallery.upLevel();
+                        return true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            FirebaseCrash.report(new Exception("error in upLevelFileManager"));
+            Toast.makeText(MainActivity.this, R.string.toast_error_when_up_level_file_manage,
+                    Toast.LENGTH_LONG).show();
         }
-
         openFileManager(false);
         return true;
     }
@@ -2992,10 +2995,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mTimerTaskHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (mVideoPath != null) {
-                        addVideoTL();
-                        resetVideoView();
-                    }
+                    MainActivity.this.sendBroadcast(new Intent("dismiss_waiting_dialog"));
                 }
             });
         }

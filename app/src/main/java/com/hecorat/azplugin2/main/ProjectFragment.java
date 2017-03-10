@@ -52,6 +52,9 @@ public class ProjectFragment extends Fragment implements View.OnClickListener {
         void onBackButtonClicked();
 
         void onNewProjectButtonClicked();
+
+        void onAllProjectsLoaded();
+
     }
 
     @Override
@@ -106,6 +109,7 @@ public class ProjectFragment extends Fragment implements View.OnClickListener {
                     mAdapter.changeData(mProjectList);
                 }
                 setEmptyMessageVisibility(!hasData);
+                mCallback.onAllProjectsLoaded();
             }
         };
         cursorLoader.startLoading();

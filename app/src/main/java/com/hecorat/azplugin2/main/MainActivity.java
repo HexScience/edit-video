@@ -1896,13 +1896,16 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     public void saveImageObjects(int projectId) {
         getImageOrder();
-        for (ExtraTL extraTL : mImageList) {
-            ImageObject image = extraTL.getImageObject();
+        int i = mIsVip ? 0 : 1;
+        while (i < mImageList.size()){
+            ImageObject image = mImageList.get(i).getImageObject();
             mImageTable.insertValue(image, projectId);
+            i++;
         }
     }
 
     public void restoreAllImageTL(int projectId) {
+        addWaterMark();
         ArrayList<ImageObject> listImages = mImageTable.getData(projectId);
         for (ImageObject image : listImages) {
             restoreImageTL(image);
@@ -2095,7 +2098,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     public void restoreAllTextTL(int projectId) {
-        addWaterMark();
+
         ArrayList<TextObject> listText = mTextTable.getData(projectId);
         for (TextObject textObject : listText) {
             restoreTextTL(textObject);
@@ -2185,7 +2188,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), true).apply();
         mLayoutFloatView.removeView(mWaterMark);
         mTextList.remove(mWaterMark.timeline);
-//        Toast.makeText(this, "Watermark was removed", Toast.LENGTH_LONG).show();
         AnalyticsHelper.getInstance().send(this, Constants.CATEGORY_DONATE,
                 Constants.ACTION_REMOVE_SUCCESSFUL);
     }

@@ -1771,6 +1771,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public void addVideoTL() {
         try {
             VideoTL videoTL = new VideoTL(this, mVideoPath, mTimeLineVideoHeight);
+            mActiveVideoView.setVideoPath(videoTL.videoPath);
+            mActiveVideoView.seekTo(10);
+
             videoTL.setOnClickListener(onVideoTimeLineClick);
             videoTL.setOnLongClickListener(onVideoLongClick);
 
@@ -1782,8 +1785,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mMaxTimeLineMs = videoTL.endInTimeLineMs;
             mTLPositionInMs = videoTL.startInTimeLineMs;
             scrollTo(mTLPositionInMs);
-            mActiveVideoView.setVideoPath(videoTL.videoPath);
-            mActiveVideoView.seekTo(10);
+
             updateVideoViewSize(mActiveVideoView, videoTL);
             mCurrentVideoId = mCountVideo - 1;
             fixIfVideoHasNoAudio(videoTL);
@@ -1804,6 +1806,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     Constants.ACTION_ADD_VIDEO);
         } catch (Exception e) {
             //// TODO: 10/03/2017 delete error video
+            e.printStackTrace();
             FirebaseCrash.report(new Exception("error when adding video"));
             Toast.makeText(this, R.string.toast_add_video_fail,
                     Toast.LENGTH_LONG).show();
@@ -3430,8 +3433,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             Intent intent = new Intent(Intent.ACTION_SENDTO);
             intent.setType("text/plain");
             intent.setData(Uri.parse("mailto:"));
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"az.video.edit@gmail.com"});
-            intent.putExtra(Intent.EXTRA_SUBJECT, "Report problems");
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"az.screen.recorder@gmail.com"});
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Report editor problems");
             intent.putExtra(Intent.EXTRA_TEXT, "Hello Hecorat,");
             try {
                 mActivity.startActivity(intent);

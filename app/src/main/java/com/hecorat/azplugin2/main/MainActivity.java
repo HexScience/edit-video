@@ -1752,6 +1752,10 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
         VideoTL videoTL = mVideoList.get(mVideoList.size() - 1);
         mMaxTimeLineMs = videoTL.endInTimeLineMs;
+        if (mVideoList.size() > 0) {
+            mActiveVideoView.setVideoPath(mVideoList.get(0).videoPath);
+            mActiveVideoView.seekTo(10);
+        }
     }
 
     public void restoreVideoTL(VideoObject video) {

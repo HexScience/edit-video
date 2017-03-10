@@ -877,9 +877,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public void onCheckVipCompleted(boolean isVip) {
         Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), isVip).apply();
         if (isVip) {
-            mBtnUpgrade.setVisibility(View.GONE);
-            findViewById(R.id.text_pro_1).setVisibility(View.GONE);
-            findViewById(R.id.text_pro_2).setVisibility(View.GONE);
+            hideAskForProViews();
         } else {
             mBtnUpgrade.setVisibility(View.VISIBLE);
         }
@@ -2184,12 +2182,18 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     public void removeWaterMark() {
         mIsVip = true;
-        mBtnUpgrade.setVisibility(View.GONE);
-        Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), true).apply();
+        hideAskForProViews();
         mLayoutFloatView.removeView(mWaterMark);
         mTextList.remove(mWaterMark.timeline);
+        Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), true).apply();
         AnalyticsHelper.getInstance().send(this, Constants.CATEGORY_DONATE,
                 Constants.ACTION_REMOVE_SUCCESSFUL);
+    }
+
+    private void hideAskForProViews(){
+        findViewById(R.id.text_pro_1).setVisibility(View.GONE);
+        findViewById(R.id.text_pro_2).setVisibility(View.GONE);
+        mBtnUpgrade.setVisibility(View.GONE);
     }
 
     private void addTextTL() {

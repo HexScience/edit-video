@@ -12,9 +12,9 @@
     <string name="confirm_export_title">Confirm Export</string>
     <string name="confirm_export_msg">Do you want to export video now?</string>
     <string name="export_progress_msg">Export video</string>
-    <string name="dialog_title_new_project_name">Enter Project Name</string>
+    <string name="dialog_title_new_project_name">Create Project</string>
     <string name="dialog_title_rename_project">Rename Project</string>
-    <string name="dialog_mess_rename_project">Enter New Name: </string>
+    <string name="dialog_mess_rename_project">Enter Name: </string>
     <string name="positive_btn_text_create_project">Create Project</string>
     <string name="toast_file_not_exists_when_click_play">Some file is not exists, please remove it before playing</string>
     <string name="toast_file_not_exists_when_click_export">Some file is not exists, please remove it before exporting</string>
@@ -100,7 +100,7 @@
     <string name="exporting_gif">Exporting Gif..</string>
     <string name="keep_original_ratio">Keep original ratio (Much faster)</string>
     <string name="dialog_title_gif_duration_warning">Gif Duration Limit</string>
-    <string name="dialog_msg_gif_duration_warning">You can not export Gif with duration longer than 20 seconds.\n\nPlease adjust videos.</string>
+    <string name="dialog_msg_gif_duration_warning">You can not export Gif with duration longer than 20 seconds.\n\nPlease adjust videos with trim feature and try again.</string>
     <string name="recent_project_dialog_title">Recent projects</string>
     <string name="recent_project_action_open">Open</string>
     <string name="recent_project_action_rename">Rename</string>
@@ -124,6 +124,7 @@
     <string name="toast_project_list_empty">List projects is empty</string>
     <string name="toast_delete_project">%d project have been deleted</string>
     <string name="toast_delete_projects">%d projects have been deleted</string>
+    <string name="toast_delete_all_projects">all projects have been deleted</string>
     <string name="empty_list_project">List recent projects is empty, please use add button to create a new project</string>
 
 </resources>

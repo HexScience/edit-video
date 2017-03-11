@@ -299,12 +299,15 @@ public class FloatImage extends AppCompatImageView {
                     oldY = motionEvent.getY();
                     startAngle = getAngle(oldX, oldY);
                     int eps = 75;
-                    if (oldX < scalePoint[0]+eps && oldX > scalePoint[0]-eps && oldY < scalePoint[1]+eps && oldY > scalePoint[1]-eps){
+                    if (oldX < scalePoint[0] + eps && oldX > scalePoint[0] - eps && oldY < scalePoint[1]+eps && oldY > scalePoint[1]-eps){
                         touch = 1;
-                    } else if (oldX < centerPoint[0]+eps && oldX > centerPoint[0]-eps && oldY < centerPoint[1]+eps && oldY > centerPoint[1]-eps) {
+                    } else if (oldX < centerPoint[0] + eps && oldX > centerPoint[0] - eps && oldY < centerPoint[1]+eps && oldY > centerPoint[1]-eps) {
                         touch = 2;
-                    } else if (oldX < rotatePoint[0]+eps && oldX > rotatePoint[0]-eps && oldY < rotatePoint[1]+eps && oldY > rotatePoint[1]-eps){
+                    } else if (oldX < rotatePoint[0] + eps && oldX > rotatePoint[0] - eps && oldY < rotatePoint[1]+eps && oldY > rotatePoint[1]-eps){
                         touch = 3;
+                    } else if (oldX < scalePoint[0] + eps && oldX > scalePoint[0] - eps
+                            && oldY < rotatePoint[1] + eps && oldY > rotatePoint[1] - eps) {
+                        touch = 4;
                     } else {
                         touch = 0;
                     }
@@ -339,7 +342,7 @@ public class FloatImage extends AppCompatImageView {
                     break;
                 case MotionEvent.ACTION_UP:
                     if (!isTouch){
-                        if (touch == 3 && isWaterMark && drawBorder){
+                        if (touch == 4 && isWaterMark && drawBorder){
                             mActivity.askDonate();
                         } else if (touch != 0) {
                             performClick();
@@ -352,8 +355,8 @@ public class FloatImage extends AppCompatImageView {
             }
             return true;
         }
-
     };
+
     View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {

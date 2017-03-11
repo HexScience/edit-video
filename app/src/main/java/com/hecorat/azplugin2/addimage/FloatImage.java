@@ -53,6 +53,7 @@ public class FloatImage extends AppCompatImageView {
     public boolean isWaterMark;
 
     public static final int MAX_DIMENSION = 300;
+    public static final int MAX_DIMENSION_WATERMARK = 250;
     public static final int ROTATE_CONSTANT = 30;
     public static final int INIT_X = 300, INIT_Y = 300;
 
@@ -63,8 +64,9 @@ public class FloatImage extends AppCompatImageView {
         mActivity = (MainActivity) context;
         this.isWaterMark = isWaterMark;
         boolean maxWidth = bitmap.getWidth() > bitmap.getHeight();
-        width = maxWidth ? MAX_DIMENSION : MAX_DIMENSION * bitmap.getWidth() / bitmap.getHeight();
-        height = maxWidth ? MAX_DIMENSION * bitmap.getHeight() / bitmap.getWidth() : MAX_DIMENSION;
+        int maxDimension = isWaterMark ? MAX_DIMENSION_WATERMARK : MAX_DIMENSION;
+        width = maxWidth ? maxDimension : maxDimension * bitmap.getWidth() / bitmap.getHeight();
+        height = maxWidth ? maxDimension * bitmap.getHeight() / bitmap.getWidth() : maxDimension;
         widthScale = width;
         heightScale = height;
         x = INIT_X;
@@ -108,7 +110,7 @@ public class FloatImage extends AppCompatImageView {
     }
 
     public void setWaterMarkPosition(float x, float y) {
-        this.x = x;
+        this.x = x - ROTATE_CONSTANT;
         this.y = y;
         invalidate();
     }
@@ -257,7 +259,7 @@ public class FloatImage extends AppCompatImageView {
         }
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(3);
-        paint.setColor(Color.CYAN);
+        paint.setColor(Color.WHITE);
         paint.setPathEffect(dashPathEffect);
 
         canvas.save();
@@ -273,10 +275,11 @@ public class FloatImage extends AppCompatImageView {
         canvas.drawRect(rectBorder, paint);
         canvas.restore();
 
-        canvas.drawBitmap(rotateBitmap, (int) rotatePoint[0]-ROTATE_CONSTANT, (int) rotatePoint[1]-ROTATE_CONSTANT, paint);
         if (isWaterMark) {
+            canvas.drawBitmap(rotateBitmap, (int) (scalePoint[0]- ROTATE_CONSTANT), (int) rotatePoint[1]-ROTATE_CONSTANT, paint);
             return;
         }
+        canvas.drawBitmap(rotateBitmap, (int) rotatePoint[0]-ROTATE_CONSTANT, (int) rotatePoint[1]-ROTATE_CONSTANT, paint);
         canvas.drawBitmap(scaleBitmap, (int) scalePoint[0] - ROTATE_CONSTANT, (int) scalePoint[1]-ROTATE_CONSTANT, paint);
     }
 

@@ -276,8 +276,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-        setViewsListener();
         getInfoFromAzRecorder();
+        setViewsListener();
         mColorPicker.setAlphaSliderVisible(true);
         mColorPicker.setOnColorChangedListener(this);
         mColorPicker.setAlphaSliderText(R.string.color_picker_opacity_title);
@@ -373,7 +373,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     addVideoTL();
                     resetVideoView();
                     findViewById(R.id.layout_fragment).setVisibility(View.GONE);
-                    new Timer().schedule(new DelayTask(), 100);
+                    dismissLoadingProgress();
                 }
             } catch (Exception e) {
                 dismissLoadingProgress();
@@ -389,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     @Override
     public void onAllProjectsLoaded() {
         log("onAllProjectsLoaded");
-        new Timer().schedule(new DelayTask(), 100);
+        dismissLoadingProgress();
     }
 
     @Override
@@ -737,10 +737,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         mTimeLineText.setOnDragListener(onExtraDragListener);
         mTimeLineAudio.setOnDragListener(onExtraDragListener);
         mScrollView.setOnCustomScrollChanged(mScrollChangedListener);
-//        mLayoutTimeLine.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutTimeLineCreated);
-//        mVideoViewLayout.getViewTreeObserver().addOnGlobalLayoutListener(onVideoViewLayoutCreated);
-//        mLayoutVideo.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutVideoCreated);
-//        mLayoutImage.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutImageCreated);
+        if (getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE) {
+            mLayoutTimeLine.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutTimeLineCreated);
+            mVideoViewLayout.getViewTreeObserver().addOnGlobalLayoutListener(onVideoViewLayoutCreated);
+            mLayoutVideo.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutVideoCreated);
+            mLayoutImage.getViewTreeObserver().addOnGlobalLayoutListener(onLayoutImageCreated);
+        }
+
         final View decorView = getWindow().getDecorView();
         decorView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -775,7 +779,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mOutputDirectory = intent.getStringExtra(Constants.DIRECTORY);
             mOpenFromWhere = intent.getStringExtra(Constants.OPEN_EDITOR_ACTION_FROM_WHERE);
             mIsVip = intent.getBooleanExtra(Constants.IS_VIP, false);
-//            mIsVip= true;
             mVideoPath = intent.getStringExtra(Constants.VIDEO_FILE_PATH);
             if (TextUtils.isEmpty(mVideoPath)) return;
             try {
@@ -792,7 +795,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mBtnUpgrade.setVisibility(View.VISIBLE);
         }
         Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), mIsVip).apply();
-        log("isVip = " + mIsVip);
     }
 
     protected void setFullscreen() {
@@ -2989,7 +2991,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mTimerTaskHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    dismissLoadingProgress();
+                    if (OPEN_EDITOR_FROM_FLOATING_CONTROLLER.equals(mOpenFromWhere)) {
+                        openLayoutProject();
+                    } else {
+                        addVideoTL();
+                        resetVideoView();
+                        findViewById(R.id.layout_fragment).setVisibility(View.GONE);
+                        dismissLoadingProgress();
+                    }
                 }
             });
         }
@@ -3912,6 +3921,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     mLayoutVideo.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     mTimeLineVideoHeight = mLayoutVideo.getHeight() - 10;
                     new Timer().schedule(new DelayTask(), 100);
+
                     log("onLayoutVideoCreated");
                 }
             };

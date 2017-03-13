@@ -258,9 +258,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private int mInitProjectId;
     private String mOpenFromWhere;
     private boolean mCreated = false;
-
     private boolean mShowLoading = true;
-
     private ProgressHandler mHandler;
     private CustomScrollChanged mScrollChangedListener = new CustomScrollChanged();
     private Handler mTimerTaskHandler = new Handler();
@@ -390,6 +388,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     @Override
     public void onAllProjectsLoaded() {
+        log("onAllProjectsLoaded");
         new Timer().schedule(new DelayTask(), 100);
     }
 
@@ -440,9 +439,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 backToAzRecorderApp();
                 break;
             case NameDialog.CREATE_PROJECT:
+                if (mOpenLayoutProject) closeLayoutProject();
                 saveProject(mProjectId);
-                mProjectId = (int) mProjectTable.insertValue(name,
-                        System.currentTimeMillis() + "");
+                mProjectId = (int) mProjectTable.insertValue(name, System.currentTimeMillis() + "");
                 mProjectName = name;
                 resetActivity();
                 resetTempListLayout();
@@ -604,11 +603,11 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     @Override
     public void onNewProjectButtonClicked() {
-        closeLayoutProject();
         createNewProject();
     }
 
     private void dismissLoadingProgress() {
+        log("send dismiss waiting dialog");
         sendBroadcast(new Intent("dismiss_waiting_dialog"));
         mShowLoading = false;
     }
@@ -776,6 +775,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mOutputDirectory = intent.getStringExtra(Constants.DIRECTORY);
             mOpenFromWhere = intent.getStringExtra(Constants.OPEN_EDITOR_ACTION_FROM_WHERE);
             mIsVip = intent.getBooleanExtra(Constants.IS_VIP, false);
+//            mIsVip= true;
             mVideoPath = intent.getStringExtra(Constants.VIDEO_FILE_PATH);
             if (TextUtils.isEmpty(mVideoPath)) return;
             try {
@@ -3099,6 +3099,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 String reason = intent.getStringExtra(SYSTEM_REASON);
                 if (SYSTEM_HOME_KEY.equals(reason)) {
                     sendBroadcast(new Intent("show_floating_controller"));
+                    saveProject(mProjectId);
+                    finish();
                 }
             }
         }

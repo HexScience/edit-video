@@ -1,7 +1,5 @@
 package com.hecorat.azplugin2.main;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -34,7 +32,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.View;
@@ -113,7 +110,7 @@ import static com.hecorat.azplugin2.main.Constants.OPEN_EDITOR_FROM_VIDEO_GALLER
 
 public class MainActivity extends AppCompatActivity implements VideoTLControl.OnControlTimeLineChanged,
         ExtraTLControl.OnExtraTimeLineControlChanged, AudioTLControl.OnAudioControlTimeLineChanged,
-        ColorPickerView.OnColorChangedListener, DialogClickListener, ProjectAdapter.Callback,
+        ColorPickerView.OnColorChangedListener, DialogClickListener,
         NameDialog.DialogClickListener, ProjectFragment.Callback {
     private static final int TIMELINE_VIDEO = 0;
     private static final int TIMELINE_EXTRA = 1;
@@ -136,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private static final int ADD_AUDIO = 1;
     private static final int ADD_IMAGE = 2;
     private static final int ADD_TEXT = 3;
-    private static final int LAYOUT_ANIMATION_DURATION = 50;
+    private static final int LAYOUT_ANIMATION_DURATION = 20;
     private static final String RECENT_PROJECT_LIST_FG = "recent_project_list_fg";
     private static final int INVALID_ID = -1;
 
@@ -261,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     private int mInitProjectId;
     private String mOpenFromWhere;
     private boolean mCreated = false;
-
+    private boolean mShowLoading = true;
     private ProgressHandler mHandler;
     private CustomScrollChanged mScrollChangedListener = new CustomScrollChanged();
     private Handler mTimerTaskHandler = new Handler();
@@ -271,6 +268,8 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mExportFragment.onBroadcastReceived(intent, Constants.ACTION_COPY_COMPLETED);
         }
     };
+
+    private CustomReceiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -303,7 +302,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         keepScreenOn();
         initVideoView();
         setFullscreen();
-        checkVip();
 
         registerReceiver(mReceiverCopyCompleted, new IntentFilter(Constants.ACTION_COPY_COMPLETED));
     }
@@ -311,11 +309,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     @Override
     protected void onStart() {
         super.onStart();
+        mReceiver = new CustomReceiver();
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
         log("onStart");
     }
 
     @Override
     protected void onResume() {
+        if (!mShowLoading) dismissLoadingProgress();
         super.onResume();
     }
 
@@ -323,6 +324,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     protected void onStop() {
         super.onStop();
         new SaveProjectTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    protected void onPause() {
+        if (mShowLoading) dismissLoadingProgress();
+        super.onPause();
     }
 
     @Override
@@ -368,8 +376,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     new Timer().schedule(new DelayTask(), 100);
                 }
             } catch (Exception e) {
-                sendBroadcast(new Intent("dismiss_waiting_dialog"));
-                Toast.makeText(this, R.string.toast_preparing_project_fail, Toast.LENGTH_LONG).show();
+                dismissLoadingProgress();
+                Toast.makeText(this, R.string.toast_preparing_project_fail,
+                        Toast.LENGTH_LONG).show();
                 FirebaseCrash.report(new Exception("error when start Az Editor"));
                 backToAzRecorderApp();
             }
@@ -379,6 +388,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     @Override
     public void onAllProjectsLoaded() {
+        log("onAllProjectsLoaded");
         new Timer().schedule(new DelayTask(), 100);
     }
 
@@ -404,10 +414,16 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             case Constants.REQUEST_CODE_PURCHASE:
                 log("REQUEST_CODE_PURCHASE");
                 if (resultCode == Activity.RESULT_OK) {
-                    boolean purchaseResult = data.getBooleanExtra("purchase_result", false);
-                    log("purchaseResult = " + purchaseResult);
-                    if (purchaseResult) {
-                        removeWaterMark();
+                    boolean purchased = data.getBooleanExtra("purchase_result", false);
+                    log("purchased = " + purchased);
+                    if (purchased) {
+                        mIsVip = true;
+                        hideAskForProViews();
+                        mLayoutFloatView.removeView(mWaterMark);
+                        mTextList.remove(mWaterMark.timeline);
+                        Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), true).apply();
+                        AnalyticsHelper.getInstance().send(this, Constants.CATEGORY_DONATE,
+                                Constants.ACTION_REMOVE_SUCCESSFUL);
                     }
                 }
                 break;
@@ -423,9 +439,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 backToAzRecorderApp();
                 break;
             case NameDialog.CREATE_PROJECT:
+                if (mOpenLayoutProject) closeLayoutProject();
                 saveProject(mProjectId);
-                mProjectId = (int) mProjectTable.insertValue(name,
-                        System.currentTimeMillis() + "");
+                mProjectId = (int) mProjectTable.insertValue(name, System.currentTimeMillis() + "");
                 mProjectName = name;
                 resetActivity();
                 resetTempListLayout();
@@ -587,8 +603,13 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
 
     @Override
     public void onNewProjectButtonClicked() {
-        closeLayoutProject();
         createNewProject();
+    }
+
+    private void dismissLoadingProgress() {
+        log("send dismiss waiting dialog");
+        sendBroadcast(new Intent("dismiss_waiting_dialog"));
+        mShowLoading = false;
     }
 
     private void initViews() {
@@ -732,7 +753,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void backToAzRecorderApp() {
-        finish();
         if (OPEN_EDITOR_FROM_VIDEO_GALLERY.equals(mOpenFromWhere)) {
             Intent intent = new Intent();
             intent.setComponent(new ComponentName("com.hecorat.screenrecorder.free",
@@ -743,9 +763,9 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             log("send broadcast open floating");
             sendBroadcast(new Intent("show_floating_controller"));
         }
-
-//        AnalyticsHelper.getInstance().send(mActivity, Constants.CATEGORY_CLICK_BACK,
-//                Constants.ACTION_CLICK_BUTTON_BACK);
+        AnalyticsHelper.getInstance().send(mActivity, Constants.CATEGORY_CLICK_BACK,
+                Constants.ACTION_CLICK_BUTTON_BACK);
+        finish();
     }
 
     private void getInfoFromAzRecorder() {
@@ -755,6 +775,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mOutputDirectory = intent.getStringExtra(Constants.DIRECTORY);
             mOpenFromWhere = intent.getStringExtra(Constants.OPEN_EDITOR_ACTION_FROM_WHERE);
             mIsVip = intent.getBooleanExtra(Constants.IS_VIP, false);
+//            mIsVip= true;
             mVideoPath = intent.getStringExtra(Constants.VIDEO_FILE_PATH);
             if (TextUtils.isEmpty(mVideoPath)) return;
             try {
@@ -764,6 +785,14 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 mProjectName = "no_name";
             }
         }
+
+        if (mIsVip) {
+            hideAskForProViews();
+        } else {
+            mBtnUpgrade.setVisibility(View.VISIBLE);
+        }
+        Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), mIsVip).apply();
+        log("isVip = " + mIsVip);
     }
 
     protected void setFullscreen() {
@@ -830,7 +859,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 .findFragmentByTag(RECENT_PROJECT_LIST_FG);
         if (fragment != null)
             getSupportFragmentManager().beginTransaction().remove(fragment).commit();
-
     }
 
     public void slideExtraToolsIn(boolean in) {
@@ -863,24 +891,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public void setBtnUpLevelVisible(boolean visible) {
         int visibility = visible ? View.VISIBLE : View.GONE;
         mBtnUpLevel.setVisibility(visibility);
-    }
-
-    private void checkVip() {
-        onCheckVipCompleted(mIsVip);
-        log("isVip = " + mIsVip);
-    }
-
-    public void checkVipWithoutInternet() {
-        new CheckVipWithoutInternetTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    public void onCheckVipCompleted(boolean isVip) {
-        Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), isVip).apply();
-        if (isVip) {
-            hideAskForProViews();
-        } else {
-            mBtnUpgrade.setVisibility(View.VISIBLE);
-        }
     }
 
     private void createNewProject() {
@@ -1098,6 +1108,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         updateSystemVolume();
     }
 
+    @SuppressWarnings("unused")
     public void onIncreaseVolumeTaskCompleted(boolean isVideo) {
         if (!isVideo) {
             changeAudio(mCurrentAudioTL, mSeekTimeAudio);
@@ -1902,7 +1913,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     public void saveImageObjects(int projectId) {
         getImageOrder();
         int i = mIsVip ? 0 : 1;
-        while (i < mImageList.size()){
+        while (i < mImageList.size()) {
             ImageObject image = mImageList.get(i).getImageObject();
             mImageTable.insertValue(image, projectId);
             i++;
@@ -2187,17 +2198,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                 Constants.ACTION_REMOVE_WATERMARK);
     }
 
-    public void removeWaterMark() {
-        mIsVip = true;
-        hideAskForProViews();
-        mLayoutFloatView.removeView(mWaterMark);
-        mTextList.remove(mWaterMark.timeline);
-        Utils.getSharedPref(this).edit().putBoolean(getString(R.string.pref_is_vip), true).apply();
-        AnalyticsHelper.getInstance().send(this, Constants.CATEGORY_DONATE,
-                Constants.ACTION_REMOVE_SUCCESSFUL);
-    }
-
-    private void hideAskForProViews(){
+    private void hideAskForProViews() {
         findViewById(R.id.text_pro_1).setVisibility(View.GONE);
         findViewById(R.id.text_pro_2).setVisibility(View.GONE);
         mBtnUpgrade.setVisibility(View.GONE);
@@ -2623,7 +2624,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
         }
 
         if (mOpenLayoutProject) {
-            closeLayoutProject();
+            onBackButtonClicked();
             return;
         }
 
@@ -2933,7 +2934,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
     }
 
     private void log(String msg) {
-        Log.e("MainActivity", msg);
+//        Log.e("MainActivity", msg);
     }
 
     private void toast(String msg) {
@@ -2953,26 +2954,6 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             super.onPostExecute(aVoid);
             mFontSpinner.setAdapter(mFontAdapter);
             mFontSpinner.setOnItemSelectedListener(onFontSelectedListener);
-        }
-    }
-
-    private final class CheckVipWithoutInternetTask extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... params) {
-            mIsVip = false;
-            String vipAccount = Utils.getSharedPref(mActivity).getString(getString(R.string.pref_last_account), null);
-            if (vipAccount == null) {
-                return null;
-            }
-            AccountManager accountManager = AccountManager.get(mActivity);
-            Account[] accounts = accountManager.getAccountsByType("com.google");
-            for (Account account : accounts) {
-                if (account.name.equals(vipAccount)) {
-                    mIsVip = Utils.getSharedPref(mActivity).getBoolean(getString(R.string.pref_is_vip), false);
-                    return null;
-                }
-            }
-            return null;
         }
     }
 
@@ -3008,7 +2989,7 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
             mTimerTaskHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    MainActivity.this.sendBroadcast(new Intent("dismiss_waiting_dialog"));
+                    dismissLoadingProgress();
                 }
             });
         }
@@ -3104,6 +3085,23 @@ public class MainActivity extends AppCompatActivity implements VideoTLControl.On
                     activity.updateMediaPlayer();
                     activity.log(" Running");
                     break;
+            }
+        }
+    }
+
+    private final class CustomReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
+                String SYSTEM_REASON = "reason";
+                String SYSTEM_HOME_KEY = "homekey";
+                String reason = intent.getStringExtra(SYSTEM_REASON);
+                if (SYSTEM_HOME_KEY.equals(reason)) {
+                    sendBroadcast(new Intent("show_floating_controller"));
+                    saveProject(mProjectId);
+                    finish();
+                }
             }
         }
     }

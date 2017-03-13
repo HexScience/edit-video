@@ -44,7 +44,6 @@ public class NameDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle(getTitle());
 
         View view = LayoutInflater.from(mContext).inflate(R.layout.edt_name_project, null);
         mEdtName = (EditText) view.findViewById(R.id.edt_name_project);
@@ -52,6 +51,8 @@ public class NameDialog extends DialogFragment {
         if(!TextUtils.isEmpty(mInitText)) mEdtName.setSelection(mInitText.length());
 
         builder.setView(view);
+        builder.setTitle(getDialogTitle());
+        builder.setIcon(getDialogIconId());
         builder.setPositiveButton(getPositiveBtnText(), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -68,12 +69,14 @@ public class NameDialog extends DialogFragment {
         return builder.create();
     }
 
-    private String getTitle() {
+    private String getDialogTitle() {
         String title = "";
         switch (mType) {
             case CREATE_PROJECT:
-            case SAVE_PROJECT:
                 title = getString(R.string.dialog_title_new_project_name);
+                break;
+            case SAVE_PROJECT:
+                title = getString(R.string.dialog_title_save_project);
                 break;
             case RENAME:
                 title = getString(R.string.dialog_title_rename_project);
@@ -81,6 +84,23 @@ public class NameDialog extends DialogFragment {
             default: break;
         }
         return title;
+    }
+
+    private int getDialogIconId() {
+        int iconId = 0 ;
+        switch (mType) {
+            case CREATE_PROJECT:
+                iconId = R.drawable.ic_add_project;
+                break;
+            case SAVE_PROJECT:
+                iconId = R.drawable.ic_save;
+                break;
+            case RENAME:
+                iconId = R.drawable.ic_edit;
+                break;
+            default: break;
+        }
+        return iconId;
     }
 
     private String getPositiveBtnText() {
